@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <% include ./partials/head %>
+</head>
+<body class='container'>
+  <header>
+    <ol class='breadcrumb'>
+      <a class='breadcrumb-item active' href='/'>Home</a>
+    </ol>
+  </header>
+
+  <main>
+    <div class='jumbotron'>
+      <h1>Tables</h1>
+      <ul>
+        <% for(var i = 0; i < data.TableNames.length; i++) { %>
+          <li>
+            <a href='/tables/<%= data.TableNames[i] %>'>
+              <%= data.TableNames[i] %>
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <% include ./partials/head %>
+</head>
+<body class='container'>
+  <header>
+    <ol class='breadcrumb'>
+      <a class='breadcrumb-item' href='/'>Home</a>
+      <a class='breadcrumb-item active'><%= Table.TableName %></a>
+    </ol>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Items</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/<%= Table.TableName %>/meta">Meta</a>
+      </li>
+    </ul>
+  </header>
+
+  <main>
+    <table class="table">
+      <tbody>
+        <% for(var i = 0; i < Items.length; i++) { %>
+          <tr>
+            <th scope="row" style="font-size: 0.85rem;">
+              <a href="/tables/<%= Table.TableName %>/items/<%= Items[i].id %>">
+                <%= Items[i].id %>
+              </a>
+            </th>
+            <td><pre><%= JSON.stringify(Items[i], null, 2) %></pre></td>
+            <td>[Delete]</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
