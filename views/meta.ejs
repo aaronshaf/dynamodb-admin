@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <% include ./partials/head %>
+</head>
+<body class='container'>
+  <header>
+    <ol class='breadcrumb'>
+      <a class='breadcrumb-item' href='/'>Home</a>
+      <a class='breadcrumb-item active'><%= Table.TableName %></a>
+    </ol>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="/tables/<%= Table.TableName %>">Items</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="/tables/<%= Table.TableName %>/meta">Meta</a>
+      </li>
+    </ul>
+  </header>
+
+  <main>
+    <div>
+      <pre><%= JSON.stringify(Table, null, 2) %></pre>
+    </div>
+  </main>
+</body>
+</html>

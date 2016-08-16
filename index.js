@@ -47,6 +47,22 @@ app.get('/tables/:TableName', (req, res) => {
   })
 })
 
+app.get('/tables/:TableName/meta', (req, res) => {
+  const TableName = req.params.TableName
+  Promise.all([
+    describeTable({TableName}),
+    scan({TableName})
+  ]).then(([description, items]) => {
+    const data = Object.assign({},
+      description,
+      items
+    )
+    res.render('meta', data)
+  }).catch((error) => {
+    res.json({error})
+  })
+})
+
 const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
