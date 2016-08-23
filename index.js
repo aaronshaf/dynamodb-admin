@@ -10,7 +10,8 @@ AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'key',
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'secret',
   endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
-  sslEnabled: false
+  sslEnabled: false,
+  region: process.env.AWS_REGION || 'us-east-1'
 })
 
 const dynamodb = new AWS.DynamoDB()
