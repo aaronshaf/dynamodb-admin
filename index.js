@@ -1,6 +1,7 @@
 const express = require('express')
 const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
+const getPort = require('get-port')
 
 const app = express()
 app.set('json spaces', 2)
@@ -64,7 +65,11 @@ app.get('/tables/:TableName/meta', (req, res) => {
   })
 })
 
-const port = process.env.PORT || 8001
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`)
+getPort().then((availablePort) => {
+  const port = process.env.PORT || availablePort
+  app.listen(port, () => {
+    console.log(`dynamodb-admin listening on port ${port}!`)
+  })
+}).catch((error) => {
+  console.error(error)
 })
