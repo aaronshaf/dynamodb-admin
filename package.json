@@ -1,11 +1,9 @@
 {
-  "name": "dynamodb-viewer",
+  "name": "dynamodb-admin",
   "version": "1.0.0",
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "bin": "./bin/dynamodb-admin.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aaronshaf/dynamodb-viewer.git"

@@ -11,7 +11,7 @@ AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'key',
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'secret',
   endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
-  sslEnabled: false,
+  sslEnabled: process.env.DYNAMO_ENDPOINT && process.env.DYNAMO_ENDPOINT.indexOf('https://') === 0,
   region: process.env.AWS_REGION || 'us-east-1'
 })
 
