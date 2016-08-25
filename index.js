@@ -24,6 +24,8 @@ const listTables = promisify(dynamodb.listTables.bind(dynamodb))
 const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
 const scan = promisify(documentClient.scan.bind(documentClient))
 
+app.use('/assets', express.static(path.join(__dirname, '/public')))
+
 app.get('/', (req, res) => {
   dynamodb.listTables({}, (error, data) => {
     if (error) {
