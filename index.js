@@ -2,10 +2,12 @@ const express = require('express')
 const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const getPort = require('get-port')
+const path = require('path')
 
 const app = express()
 app.set('json spaces', 2)
 app.set('view engine', 'ejs')
+app.set('views', path.resolve(__dirname, 'views'))
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'key',
@@ -27,7 +29,6 @@ app.get('/', (req, res) => {
     if (error) {
       res.json({error})
     } else {
-      // res.json(data)
       res.render('tables', {data})
     }
   })
