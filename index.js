@@ -29,7 +29,13 @@ app.get('/', (req, res) => {
     if (error) {
       res.json({error})
     } else {
-      res.render('tables', {data})
+      Promise.all(data.TableNames.map((TableName) => {
+        return describeTable({TableName}).then((data) => data.Table)
+      })).then((data) => {
+        res.render('tables', {data})
+      }).catch((error) => {
+        res.json({error})
+      })
     }
   })
 })

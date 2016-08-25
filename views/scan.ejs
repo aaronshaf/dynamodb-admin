@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-    <% include ./partials/head %>
+  <% include ./partials/head %>
 </head>
-<body class='container'>
+<body class='container-fluid'>
   <header>
+    <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
+      <div class="nav navbar-nav">
+        <a class='navbar-brand' href='/'>DynamoDB Admin</a>
+        <a class='nav-item nav-link' href='/'>
+          Tables
+        </a>
+      </div>
+    </nav>
+
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Home</a>
       <a class='breadcrumb-item active'><%= Table.TableName %></a>
     </ol>
+
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link active" href="/tables/<%= Table.TableName %>">

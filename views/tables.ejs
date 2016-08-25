@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-    <% include ./partials/head %>
+  <% include ./partials/head %>
 </head>
-<body class='container'>
+<body class='container-fluid'>
   <header>
-    <ol class='breadcrumb'>
-      <a class='breadcrumb-item active' href='/'>Home</a>
-    </ol>
+    <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
+      <div class="nav navbar-nav">
+        <a class='navbar-brand' href='/'>DynamoDB Admin</a>
+        <a class='nav-item nav-link active' href='/tables'>
+          Tables
+        </a>
+      </div>
+    </nav>
   </header>
 
   <main>
-    <div class='jumbotron'>
-      <h1>Tables</h1>
-      <ul>
-        <% for(var i = 0; i < data.TableNames.length; i++) { %>
-          <li>
-            <a href='/tables/<%= data.TableNames[i] %>'>
-              <%= data.TableNames[i] %>
-            </a>
-          </li>
-        <% } %>
-      </ul>
-    </div>
+    <ul class="list-group">
+      <% for(var i = 0; i < data.length; i++) { %>
+        <li class="list-group-item">
+          <a href='/tables/<%= data[i].TableName %>'>
+            <%= data[i].TableName %>
+          </a>
+          <span class="tag tag-default tag-pill pull-xs-right">
+            <%= data[i].ItemCount %>
+          </span>
+        </li>
+      <% } %>
+    </ul>
   </main>
 </body>
 </html>
