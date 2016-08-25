@@ -68,7 +68,7 @@ app.get('/tables/:TableName/meta', (req, res) => {
 getPort().then((availablePort) => {
   const port = process.env.PORT || availablePort
   app.listen(port, () => {
-    console.log(`dynamodb-admin listening on port ${port}!`)
+    console.log(`dynamodb-admin listening on port ${port}`)
   })
 }).catch((error) => {
   console.error(error)
