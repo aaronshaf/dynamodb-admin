@@ -37,11 +37,11 @@
         <% for(var i = 0; i < Items.length; i++) { %>
           <tr>
             <th scope="row" style="font-size: 0.85rem;">
-              <a href="/tables/<%= Table.TableName %>/items/<%= Items[i].id %>">
-                <%= Items[i].id %>
+              <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[i].__key).join(',')) %>">
+                <pre><%= JSON.stringify(Items[i].__key, null, 2) %></pre>
               </a>
             </th>
-            <td><pre><%= JSON.stringify(Items[i], null, 2) %></pre></td>
+            <td><pre><%= JSON.stringify(Object.assign({}, Items[i], {__key: undefined}), null, 2) %></pre></td>
           </tr>
         <% } %>
       </tbody>

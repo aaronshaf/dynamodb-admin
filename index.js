@@ -3,6 +3,10 @@ const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const getPort = require('get-port')
 const path = require('path')
+const errorhandler = require('errorhandler')
+const { serializeKey, unserializeKey } = require('./util')
+
+require('es7-object-polyfill')
 
 const app = express()
 app.set('json spaces', 2)
@@ -25,6 +29,7 @@ const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
 const scan = promisify(documentClient.scan.bind(documentClient))
 const get = promisify(documentClient.get.bind(documentClient))
 
+app.use(errorhandler())
 app.use('/assets', express.static(path.join(__dirname, '/public')))
 
 app.get('/', (req, res) => {
@@ -43,20 +48,24 @@ app.get('/', (req, res) => {
   })
 })
 
-app.get('/tables/:TableName', (req, res) => {
+app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
   Promise.all([
     describeTable({TableName}),
     scan({TableName})
-  ]).then(([description, items]) => {
+  ]).then(([description, result]) => {
     const data = Object.assign({},
       description,
-      items
+      {
+        Items: result.Items.map((item) => {
+          return Object.assign({}, item, {
+            __key: serializeKey(item, description.Table)
+          })
+        })
+      }
     )
     res.render('scan', data)
-  }).catch((error) => {
-    res.json({error})
-  })
+  }).catch(next)
 })
 
 app.get('/tables/:TableName/meta', (req, res) => {
@@ -75,25 +84,24 @@ app.get('/tables/:TableName/meta', (req, res) => {
   })
 })
 
-app.get('/tables/:TableName/items/:id', (req, res) => {
-  const params = {
-    TableName : req.params.TableName,
-    Key: {
-      id: req.params.id
+app.get('/tables/:TableName/items/:key', (req, res, next) => {
+  const TableName = req.params.TableName
+  describeTable({TableName}).then((result) => {
+    const params = {
+      TableName,
+      Key: unserializeKey(req.params.key, result.Table)
     }
-  }
 
-  get(params).then((response) => {
-    if (!response) {
-      return res.status(404).end()
-    }
-    res.render('item', {
-      TableName: req.params.TableName,
-      Item: response.Item
+    get(params).then((response) => {
+      if (!response) {
+        return res.status(404).end()
+      }
+      res.render('item', {
+        TableName: req.params.TableName,
+        Item: response.Item
+      })
     })
-  }).catch((error) => {
-    res.json({error})
-  })
+  }).catch(next)
 })
 
 getPort().then((availablePort) => {
