@@ -24,7 +24,6 @@
     "errorhandler": "^1.4.3",
     "es6-promisify": "^4.1.0",
     "es7-object-polyfill": "0.0.1",
-    "express": "^4.14.0",
-    "get-port": "^2.1.0"
+    "express": "^4.14.0"
   }
 }

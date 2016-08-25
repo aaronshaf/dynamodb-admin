@@ -1,7 +1,6 @@
 const express = require('express')
 const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
-const getPort = require('get-port')
 const path = require('path')
 const errorhandler = require('errorhandler')
 const { serializeKey, unserializeKey } = require('./util')
@@ -107,11 +106,7 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
   }).catch(next)
 })
 
-getPort().then((availablePort) => {
-  const port = process.env.PORT || availablePort
-  app.listen(port, () => {
-    console.log(`dynamodb-admin listening on port ${port}`)
-  })
-}).catch((error) => {
-  console.error(error)
+const port = process.env.PORT || 8001
+app.listen(port, () => {
+  console.log(`dynamodb-admin listening on port ${port}`)
 })
