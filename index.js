@@ -52,7 +52,10 @@ app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
   Promise.all([
     describeTable({TableName}),
-    scan({TableName})
+    scan({
+      TableName,
+      Limit: 25
+    })
   ]).then(([description, result]) => {
     const data = Object.assign({},
       description,
