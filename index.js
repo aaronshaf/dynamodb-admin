@@ -92,7 +92,7 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
       Key: unserializeKey(req.params.key, result.Table)
     }
 
-    get(params).then((response) => {
+    return get(params).then((response) => {
       if (!response) {
         return res.status(404).end()
       }

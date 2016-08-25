@@ -10,14 +10,29 @@ exports.serializeKey = function (item, table) {
   }
 }
 
-exports.unserializeKey = function (key, table) {
+exports.unserializeKey = function (keys, table) {
   if (table.KeySchema.length === 2) {
     return {
-      [table.KeySchema[0].AttributeName]: key.split(',')[0],
-      [table.KeySchema[1].AttributeName]: key.split(',')[1]
+      [table.KeySchema[0].AttributeName]: keys.split(',')[0],
+      [table.KeySchema[1].AttributeName]: typecastKey(table.KeySchema[1].AttributeName, keys.split(',')[1], table)
     }
   }
   return {
-    id: key
+    id: keys
   }
+}
+
+function typecastKey (keyName, keyValue, table) {
+  const definition = table.AttributeDefinitions.find((attribute) => {
+    return attribute.AttributeName === keyName
+  })
+  if (definition) {
+    switch (definition.AttributeType) {
+      case 'N':
+        return Number(keyValue)
+      case 'S':
+        return String(keyValue)
+    }
+  }
+  return keyValue
 }
