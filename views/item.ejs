@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <% include ./partials/head %>
+</head>
+<body class='container-fluid'>
+  <header>
+    <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
+      <div class="nav navbar-nav">
+        <a class='navbar-brand' href='/'>DynamoDB Admin</a>
+        <a class='nav-item nav-link' href='/'>
+          Tables
+        </a>
+      </div>
+    </nav>
+
+    <ol class='breadcrumb'>
+      <a class='breadcrumb-item' href='/'>Home</a>
+      <a class='breadcrumb-item'><%= TableName %></a>
+    </ol>
+  </header>
+
+  <main>
+    <div>
+      <pre><%= JSON.stringify(Item, null, 2) %></pre>
+    </div>
+  </main>
+</body>
+</html>

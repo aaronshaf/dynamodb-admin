@@ -23,6 +23,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient()
 const listTables = promisify(dynamodb.listTables.bind(dynamodb))
 const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
 const scan = promisify(documentClient.scan.bind(documentClient))
+const get = promisify(documentClient.get.bind(documentClient))
 
 app.use('/assets', express.static(path.join(__dirname, '/public')))
 
@@ -69,6 +70,27 @@ app.get('/tables/:TableName/meta', (req, res) => {
       items
     )
     res.render('meta', data)
+  }).catch((error) => {
+    res.json({error})
+  })
+})
+
+app.get('/tables/:TableName/items/:id', (req, res) => {
+  const params = {
+    TableName : req.params.TableName,
+    Key: {
+      id: req.params.id
+    }
+  }
+
+  get(params).then((response) => {
+    if (!response) {
+      return res.status(404).end()
+    }
+    res.render('item', {
+      TableName: req.params.TableName,
+      Item: response.Item
+    })
   }).catch((error) => {
     res.json({error})
   })
