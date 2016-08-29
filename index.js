@@ -4,6 +4,7 @@ const promisify = require('es6-promisify')
 const path = require('path')
 const errorhandler = require('errorhandler')
 const { serializeKey, unserializeKey } = require('./util')
+const bodyParser = require('body-parser')
 
 require('es7-object-polyfill')
 
@@ -26,7 +27,8 @@ const documentClient = new AWS.DynamoDB.DocumentClient()
 const listTables = promisify(dynamodb.listTables.bind(dynamodb))
 const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
 const scan = promisify(documentClient.scan.bind(documentClient))
-const get = promisify(documentClient.get.bind(documentClient))
+const getItem = promisify(documentClient.get.bind(documentClient))
+const putItem = promisify(documentClient.put.bind(documentClient))
 const deleteItem = promisify(documentClient.delete.bind(documentClient))
 
 app.use(errorhandler())
@@ -109,13 +111,33 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
       Key: unserializeKey(req.params.key, result.Table)
     }
 
-    return get(params).then((response) => {
+    return getItem(params).then((response) => {
       if (!response.Item) {
         return res.status(404).send('Not found')
       }
       res.render('item', {
         TableName: req.params.TableName,
         Item: response.Item
+      })
+    })
+  }).catch(next)
+})
+
+app.put('/tables/:TableName/items/:key', bodyParser.json(), (req, res, next) => {
+  const TableName = req.params.TableName
+  describeTable({TableName}).then((result) => {
+    const params = {
+      TableName,
+      Item: req.body
+    }
+
+    return putItem(params).then(() => {
+      const params = {
+        TableName,
+        Key: unserializeKey(req.params.key, result.Table)
+      }
+      return getItem(params).then((response) => {
+        return res.json(response.Item)
       })
     })
   }).catch(next)

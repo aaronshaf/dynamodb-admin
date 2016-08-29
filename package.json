@@ -20,6 +20,7 @@
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
     "aws-sdk": "^2.5.0",
+    "body-parser": "^1.15.2",
     "ejs": "^2.5.1",
     "errorhandler": "^1.4.3",
     "es6-promisify": "^4.1.0",

@@ -31,7 +31,22 @@
     <nav>
       <script>
       function handleEditClick () {
-
+        fetch(document.location.pathname, {
+          method: 'put',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: document.getElementById('documentTextarea').value
+        }).then((response) => {
+          if (response.ok) {
+            return response.json()
+          }
+        }).then((json) => {
+          document.getElementById('documentTextarea').value = JSON.stringify(json, null, 2)
+        }).catch((error) => {
+          console.error(error)
+          alert('There was an error.')
+        })
       }
       </script>
       <button
@@ -43,7 +58,8 @@
       </button>
 
       <script>
-      function handleDeleteClick () {
+      function handleDeleteClick (event) {
+        event.preventDefault()
         const result = window.confirm('Are you sure you want to delete this document?')
         if (!result) {
           return false
@@ -62,7 +78,7 @@
       </script>
       <button
         class='btn btn-danger'
-        onclick='handleDeleteClick()'
+        onclick='handleDeleteClick(event)'
         type='button'
       >
         Delete
