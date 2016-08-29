@@ -27,6 +27,7 @@ const listTables = promisify(dynamodb.listTables.bind(dynamodb))
 const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
 const scan = promisify(documentClient.scan.bind(documentClient))
 const get = promisify(documentClient.get.bind(documentClient))
+const deleteItem = promisify(documentClient.delete.bind(documentClient))
 
 app.use(errorhandler())
 app.use('/assets', express.static(path.join(__dirname, '/public')))
@@ -84,6 +85,20 @@ app.get('/tables/:TableName/meta', (req, res) => {
   }).catch((error) => {
     res.json({error})
   })
+})
+
+app.delete('/tables/:TableName/items/:key', (req, res, next) => {
+  const TableName = req.params.TableName
+  describeTable({TableName}).then((result) => {
+    const params = {
+      TableName,
+      Key: unserializeKey(req.params.key, result.Table)
+    }
+
+    return deleteItem(params).then((response) => {
+      res.status(204).end()
+    })
+  }).catch(next)
 })
 
 app.get('/tables/:TableName/items/:key', (req, res, next) => {

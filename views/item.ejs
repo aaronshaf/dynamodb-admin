@@ -6,7 +6,7 @@
 <body class='container-fluid'>
   <header>
     <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
-      <div class="nav navbar-nav">
+      <div class='nav navbar-nav'>
         <a class='navbar-brand' href='/'>DynamoDB Admin</a>
         <a class='nav-item nav-link' href='/'>
           Tables
@@ -19,13 +19,75 @@
       <a class='breadcrumb-item' href='/tables/<%= TableName %>'>
         <%= TableName %>
       </a>
+      <% if (Item.id) { %>
+        <span class='breadcrumb-item'>
+          <%= Item.id %>
+        </span>
+      <% } %>
     </ol>
   </header>
 
   <main>
-    <div>
-      <pre><%= JSON.stringify(Item, null, 2) %></pre>
-    </div>
+    <nav>
+      <script>
+      function handleEditClick () {
+
+      }
+      </script>
+      <button
+        class='btn btn-primary'
+        onclick='handleEditClick()'
+        type='button'
+      >
+        Save
+      </button>
+
+      <script>
+      function handleDeleteClick () {
+        const result = window.confirm('Are you sure you want to delete this document?')
+        if (!result) {
+          return false
+        }
+        fetch(document.location.pathname, {
+          method: 'delete'
+        }).then((response) => {
+          if (response.ok) {
+            window.location = `/tables/<%= TableName %>`
+          }
+        }).catch((error) => {
+          console.error(error)
+          alert('There was an error.')
+        })
+      }
+      </script>
+      <button
+        class='btn btn-danger'
+        onclick='handleDeleteClick()'
+        type='button'
+      >
+        Delete
+      </button>
+    </nav>
+    <article
+      style='margin-top: 16px;'
+    >
+      <textarea
+        autocapitalize='off'
+        autocorrect='off'
+        autofocus
+        spellcheck='false'
+        id='documentTextarea'
+        onKeyUp='setTextareaHeight()'
+        style='width: 100%; border: 0 none; outline: none;'
+      ><%= JSON.stringify(Item, null, 2) %></textarea>
+      <script>
+      function setTextareaHeight (fieldId){
+        const textarea = document.getElementById('documentTextarea')
+        textarea.style.height = `${textarea.scrollHeight + 100}px`
+      }
+      setTextareaHeight()
+      </script>
+    </article>
   </main>
 </body>
 </html>
