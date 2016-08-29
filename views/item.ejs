@@ -31,6 +31,9 @@
     <nav>
       <script>
       function handleEditClick () {
+        const textarea = document.getElementById('documentTextarea')
+        const saveButton = document.getElementById('saveButton')
+
         fetch(document.location.pathname, {
           method: 'put',
           headers: {
@@ -40,17 +43,33 @@
         }).then((response) => {
           if (response.ok) {
             return response.json()
+          } else {
+            throw new Error()
           }
         }).then((json) => {
-          document.getElementById('documentTextarea').value = JSON.stringify(json, null, 2)
+          textarea.value = JSON.stringify(json, null, 2)
+          textarea.focus()
+          saveButton.classList.remove('btn-primary')
+          saveButton.classList.add('btn-success')
+          setTimeout(() => {
+            saveButton.classList.add('btn-primary')
+            saveButton.classList.remove('btn-success')
+          }, 2000)
         }).catch((error) => {
+          textarea.focus()
+          saveButton.classList.remove('btn-primary')
+          saveButton.classList.add('btn-warning')
+          setTimeout(() => {
+            saveButton.classList.add('btn-primary')
+            saveButton.classList.remove('btn-warning')
+          }, 2000)
           console.error(error)
-          alert('There was an error.')
         })
       }
       </script>
       <button
         class='btn btn-primary'
+        id='saveButton'
         onclick='handleEditClick()'
         type='button'
       >
