@@ -95,8 +95,8 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
     }
 
     return get(params).then((response) => {
-      if (!response) {
-        return res.status(404).end()
+      if (!response.Item) {
+        return res.status(404).send('Not found')
       }
       res.render('item', {
         TableName: req.params.TableName,
