@@ -1,12 +1,12 @@
 const { parseKey } = require('../util')
 
 describe('parseKey', () => {
-  it('correctly parses key with 1 attribute', () => {
+  it('parses key with 1 attribute', () => {
     const key = 'CfHhu6c1C_8W4JygfbAAc16UJJg2Bw,app_admin|0a5b7a9c-af15-2506-fd4f-80c20bca6414'
     const parsedKey = parseKey(key, table1)
     expect(parsedKey).toEqual({
       document_id: 'CfHhu6c1C_8W4JygfbAAc16UJJg2Bw',
-      ctx_and_id:'app_admin|0a5b7a9c-af15-2506-fd4f-80c20bca6414'
+      ctx_and_id: 'app_admin|0a5b7a9c-af15-2506-fd4f-80c20bca6414'
     })
   })
 })

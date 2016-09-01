@@ -1,14 +1,14 @@
 const { serializeKey } = require('../util')
 
 describe('serializeKey', () => {
-  it('correctly serializes item with 1 key attribute', () => {
+  it('serializes item with 1 key attribute', () => {
     const serializedKey = serializeKey(item1, table1.KeySchema)
     expect(serializedKey).toEqual({
       username: 'jdoe@domain.com'
     })
   })
 
-  it('correctly serializes item with 2 key attributes', () => {
+  it('serializes item with 2 key attributes', () => {
     const serializedKey = serializeKey(item2, table2.KeySchema)
     expect(serializedKey).toEqual({
       document_id: 'CfHhu6d1C_8W4JygfbBAc16UJeg2Bw',
