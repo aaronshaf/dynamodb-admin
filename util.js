@@ -6,7 +6,7 @@ exports.serializeKey = function (item, KeySchema) {
   }, {})
 }
 
-exports.unserializeKey = function (keys, table) {
+exports.parseKey = function (keys, table) {
   const splitKeys = keys.split(',')
 
   return table.KeySchema.reduce((prev, current, index) => {

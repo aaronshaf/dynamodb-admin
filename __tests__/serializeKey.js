@@ -80,7 +80,7 @@ const table1 = {
 const item2 = {
   'user_role': 'Admin',
   'ctx_and_id': 'admin|0a5c7a9c-af15-2156-fd4f-80c20bca6414',
-  'user_id': 'canvadocs_admin',
+  'user_id': 'app_admin',
   'user_name': 'Jane',
   'created_at': 1472489291,
   'id': '0a5c7a9c-bf15-2506-fd4f-80c30bcb6414',
@@ -98,7 +98,7 @@ const table2 = {
       'AttributeType': 'S'
     }
   ],
-  'TableName': 'canvadocs_annotations',
+  'TableName': 'app_annotations',
   'KeySchema': [
     {
       'AttributeName': 'document_id',

@@ -3,7 +3,7 @@ const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const path = require('path')
 const errorhandler = require('errorhandler')
-const { serializeKey, unserializeKey } = require('./util')
+const { serializeKey, parseKey } = require('./util')
 const bodyParser = require('body-parser')
 
 require('es7-object-polyfill')
@@ -94,7 +94,7 @@ app.delete('/tables/:TableName/items/:key', (req, res, next) => {
   describeTable({TableName}).then((result) => {
     const params = {
       TableName,
-      Key: unserializeKey(req.params.key, result.Table)
+      Key: parseKey(req.params.key, result.Table)
     }
 
     return deleteItem(params).then((response) => {
@@ -108,7 +108,7 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
   describeTable({TableName}).then((result) => {
     const params = {
       TableName,
-      Key: unserializeKey(req.params.key, result.Table)
+      Key: parseKey(req.params.key, result.Table)
     }
 
     return getItem(params).then((response) => {
@@ -134,7 +134,7 @@ app.put('/tables/:TableName/items/:key', bodyParser.json(), (req, res, next) => 
     return putItem(params).then(() => {
       const params = {
         TableName,
-        Key: unserializeKey(req.params.key, result.Table)
+        Key: parseKey(req.params.key, result.Table)
       }
       return getItem(params).then((response) => {
         return res.json(response.Item)
