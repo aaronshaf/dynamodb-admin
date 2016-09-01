@@ -1,25 +1,19 @@
-exports.serializeKey = function (item, table) {
-  if (table.KeySchema.length === 2) {
-    return {
-      [table.KeySchema[0].AttributeName]: item[table.KeySchema[0].AttributeName],
-      [table.KeySchema[1].AttributeName]: item[table.KeySchema[1].AttributeName]
-    }
-  }
-  return {
-    id: item.id
-  }
+exports.serializeKey = function (item, KeySchema) {
+  return KeySchema.reduce((prev, current) => {
+    return Object.assign({}, prev, {
+      [current.AttributeName]: item[current.AttributeName]
+    })
+  }, {})
 }
 
 exports.unserializeKey = function (keys, table) {
-  if (table.KeySchema.length === 2) {
-    return {
-      [table.KeySchema[0].AttributeName]: keys.split(',')[0],
-      [table.KeySchema[1].AttributeName]: typecastKey(table.KeySchema[1].AttributeName, keys.split(',')[1], table)
-    }
-  }
-  return {
-    id: keys
-  }
+  const splitKeys = keys.split(',')
+
+  return table.KeySchema.reduce((prev, current, index) => {
+    return Object.assign({}, prev, {
+      [current.AttributeName]: typecastKey(current.AttributeName, splitKeys[index], table)
+    })
+  }, {})
 }
 
 function typecastKey (keyName, keyValue, table) {

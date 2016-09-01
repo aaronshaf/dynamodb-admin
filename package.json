@@ -4,6 +4,9 @@
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
+  "scripts": {
+    "test": "jest"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aaronshaf/dynamodb-viewer.git"
@@ -26,5 +29,8 @@
     "es6-promisify": "^4.1.0",
     "es7-object-polyfill": "0.0.1",
     "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "jest-cli": "^15.0.2"
   }
 }

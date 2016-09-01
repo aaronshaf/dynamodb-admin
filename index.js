@@ -64,7 +64,7 @@ app.get('/tables/:TableName', (req, res, next) => {
       {
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
-            __key: serializeKey(item, description.Table)
+            __key: serializeKey(item, description.Table.KeySchema)
           })
         })
       }
