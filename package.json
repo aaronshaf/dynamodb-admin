@@ -5,7 +5,8 @@
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
   "engines": {
-    "node": "6.4.0"
+    "node": "6.4.0",
+    "npm": "3.10.3"
   },
   "scripts": {
     "test": "jest"
