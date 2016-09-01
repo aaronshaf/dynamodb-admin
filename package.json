@@ -4,6 +4,9 @@
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
+  "engines": {
+    "node": "6.4.0"
+  },
   "scripts": {
     "test": "jest"
   },
