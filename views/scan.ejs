@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
   <% include ./partials/head %>
 </head>
-<body class='container-fluid'>
+<body class="container-fluid">
   <header>
-    <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
+    <nav class="navbar navbar-fixed-top navbar-light bg-faded">
       <div class="nav navbar-nav">
-        <a class='navbar-brand' href='/'>DynamoDB Admin</a>
-        <a class='nav-item nav-link' href='/'>
+        <a class="navbar-brand" href="/">DynamoDB Admin</a>
+        <a class="nav-item nav-link" href="/">
           Tables
         </a>
       </div>
       <% include ./partials/right-nav %>
     </nav>
 
-    <ol class='breadcrumb'>
-      <a class='breadcrumb-item' href='/'>Home</a>
-      <a class='breadcrumb-item active'><%= Table.TableName %></a>
+    <ol class="breadcrumb">
+      <a class="breadcrumb-item" href="/">Home</a>
+      <a class="breadcrumb-item active"><%= Table.TableName %></a>
     </ol>
 
     <ul class="nav nav-tabs">
@@ -29,6 +29,9 @@
       <li class="nav-item">
         <a class="nav-link" href="/tables/<%= Table.TableName %>/meta">Meta</a>
       </li>
+      <li class="nav-item pull-xs-right">
+        <a href="/tables/<%= Table.TableName %>/add-item" class="nav-link">Create item</a>
+      </li>
     </ul>
   </header>
 
@@ -38,7 +41,7 @@
         <% for(var i = 0; i < Items.length; i++) { %>
           <tr>
             <th scope="row" style="font-size: 0.85rem;">
-              <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[i].__key).join(',')) %>">
+              <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[i].__key).join(",")) %>">
                 <pre><%= JSON.stringify(Items[i].__key, null, 2) %></pre>
               </a>
             </th>

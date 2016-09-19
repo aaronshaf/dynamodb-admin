@@ -1,4 +1,4 @@
-exports.serializeKey = function (item, KeySchema) {
+exports.extractKey = function (item, KeySchema) {
   return KeySchema.reduce((prev, current) => {
     return Object.assign({}, prev, {
       [current.AttributeName]: item[current.AttributeName]

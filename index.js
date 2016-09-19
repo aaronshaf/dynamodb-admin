@@ -3,7 +3,7 @@ const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const path = require('path')
 const errorhandler = require('errorhandler')
-const { serializeKey, parseKey } = require('./util')
+const { extractKey, parseKey } = require('./util')
 const bodyParser = require('body-parser')
 
 require('es7-object-polyfill')
@@ -102,7 +102,7 @@ app.get('/tables/:TableName', (req, res, next) => {
       {
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
-            __key: serializeKey(item, description.Table.KeySchema)
+            __key: extractKey(item, description.Table.KeySchema)
           })
         })
       }
@@ -141,6 +141,25 @@ app.delete('/tables/:TableName/items/:key', (req, res, next) => {
   }).catch(next)
 })
 
+app.get('/tables/:TableName/add-item', (req, res, next) => {
+  const TableName = req.params.TableName
+  describeTable({TableName}).then((result) => {
+    const table = result.Table
+    const Item = {}
+    table.KeySchema.forEach((key) => {
+      const definition = table.AttributeDefinitions.find((attribute) => {
+        return attribute.AttributeName === key.AttributeName
+      })
+      Item[key.AttributeName] = definition.AttributeType === 'S' ? '' : 0
+    })
+    res.render('item', {
+      TableName: req.params.TableName,
+      Item: Item,
+      isNew: true
+    })
+  }).catch(next)
+})
+
 app.get('/tables/:TableName/items/:key', (req, res, next) => {
   const TableName = req.params.TableName
   describeTable({TableName}).then((result) => {
@@ -155,7 +174,32 @@ app.get('/tables/:TableName/items/:key', (req, res, next) => {
       }
       res.render('item', {
         TableName: req.params.TableName,
-        Item: response.Item
+        Item: response.Item,
+        isNew: false
+      })
+    })
+  }).catch(next)
+})
+
+app.put('/tables/:TableName/add-item', bodyParser.json(), (req, res, next) => {
+  const TableName = req.params.TableName
+  describeTable({TableName}).then((description) => {
+    const params = {
+      TableName,
+      Item: req.body
+    }
+
+    return putItem(params).then((response) => {
+      const Key = extractKey(req.body, description.Table.KeySchema)
+      const params = {
+        TableName,
+        Key
+      }
+      return getItem(params).then((response) => {
+        if (!response.Item) {
+          return res.status(404).send('Not found')
+        }
+        return res.json(Key)
       })
     })
   }).catch(next)
