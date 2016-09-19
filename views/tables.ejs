@@ -12,15 +12,33 @@
           Tables
         </a>
       </div>
+      <% include ./partials/right-nav %>
     </nav>
   </header>
 
   <main>
+    <script>
+    function deleteTable (TableName) {
+      fetch(`/tables/${TableName}`, {
+        method: 'delete'
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error
+        }
+        window.location.href = '/'
+      }).catch(() => {
+        window.alert('There was an error when attempting to delete the table.')
+      })
+    }
+    </script>
     <ul class="list-group">
       <% for(var i = 0; i < data.length; i++) { %>
         <li class="list-group-item">
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
+          </a>
+          <a href="/" onClick="deleteTable('<%= data[i].TableName %>')" class="tag tag-danger tag-pill pull-xs-right" style="margin-left: 8px;">
+            Delete
           </a>
           <span class="tag tag-default tag-pill pull-xs-right">
             <%= data[i].ItemCount %>

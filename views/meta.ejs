@@ -12,6 +12,7 @@
           Tables
         </a>
       </div>
+      <% include ./partials/right-nav %>
     </nav>
 
     <ol class='breadcrumb'>
@@ -32,8 +33,25 @@
   </header>
 
   <main>
-    <div>
+    <div style="margin-top: 16px; margin-bottom: 16px;">
       <pre><%= JSON.stringify(Table, null, 2) %></pre>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <button id="deleteTable" type="button" class="btn btn-danger">Delete table</button>
+      <script>
+      document.querySelector('#deleteTable').addEventListener('click', () => {
+        fetch('/tables/<%= Table.TableName %>', {
+          method: 'delete'
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error
+          }
+          window.location.href = '/'
+        }).catch(() => {
+          window.alert('There was an error when attempting to delete the table.')
+        })
+      })
+      </script>
     </div>
   </main>
 </body>

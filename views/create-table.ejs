@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ./partials/head %>
+</head>
+<body class="container-fluid">
+  <header>
+    <nav class="navbar navbar-fixed-top navbar-light bg-faded">
+      <div class="nav navbar-nav">
+        <a class="navbar-brand" href="/">DynamoDB Admin</a>
+        <a class="nav-item nav-link active" href="/">
+          Tables
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Create table</h1>
+
+    <form id="form" method="post">
+      <div class="form-group">
+<pre>{
+  "TableName": <input type="text" name="TableName" autofocus />,
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": <input style="width: 50px;" type="number" name="ReadCapacityUnits" value="3">,
+    "WriteCapacityUnits": <input style="width: 50px;" type="number" name="WriteCapacityUnits" value="3">
+  },
+  KeySchema: [
+    {
+      AttributeName: "id",
+      KeyType: "HASH"
+    }
+  ],
+  AttributeDefinitions: [
+    {
+      AttributeName: "id",
+      AttributeType: "S"
+    }
+  ]
+}</pre>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

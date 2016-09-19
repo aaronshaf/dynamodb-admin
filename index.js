@@ -8,6 +8,11 @@ const bodyParser = require('body-parser')
 
 require('es7-object-polyfill')
 
+if (process.env.NODE_ENV === 'production') {
+  console.error('\x1b[31mDo not run this in production!') // red
+  process.exit(1)
+}
+
 const app = express()
 app.set('json spaces', 2)
 app.set('view engine', 'ejs')
@@ -48,6 +53,39 @@ app.get('/', (req, res) => {
       })
     }
   })
+})
+
+app.get('/create-table', (req, res) => {
+  res.render('create-table', {})
+})
+
+app.post('/create-table', bodyParser.urlencoded({extended: false}), (req, res, next) => {
+  dynamodb.createTable({
+    TableName: req.body.TableName,
+    ProvisionedThroughput: {
+      ReadCapacityUnits: req.body.ReadCapacityUnits,
+      WriteCapacityUnits: req.body.WriteCapacityUnits
+    },
+    KeySchema: [{
+      AttributeName: 'id',
+      KeyType: 'HASH'
+    }],
+    AttributeDefinitions: [{
+      AttributeName: 'id',
+      AttributeType: 'S'
+    }]
+  }).promise().then((response) => {
+    res.redirect('/')
+  }).catch(next)
+})
+
+app.delete('/tables/:TableName', (req, res, next) => {
+  const TableName = req.params.TableName
+  dynamodb.deleteTable({TableName}).promise()
+  .then(() => {
+    res.status(204).end()
+  })
+  .catch(next)
 })
 
 app.get('/tables/:TableName', (req, res, next) => {
