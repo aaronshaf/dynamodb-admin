@@ -1,15 +1,15 @@
-const { serializeKey } = require('../util')
+const { extractKey } = require('../util')
 
-describe('serializeKey', () => {
+describe('extractKey', () => {
   it('serializes item with 1 key attribute', () => {
-    const serializedKey = serializeKey(item1, table1.KeySchema)
+    const serializedKey = extractKey(item1, table1.KeySchema)
     expect(serializedKey).toEqual({
       username: 'jdoe@domain.com'
     })
   })
 
   it('serializes item with 2 key attributes', () => {
-    const serializedKey = serializeKey(item2, table2.KeySchema)
+    const serializedKey = extractKey(item2, table2.KeySchema)
     expect(serializedKey).toEqual({
       document_id: 'CfHhu6d1C_8W4JygfbBAc16UJeg2Bw',
       ctx_and_id: 'admin|0a5c7a9c-af15-2156-fd4f-80c20bca6414'
