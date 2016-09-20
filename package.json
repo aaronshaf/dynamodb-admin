@@ -1,6 +1,6 @@
 {
   "name": "dynamodb-admin",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
