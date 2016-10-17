@@ -5,17 +5,10 @@
 </head>
 <body class='container-fluid'>
   <header>
-    <nav class='navbar navbar-fixed-top navbar-light bg-faded'>
-      <div class="nav navbar-nav">
-        <a class='navbar-brand' href='/'>DynamoDB Admin</a>
-        <a class='nav-item nav-link active' href='/'>
-          Tables
-        </a>
-      </div>
-      <% include ./partials/right-nav %>
-    </nav>
+    <ol class="breadcrumb">
+      <a class="breadcrumb-item active" href="/">Tables</a>
+    </ol>
   </header>
-
   <main>
     <script>
     function deleteTable (TableName) {
@@ -46,6 +39,11 @@
         </li>
       <% } %>
     </ul>
+    <div style="margin-top: 12px;">
+      <a href='/create-table' class="btn btn-primary">
+        Create table
+      </a>
+    </div>
   </main>
 </body>
 </html>
