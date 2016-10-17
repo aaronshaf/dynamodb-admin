@@ -17,6 +17,11 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="/tables/<%= Table.TableName %>/get">
+          Get
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="/tables/<%= Table.TableName %>/meta">Meta</a>
       </li>
       <li class="nav-item pull-xs-right">
@@ -79,9 +84,7 @@
                   <% } %>
                   <tr>
                     <td style="width: 95px;"></td>
-                    <td
-                      style="width: 300px"
-                    >
+                    <td style="width: 300px">
                       <input
                         data-filter-key
                         type="text"

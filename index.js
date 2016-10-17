@@ -90,6 +90,41 @@ app.delete('/tables/:TableName', (req, res, next) => {
   .catch(next)
 })
 
+app.get('/tables/:TableName/get', (req, res, next) => {
+  const TableName = req.params.TableName
+  if (req.query.hash) {
+    if (req.query.range) {
+      return res.redirect(`/tables/${TableName}/items/${req.query.hash}${encodeURIComponent(',')}${req.query.range}`)
+    } else {
+      return res.redirect(`/tables/${TableName}/items/${req.query.hash}`)
+    }
+  }
+  describeTable({TableName}).then((description) => {
+    const hashKey = description.Table.KeySchema.find((schema) => {
+      return schema.KeyType === 'HASH'
+    })
+    if (hashKey) {
+      hashKey.AttributeType = description.Table.AttributeDefinitions.find((definition) => {
+        return definition.AttributeName === hashKey.AttributeName
+      }).AttributeType
+    }
+    const rangeKey = description.Table.KeySchema.find((schema) => {
+      return schema.KeyType === 'RANGE'
+    })
+    if (rangeKey) {
+      rangeKey.AttributeType = description.Table.AttributeDefinitions.find((definition) => {
+        return definition.AttributeName === rangeKey.AttributeName
+      }).AttributeType
+    }
+    res.render('get', Object.assign({},
+      description, {
+        hashKey,
+        rangeKey
+      }
+    ))
+  })
+})
+
 app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
   req.query = pickBy(req.query)

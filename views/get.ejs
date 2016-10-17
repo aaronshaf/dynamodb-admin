@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <% include ./partials/head %>
+</head>
+<body class='container-fluid'>
+  <header>
+    <ol class='breadcrumb'>
+      <a class='breadcrumb-item' href='/'>Tables</a>
+      <a class='breadcrumb-item active'><%= Table.TableName %></a>
+    </ol>
+
+    <ul class='nav nav-tabs'>
+      <li class='nav-item'>
+        <a class='nav-link' href='/tables/<%= Table.TableName %>'>
+          Scan (<%= Table.ItemCount %>)
+        </a>
+      </li><li class="nav-item">
+        <a class="nav-link active" href="/tables/<%= Table.TableName %>/get">
+          Get
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' href='/tables/<%= Table.TableName %>/meta'>Meta</a>
+      </li>
+    </ul>
+  </header>
+
+  <main>
+    <form
+      autocomplete="off"
+      style="padding-top: 20px;padding-bottom: 20px;"
+      id="form"
+    >
+      <table class="table table-bordered">
+        <tbody>
+          <% if (hashKey) { %>
+            <tr>
+              <th style="width: 200px;"><%= hashKey.AttributeName %></th>
+              <td>
+                <input autofocus class="form-control" type="text" name="hash" />
+              </td>
+            </tr>
+          <% } %>
+          <% if (rangeKey) { %>
+            <tr>
+              <th><%= rangeKey.AttributeName %></th>
+              <td>
+                <input class="form-control" type="text" name="range" />
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <input id="param" type="hidden" />
+      <button type="submit" class="btn btn-primary">Get</button>
+    </form>
+  </main>
+</body>
+</html>

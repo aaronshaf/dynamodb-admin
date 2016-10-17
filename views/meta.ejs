@@ -13,7 +13,11 @@
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
         <a class='nav-link' href='/tables/<%= Table.TableName %>'>
-          Items (<%= Table.ItemCount %>)
+          Scan (<%= Table.ItemCount %>)
+        </a>
+      </li><li class="nav-item">
+        <a class="nav-link" href="/tables/<%= Table.TableName %>/get">
+          Get
         </a>
       </li>
       <li class='nav-item'>
