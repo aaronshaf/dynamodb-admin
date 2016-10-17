@@ -5,6 +5,9 @@ const path = require('path')
 const errorhandler = require('errorhandler')
 const { extractKey, parseKey } = require('./util')
 const bodyParser = require('body-parser')
+const pickBy = require('lodash/pickBy')
+const omit = require('lodash/omit')
+const yaml = require('js-yaml')
 
 require('es7-object-polyfill')
 
@@ -27,14 +30,13 @@ AWS.config.update({
 })
 
 const dynamodb = new AWS.DynamoDB()
-const documentClient = new AWS.DynamoDB.DocumentClient()
+const docClient = new AWS.DynamoDB.DocumentClient()
 
 const listTables = promisify(dynamodb.listTables.bind(dynamodb))
 const describeTable = promisify(dynamodb.describeTable.bind(dynamodb))
-const scan = promisify(documentClient.scan.bind(documentClient))
-const getItem = promisify(documentClient.get.bind(documentClient))
-const putItem = promisify(documentClient.put.bind(documentClient))
-const deleteItem = promisify(documentClient.delete.bind(documentClient))
+const getItem = promisify(docClient.get.bind(docClient))
+const putItem = promisify(docClient.put.bind(docClient))
+const deleteItem = promisify(docClient.delete.bind(docClient))
 
 app.use(errorhandler())
 app.use('/assets', express.static(path.join(__dirname, '/public')))
@@ -90,24 +92,52 @@ app.delete('/tables/:TableName', (req, res, next) => {
 
 app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
-  Promise.all([
-    describeTable({TableName}),
-    scan({
+  req.query = pickBy(req.query)
+  const filters = omit(req.query, ['_hash', 'range'])
+
+  describeTable({TableName}).then((description) => {
+    let ExclusiveStartKey = {}
+    const ExpressionAttributeNames = {}
+    const ExpressionAttributeValues = {}
+    const KeyConditionExpression = []
+    const FilterExpressions = []
+
+    for (let key in filters) {
+      const attributeDefinition = description.Table.AttributeDefinitions.find((definition) => {
+        return definition.AttributeName === key
+      })
+      if (attributeDefinition && attributeDefinition.AttributeType === 'N') {
+        req.query[key] = Number(req.query[key])
+      }
+      ExpressionAttributeNames[`#${key}`] = key
+      ExpressionAttributeValues[`:${key}`] = req.query[key]
+      FilterExpressions.push(`#${key} = :${key}`)
+    }
+
+    const params = pickBy({
       TableName,
+      FilterExpression: FilterExpressions.length ? FilterExpressions.join(' AND ') : undefined,
+      ExpressionAttributeNames: FilterExpressions.length ? ExpressionAttributeNames : undefined,
+      ExpressionAttributeValues: FilterExpressions.length ? ExpressionAttributeValues : undefined,
+      ExclusiveStartKey: Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined,
       Limit: 25
     })
-  ]).then(([description, result]) => {
-    const data = Object.assign({},
-      description,
-      {
+    return Promise.all([
+      docClient.scan(params).promise()
+    ]).then(([result]) => {
+      const data = Object.assign({}, description, {
+        query: req.query,
+        yaml,
+        omit,
+        filters,
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
             __key: extractKey(item, description.Table.KeySchema)
           })
         })
-      }
-    )
-    res.render('scan', data)
+      })
+      res.render('scan', data)
+    })
   }).catch(next)
 })
 
@@ -115,7 +145,7 @@ app.get('/tables/:TableName/meta', (req, res) => {
   const TableName = req.params.TableName
   Promise.all([
     describeTable({TableName}),
-    scan({TableName})
+    docClient.scan({TableName}).promise()
   ]).then(([description, items]) => {
     const data = Object.assign({},
       description,

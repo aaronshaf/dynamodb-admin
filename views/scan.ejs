@@ -13,7 +13,7 @@
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link active" href="/tables/<%= Table.TableName %>">
-          Items (<%= Table.ItemCount %>)
+          Scan (<%= Table.ItemCount %>)
         </a>
       </li>
       <li class="nav-item">
@@ -26,16 +26,115 @@
   </header>
 
   <main>
+    <form
+      autocomplete="off"
+      action="/tables/<%= Table.TableName %>"
+      method="get"
+      style="padding-top: 20px;padding-bottom: 20px;"
+      id="form"
+    >
+      <datalist id="attributes">
+        <% for (let AttributeDefinition of Table.AttributeDefinitions) { %>
+          <option value="<%= AttributeDefinition.AttributeName %>" />
+        <% } %>
+      </datalist>
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <th>Filter</th>
+            <td>
+              <table class="table table-bordered">
+                <tbody>
+                  <% for (let filterKey in filters) { %>
+                    <tr>
+                      <td style="width: 95px;">
+                        <button type="button" onclick="removeFilter(this)" class='btn btn-danger'>Remove</button>
+                      </td>
+                      <td
+                        style="width: 300px"
+                      >
+                        <input
+                          data-filter-key
+                          type="text"
+                          class="form-control"
+                          readonly
+                          value="<%= filterKey %>"
+                        />
+                      </td>
+                      <td>
+                        <select class="form-control" readonly>
+                          <option>=</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Value"
+                          name="<%= filterKey %>"
+                          value="<%= filters[filterKey] %>"
+                        />
+                      </td>
+                    </tr>
+                  <% } %>
+                  <tr>
+                    <td style="width: 95px;"></td>
+                    <td
+                      style="width: 300px"
+                    >
+                      <input
+                        data-filter-key
+                        type="text"
+                        class="form-control"
+                        id="key"
+                        placeholder="Key"
+                        list="attributes"
+                      />
+                    </td>
+                    <td>
+                      <select class="form-control" readonly>
+                        <option>=</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input id="value" type="text" class="form-control" placeholder="Value" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <input id="param" type="hidden" />
+      <button type="submit" class="btn btn-primary">Scan</button>
+    </form>
+    <script>
+    const form = document.querySelector('#form')
+    form.addEventListener('submit', (event) => {
+      form.param.setAttribute('name', form.key.value)
+      form.param.value = form.value.value
+    })
+    function removeFilter (node) {
+      node.closest('tr').remove()
+    }
+    </script>
+
     <table class="table">
       <tbody>
         <% for(var i = 0; i < Items.length; i++) { %>
           <tr>
-            <th scope="row" style="font-size: 0.85rem;">
+            <th
+              scope="row"
+              style="font-size: 0.85rem;min-width: 250px;"
+            >
               <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[i].__key).join(",")) %>">
-                <pre><%= JSON.stringify(Items[i].__key, null, 2) %></pre>
+                <pre style="max-height:50px;overflow:hidden"><%= yaml.safeDump(Items[i].__key) %></pre>
               </a>
             </th>
-            <td><pre><%= JSON.stringify(Object.assign({}, Items[i], {__key: undefined}), null, 2) %></pre></td>
+            <td style="width: 100%">
+              <pre style="max-height:300px;overflow:hidden"><%= yaml.safeDump(Object.assign({}, omit(Items[i], ['__key']))) %></pre>
+            </td>
           </tr>
         <% } %>
       </tbody>
