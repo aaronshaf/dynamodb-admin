@@ -128,10 +128,11 @@ app.get('/tables/:TableName/get', (req, res, next) => {
 app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
   req.query = pickBy(req.query)
-  const filters = omit(req.query, ['_hash', 'range'])
+  const filters = omit(req.query, ['_hash', 'range', 'startKey', 'pageNum'])
 
   describeTable({TableName}).then((description) => {
-    let ExclusiveStartKey = {}
+    let ExclusiveStartKey = req.query.startKey ? JSON.parse(req.query.startKey) : {}
+    let pageNum = req.query.pageNum ? parseInt(req.query.pageNum) : 1;
     const ExpressionAttributeNames = {}
     const ExpressionAttributeValues = {}
     const KeyConditionExpression = []
@@ -157,14 +158,19 @@ app.get('/tables/:TableName', (req, res, next) => {
       ExclusiveStartKey: Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined,
       Limit: 25
     })
+
     return Promise.all([
       docClient.scan(params).promise()
     ]).then(([result]) => {
+      let nextKey = result.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey)) : null;
       const data = Object.assign({}, description, {
         query: req.query,
         yaml,
         omit,
         filters,
+        pageNum: pageNum,
+        nextKey: nextKey,
+        pageCount: Math.ceil(description.Table.ItemCount / 25),
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
             __key: extractKey(item, description.Table.KeySchema)
