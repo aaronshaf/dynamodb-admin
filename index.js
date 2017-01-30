@@ -170,7 +170,6 @@ app.get('/tables/:TableName', (req, res, next) => {
         filters,
         pageNum: pageNum,
         nextKey: nextKey,
-        pageCount: Math.ceil(description.Table.ItemCount / 25),
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
             __key: extractKey(item, description.Table.KeySchema)
