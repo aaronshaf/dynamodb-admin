@@ -121,7 +121,7 @@
           <nav style="float: right">
             <ul class="pagination" style="margin: 0">
               <% if (nextKey) { %>
-                 <li class="page-item"><a class="page-link" href="?startKey=<%= nextKey %>&pageNum=<%= pageNum+1 %>">Next Page</a></li>
+                 <li class="page-item"><a class="page-link" href="?startKey=<%= nextKey %>&pageNum=<%= pageNum+1 %>&<%= filterQueryString %>">Next Page</a></li>
               <% } %>
             </ul>
          </nav>

@@ -8,6 +8,7 @@ const bodyParser = require('body-parser')
 const pickBy = require('lodash/pickBy')
 const omit = require('lodash/omit')
 const yaml = require('js-yaml')
+const querystring = require('querystring');
 
 require('es7-object-polyfill')
 
@@ -147,14 +148,19 @@ app.get('/tables/:TableName', (req, res, next) => {
       }
       ExpressionAttributeNames[`#${key}`] = key
       ExpressionAttributeValues[`:${key}`] = req.query[key]
+      const isSchemaKey = description.Table.KeySchema.find((definition) => {
+        return definition.AttributeName === key
+      });
+
       FilterExpressions.push(`#${key} = :${key}`)
     }
+
 
     const params = pickBy({
       TableName,
       FilterExpression: FilterExpressions.length ? FilterExpressions.join(' AND ') : undefined,
-      ExpressionAttributeNames: FilterExpressions.length ? ExpressionAttributeNames : undefined,
-      ExpressionAttributeValues: FilterExpressions.length ? ExpressionAttributeValues : undefined,
+      ExpressionAttributeNames: Object.keys(ExpressionAttributeNames).length ? ExpressionAttributeNames : undefined,
+      ExpressionAttributeValues: Object.keys(ExpressionAttributeValues).length ? ExpressionAttributeValues : undefined,
       ExclusiveStartKey: Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined,
       Limit: 25
     })
@@ -170,6 +176,7 @@ app.get('/tables/:TableName', (req, res, next) => {
         filters,
         pageNum: pageNum,
         nextKey: nextKey,
+        filterQueryString: querystring.stringify(filters),
         Items: result.Items.map((item) => {
           return Object.assign({}, item, {
             __key: extractKey(item, description.Table.KeySchema)
