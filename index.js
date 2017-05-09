@@ -1,4 +1,5 @@
 const express = require('express')
+const _ = require('lodash');
 const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const path = require('path')
@@ -126,6 +127,95 @@ app.get('/tables/:TableName/get', (req, res, next) => {
   })
 })
 
+var doSearch = function (docClient, tableName, scanParams, limit, startKey, done, progress, readOperation = "scan") {
+    limit = typeof limit !== 'undefined' ? limit : null;
+    startKey = typeof startKey !== 'undefined' ? startKey : null;
+    var self = this;
+    var params = {TableName: tableName};
+    if (typeof scanParams !== 'undefined' && scanParams) {
+        params = _.assign(params, scanParams);
+    }
+    if (limit != null)
+        params.Limit = limit;
+    if (startKey != null)
+        params.ExclusiveStartKey = startKey;
+    var items = [];
+    var processNextBite = function (err, items, nextKey) {
+        if (!err && nextKey) {
+            params.ExclusiveStartKey = nextKey;
+            getNextBite(params, items, processNextBite);
+        } else {
+            if (done) done(err, items);
+        }
+    };
+
+    var readMethod = {
+        "scan": docClient.scan,
+        "query": docClient.query,
+    }[readOperation].bind(docClient);
+
+
+    var getNextBite = function (params, items, callback) {
+
+        var result = readMethod(params, function (err, data) {
+            var obj = null;
+
+            if (err != null) {
+                obj = null;
+                callback(err, items, null);
+                return;
+            }
+            if (typeof data.Items == "undefined") {
+            }
+            if (data && data.Items && data.Items.length > 0)
+                items = items.concat(data.Items);
+
+            var lastStartKey = null;
+            if (data)
+                lastStartKey = data.LastEvaluatedKey;
+    
+            if (progress) {
+                var stop = progress(err, data.Items, lastStartKey);
+                if (!stop) {
+                    callback(err, items, lastStartKey);
+                } else {
+                   if (done) done(err, items);
+                }
+            } else {
+                callback(err, items, lastStartKey);
+            }
+
+        });
+    };
+    getNextBite(params, items, processNextBite);
+};
+
+var getPage = function(docClient, keySchema, TableName, scanParams, pageSize, startKey, done)
+{
+    var pageItems = [];
+    doSearch(docClient, TableName, scanParams, 10, startKey,
+      function (err, items) {
+            let nextKey = null;
+            if (_.size(pageItems) > pageSize) {
+                pageItems = pageItems.slice(0, pageSize)
+                nextKey = extractKey(pageItems[pageSize - 1], keySchema);
+            }
+            done(pageItems, err, nextKey);
+      },
+      function (err, items, lastStartKey) {
+           for (let i = 0; i < items.length && _.size(pageItems) < pageSize + 1; i++) {
+                let item = items[i];
+                pageItems.push(item);
+            }
+            if (_.size(pageItems) >= pageSize || !lastStartKey) {
+                return true;
+            }
+            else return false;
+      }
+    );
+}
+
+
 app.get('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
   req.query = pickBy(req.query)
@@ -161,29 +251,31 @@ app.get('/tables/:TableName', (req, res, next) => {
       FilterExpression: FilterExpressions.length ? FilterExpressions.join(' AND ') : undefined,
       ExpressionAttributeNames: Object.keys(ExpressionAttributeNames).length ? ExpressionAttributeNames : undefined,
       ExpressionAttributeValues: Object.keys(ExpressionAttributeValues).length ? ExpressionAttributeValues : undefined,
-      ExclusiveStartKey: Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined,
-      Limit: 25
     })
 
-    return Promise.all([
-      docClient.scan(params).promise()
-    ]).then(([result]) => {
-      let nextKey = result.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey)) : null;
-      const data = Object.assign({}, description, {
-        query: req.query,
-        yaml,
-        omit,
-        filters,
-        pageNum: pageNum,
-        nextKey: nextKey,
-        filterQueryString: querystring.stringify(filters),
-        Items: result.Items.map((item) => {
-          return Object.assign({}, item, {
-            __key: extractKey(item, description.Table.KeySchema)
+    let startKey = Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined;
+
+    getPage(docClient, description.Table.KeySchema, TableName, params, 25, startKey,
+      function(pageItems, err, nextKey) {
+        console.log("page done!", pageItems.length, nextKey);
+
+        let nextKeyParam = nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null;
+      
+        const data = Object.assign({}, description, {
+          query: req.query,
+          yaml,
+          omit,
+          filters,
+          pageNum: pageNum,
+          nextKey: nextKeyParam,
+          filterQueryString: querystring.stringify(filters),
+          Items: pageItems.map((item) => {
+            return Object.assign({}, item, {
+              __key: extractKey(item, description.Table.KeySchema)
+            })
           })
-        })
-      })
-      res.render('scan', data)
+        });
+        res.render('scan', data);
     })
   }).catch(next)
 })
