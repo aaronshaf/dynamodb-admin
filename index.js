@@ -23,13 +23,23 @@ app.set('json spaces', 2)
 app.set('view engine', 'ejs')
 app.set('views', path.resolve(__dirname, 'views'))
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'key',
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'secret',
-  endpoint: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
-  sslEnabled: process.env.DYNAMO_ENDPOINT && process.env.DYNAMO_ENDPOINT.indexOf('https://') === 0,
-  region: process.env.AWS_REGION || 'us-east-1'
-})
+const env = process.env;
+let awsConfig = {
+  region: env.AWS_REGION || 'us-east-1'
+};
+
+if(env.AWS_ACCESS_KEY_ID) {
+ awsConfig.accessKeyId = env.AWS_ACCESS_KEY_ID; 
+}
+if(env.AWS_SECRET_ACCESS_KEY) {
+ awsConfig.secretAccessKey = env.AWS_SECRET_ACCESS_KEY;
+}
+if(env.DYNAMO_ENDPOINT) {
+  awsConfig.endpoint = env.DYNAMO_ENDPOINT;
+  awsConfig.sslEnabled = env.DYNAMO_ENDPOINT.indexOf('https://') === 0;
+}
+
+AWS.config.update(awsConfig);
 
 const dynamodb = new AWS.DynamoDB()
 const docClient = new AWS.DynamoDB.DocumentClient()
