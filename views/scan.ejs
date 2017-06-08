@@ -146,23 +146,39 @@
     }
     </script>
 
+    <% const keys = Items[0] !== undefined ? Object.keys(Items[0]): [] %>
+    <% const primaryKeys = Items[0] !== undefined ? Object.keys(Items[0].__key): [] %>
+    <% const ignored = ['__key'].concat(primaryKeys) %>
     <table class="table">
+      <thead>
+      <tr>
+        <td>Actions</td>
+          <% for(let i = 0; i < primaryKeys.length; i++) { %>
+            <td><%= primaryKeys[i] %></td>
+          <% } %>
+          <% for(let i = 0; i < keys.length; i++) { %>
+              <% if (!ignored.includes(keys[i])) { %>
+                <td><%= keys[i] %></td>
+              <% } %>
+          <% } %>
+      </tr>
+      </thead>
       <tbody>
-        <% for(var i = 0; i < Items.length; i++) { %>
-          <tr>
-            <th
-              scope="row"
-              style="font-size: 0.85rem;min-width: 250px;"
-            >
-              <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[i].__key).join(",")) %>">
-                <pre style="max-height:50px;overflow:hidden"><%= yaml.safeDump(Items[i].__key) %></pre>
-              </a>
-            </th>
-            <td style="width: 100%">
-              <pre style="max-height:300px;overflow:hidden"><%= yaml.safeDump(Object.assign({}, omit(Items[i], ['__key']))) %></pre>
-            </td>
-          </tr>
-        <% } %>
+      <% for(let row = 0; row < Items.length; row++) { %>
+      <tr>
+        <td>
+          <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[row].__key).join(',')) %>">View</a>
+        </td>
+          <% for(let i = 0; i < primaryKeys.length; i++) { %>
+            <td><%= Items[row][primaryKeys[i]] %></td>
+          <% } %>
+          <% for(let column = 0; column < keys.length; column++) { %>
+              <% if (!ignored.includes(keys[column])) { %>
+                <td><%= Items[row][keys[column]] %></td>
+              <% } %>
+          <% } %>
+      </tr>
+      <% } %>
       </tbody>
     </table>
   </main>
