@@ -1,44 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <% include ./partials/head %>
+    <% include ./partials/head %>
 </head>
 <body class="container-fluid">
-  <header>
+<header>
     <ol class="breadcrumb">
-      <a class="breadcrumb-item" href="/">Tables</a>
-      <a class="breadcrumb-item active">Create table</a>
+        <a class="breadcrumb-item" href="/">Tables</a>
+        <a class="breadcrumb-item active">Create Table</a>
     </ol>
-  </header>
-  <main>
-    <h1>Create table</h1>
-
+</header>
+<main>
     <form id="form" method="post">
-      <div class="form-group">
-<pre>{
-  "TableName": <input type="text" name="TableName" autofocus />,
-  "ProvisionedThroughput": {
-    "ReadCapacityUnits": <input style="width: 50px;" type="number" name="ReadCapacityUnits" value="3">,
-    "WriteCapacityUnits": <input style="width: 50px;" type="number" name="WriteCapacityUnits" value="3">
-  },
-  KeySchema: [
-    {
-      AttributeName: "id",
-      KeyType: "HASH"
-    }
-  ],
-  AttributeDefinitions: [
-    {
-      AttributeName: "id",
-      AttributeType: "S"
-    }
-  ]
-}</pre>
-      </div>
-      <div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </div>
+        <div class="container">
+            <h1>Create Table</h1>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="TableName">Table Name</label>
+                        <input type="text" id="TableName" name="TableName" class="form-control" autofocus/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="HashAttributeName">Hash Attribute Name</label>
+                        <input type="text" id="HashAttributeName" name="HashAttributeName" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Hash Attribute Type</label>
+                        <select name="HashAttributeType" class="form-control">
+                            <option value="S">String</option>
+                            <option value="N">Number</option>
+                            <option value="B">Binary</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="HashAttributeName">Range Attribute Name (Optional)</label>
+                        <input type="text" id="RangeAttributeName" name="RangeAttributeName" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Range Attribute Type (Optional)</label>
+                        <select name="RangeAttributeType" class="form-control">
+                            <option></option>
+                            <option value="S">String</option>
+                            <option value="N">Number</option>
+                            <option value="B">Binary</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ReadCapacityUnits">ReadCapacityUnits</label>
+                        <input type="text" id="ReadCapacityUnits" name="ReadCapacityUnits" class="form-control"
+                               value="3"/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="WriteCapacityUnits">WriteCapacityUnits</label>
+                        <input type="text" id="WriteCapacityUnits" name="WriteCapacityUnits" class="form-control"
+                               value="3"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
-  </main>
+</main>
 </body>
 </html>

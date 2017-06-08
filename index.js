@@ -74,24 +74,44 @@ app.get('/create-table', (req, res) => {
 })
 
 app.post('/create-table', bodyParser.urlencoded({extended: false}), (req, res, next) => {
-  dynamodb.createTable({
-    TableName: req.body.TableName,
-    ProvisionedThroughput: {
-      ReadCapacityUnits: req.body.ReadCapacityUnits,
-      WriteCapacityUnits: req.body.WriteCapacityUnits
-    },
-    KeySchema: [{
-      AttributeName: 'id',
-      KeyType: 'HASH'
-    }],
-    AttributeDefinitions: [{
-      AttributeName: 'id',
-      AttributeType: 'S'
-    }]
-  }).promise().then((response) => {
-    res.redirect('/')
-  }).catch(next)
-})
+    let attributeDefinitions = [
+        {
+            AttributeName: req.body.HashAttributeName,
+            AttributeType: req.body.HashAttributeType,
+        }
+    ];
+
+    let keySchema = [
+        {
+            AttributeName: req.body.HashAttributeName,
+            KeyType: 'HASH',
+        }
+    ];
+
+    if (req.body.RangeAttributeName) {
+        attributeDefinitions.push({
+            AttributeName: req.body.RangeAttributeName,
+            AttributeType: req.body.RangeAttributeType,
+        });
+
+        keySchema.push({
+            AttributeName: req.body.RangeAttributeName,
+            KeyType: 'RANGE',
+        });
+    }
+
+    dynamodb.createTable({
+        TableName: req.body.TableName,
+        ProvisionedThroughput: {
+            ReadCapacityUnits: req.body.ReadCapacityUnits,
+            WriteCapacityUnits: req.body.WriteCapacityUnits,
+        },
+        KeySchema: keySchema,
+        AttributeDefinitions: attributeDefinitions,
+    }).promise().then((response) => {
+        res.redirect('/')
+    }).catch(next)
+});
 
 app.delete('/tables/:TableName', (req, res, next) => {
   const TableName = req.params.TableName
