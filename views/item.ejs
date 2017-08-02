@@ -2,6 +2,9 @@
 <html lang='en'>
 <head>
   <% include ./partials/head %>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/ace.js'></script>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/mode-json.js'></script>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/theme-monokai.js'></script>
 </head>
 <body class='container-fluid'>
   <header>
@@ -20,7 +23,6 @@
     <nav>
       <script>
       function handleEditClick () {
-        const textarea = document.getElementById('documentTextarea')
         const saveButton = document.getElementById('saveButton')
 
         fetch(document.location.pathname, {
@@ -28,7 +30,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: document.getElementById('documentTextarea').value
+          body: editor.getValue()
         }).then((response) => {
           if (response.ok) {
             return response.json()
@@ -43,8 +45,8 @@
             window.location = `${urlPart1}/items/${param}`
             return
           }
-          textarea.value = JSON.stringify(json, null, 2)
-          textarea.focus()
+          editor.setValue(JSON.stringify(json, null, 2));
+          editor.focus()
           saveButton.classList.remove('btn-primary')
           saveButton.classList.add('btn-success')
           setTimeout(() => {
@@ -52,7 +54,7 @@
             saveButton.classList.remove('btn-success')
           }, 2000)
         }).catch((error) => {
-          textarea.focus()
+          editor.focus()
           saveButton.classList.remove('btn-primary')
           saveButton.classList.add('btn-warning')
           setTimeout(() => {
@@ -108,24 +110,25 @@
         </button>
       <% } %>
     </nav>
-    <article
-      style='margin-top: 16px;'
-    >
-      <textarea
-        autocapitalize='off'
-        autocorrect='off'
-        autofocus
-        spellcheck='false'
-        id='documentTextarea'
-        onKeyUp='setTextareaHeight()'
-        style='width: 100%; border: 0 none; outline: none;'
-      ><%= JSON.stringify(Item, null, 2) %></textarea>
+    <article id="documentWrapper" style='position: relative; margin-top: 16px; width: 100%; height: 100%'>
+      <div id='documentTextarea' style='
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;'><%= JSON.stringify(Item, null, 2) %></div>
       <script>
-      function setTextareaHeight (fieldId){
-        const textarea = document.getElementById('documentTextarea')
-        textarea.style.height = `${textarea.scrollHeight + 100}px`
+      const documentWrapper = document.getElementById('documentWrapper')
+      function setTextareaHeight (){
+          documentWrapper.style.height = `${window.innerHeight}px`
       }
       setTextareaHeight()
+
+      const editor = ace.edit("documentTextarea")
+      editor.resize()
+      editor.getSession().setMode("ace/mode/json")
+      editor.setTheme("ace/theme/monokai")
+      editor.focus();
       </script>
     </article>
   </main>
