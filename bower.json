@@ -1,0 +1,25 @@
+{
+  "name": "dynamodb-admin",
+  "description": "GUI for DynamoDB. Useful for local development.",
+  "main": "index.js",
+  "authors": [
+    "Aaron Shafovaloff <aaronshaf@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "DynamoDB",
+    "Dynamo"
+  ],
+  "homepage": "https://github.com/aaronshaf/dynamodb-viewer.git",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ace-builds": "ace-build#^1.2.8"
+  }
+}

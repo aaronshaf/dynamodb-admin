@@ -5,7 +5,8 @@
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "bower install"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
     "lodash": "^4.16.4"
   },
   "devDependencies": {
+    "bower": "^1.8.0",
     "jest-cli": "^15.0.2"
   }
 }
