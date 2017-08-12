@@ -31,10 +31,10 @@
     "es7-object-polyfill": "0.0.1",
     "express": "^4.14.0",
     "js-yaml": "^3.6.1",
+    "bower": "^1.8.0",
     "lodash": "^4.16.4"
   },
   "devDependencies": {
-    "bower": "^1.8.0",
     "jest-cli": "^15.0.2"
   }
 }
