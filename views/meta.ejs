@@ -2,6 +2,9 @@
 <html lang='en'>
 <head>
   <% include ./partials/head %>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/ace.js'></script>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/mode-json.js'></script>
+  <script src='/assets/bower_components/ace-builds/src-min-noconflict/theme-monokai.js'></script>
 </head>
 <body class='container-fluid'>
   <header>
@@ -27,26 +30,40 @@
   </header>
 
   <main>
-    <div style="margin-top: 16px; margin-bottom: 16px;">
-      <pre><%= JSON.stringify(Table, null, 2) %></pre>
-    </div>
-    <div style="margin-bottom: 16px;">
+    <div style="margin: 16px 0;">
       <button id="deleteTable" type="button" class="btn btn-danger">Delete table</button>
-      <script>
-      document.querySelector('#deleteTable').addEventListener('click', () => {
-        fetch('/tables/<%= Table.TableName %>', {
-          method: 'delete'
-        }).then((response) => {
-          if (!response.ok) {
-            throw new Error
-          }
-          window.location.href = '/'
-        }).catch(() => {
-          window.alert('There was an error when attempting to delete the table.')
-        })
-      })
-      </script>
+    </div>
+    <div id="documentWrapper" style="margin-top: 16px; margin-bottom: 16px; position: relative;">
+      <div id="documentArea" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"><%= JSON.stringify(Table, null, 2) %></div>
     </div>
   </main>
+  <script>
+      document.querySelector('#deleteTable').addEventListener('click', () => {
+          fetch('/tables/<%= Table.TableName %>', {
+              method: 'delete'
+          }).then((response) => {
+              if (!response.ok) {
+                  throw new Error
+              }
+              window.location.href = '/'
+          }).catch(() => {
+              window.alert('There was an error when attempting to delete the table.')
+          })
+      });
+
+      const documentWrapper = document.getElementById('documentWrapper')
+      function setTextareaHeight (){
+          documentWrapper.style.height = `${window.innerHeight}px`
+      }
+      setTextareaHeight()
+
+
+      const editor = ace.edit("documentArea");
+      editor.resize();
+      editor.getSession().setMode("ace/mode/json");
+      editor.setTheme("ace/theme/monokai");
+      editor.setReadOnly(true);
+      editor.setFontSize(14);
+  </script>
 </body>
 </html>
