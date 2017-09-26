@@ -1,4 +1,4 @@
-GUI for DynamoDB Local.
+GUI for [DynamoDB Local](https://aws.amazon.com/blogs/aws/dynamodb-local-for-desktop-development/) or [dynalite](https://github.com/mhart/dynalite).
 
 ## Usage
 
