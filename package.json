@@ -12,10 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/aaronshaf/dynamodb-viewer.git"
   },
-  "keywords": [
-    "DynamoDB",
-    "Dynamo"
-  ],
+  "keywords": ["DynamoDB", "Dynamo"],
   "author": "Aaron Shafovaloff <aaronshaf@gmail.com>",
   "license": "MIT",
   "bugs": {
