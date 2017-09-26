@@ -5,14 +5,16 @@
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
   "scripts": {
-    "test": "jest",
-    "postinstall": "bower install"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aaronshaf/dynamodb-viewer.git"
   },
-  "keywords": ["DynamoDB", "Dynamo"],
+  "keywords": [
+    "DynamoDB",
+    "Dynamo"
+  ],
   "author": "Aaron Shafovaloff <aaronshaf@gmail.com>",
   "license": "MIT",
   "bugs": {
@@ -22,13 +24,13 @@
   "dependencies": {
     "aws-sdk": "^2.7.27",
     "body-parser": "^1.15.2",
+    "cli-color": "^1.2.0",
     "ejs": "^2.5.1",
     "errorhandler": "^1.4.3",
     "es6-promisify": "^4.1.0",
     "es7-object-polyfill": "0.0.1",
     "express": "^4.14.0",
     "js-yaml": "^3.6.1",
-    "bower": "^1.8.0",
     "lodash": "^4.16.4"
   },
   "devDependencies": {
