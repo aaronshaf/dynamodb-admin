@@ -344,8 +344,6 @@ app.get('/tables/:TableName', (req, res, next) => {
         25,
         startKey,
         function(pageItems, err, nextKey) {
-          console.log('page done!', pageItems.length, nextKey)
-
           let nextKeyParam = nextKey
             ? encodeURIComponent(JSON.stringify(nextKey))
             : null
