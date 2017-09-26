@@ -10,11 +10,14 @@ const pickBy = require('lodash/pickBy')
 const omit = require('lodash/omit')
 const yaml = require('js-yaml')
 const querystring = require('querystring')
+const clc = require('cli-color')
 
 require('es7-object-polyfill')
 
+console.log('dynamodb-admin')
+
 if (process.env.NODE_ENV === 'production') {
-  console.error('\x1b[31mDo not run this in production!') // red
+  console.error(clc.red('Do not run this in production!'))
   process.exit(1)
 }
 
@@ -27,15 +30,32 @@ const env = process.env
 const awsConfig = {
   region: env.AWS_REGION || 'us-east-1'
 }
-if (env.AWS_ACCESS_KEY_ID) {
+
+if (typeof env.AWS_ACCESS_KEY_ID === 'string') {
   awsConfig.accessKeyId = env.AWS_ACCESS_KEY_ID
+} else {
+  console.log(clc.red(`  AWS_ACCESS_KEY_ID is not defined`))
+  process.exit(1)
 }
-if (env.AWS_SECRET_ACCESS_KEY) {
+
+if (typeof env.AWS_SECRET_ACCESS_KEY === 'string') {
   awsConfig.secretAccessKey = env.AWS_SECRET_ACCESS_KEY
+} else {
+  console.log(clc.red(`  AWS_SECRET_ACCESS_KEY is not defined`))
+  process.exit(1)
 }
-if (env.DYNAMO_ENDPOINT) {
+
+if (typeof env.DYNAMO_ENDPOINT === 'string') {
   awsConfig.endpoint = env.DYNAMO_ENDPOINT
   awsConfig.sslEnabled = env.DYNAMO_ENDPOINT.indexOf('https://') === 0
+} else {
+  awsConfig.endpoint = 'http://localhost:8000'
+  awsConfig.sslEnabled = false
+  console.log(
+    clc.yellow(
+      `  DYNAMO_ENDPOINT is not defined (using default of http://localhost:8000)`
+    )
+  )
 }
 
 AWS.config.update(awsConfig)
@@ -498,5 +518,5 @@ app.put(
 
 const port = process.env.PORT || 8001
 app.listen(port, () => {
-  console.log(`dynamodb-admin listening on port ${port}`)
+  console.log(`  listening on port ${port}`)
 })
