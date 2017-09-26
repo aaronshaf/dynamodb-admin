@@ -46,6 +46,12 @@ if (typeof env.AWS_SECRET_ACCESS_KEY === 'string') {
 }
 
 if (typeof env.DYNAMO_ENDPOINT === 'string') {
+  if (env.DYNAMO_ENDPOINT.indexOf('.amazonaws.com') > -1) {
+    console.error(
+      clc.red('dynamodb-admin is only intended for local development')
+    )
+    process.exit(1)
+  }
   awsConfig.endpoint = env.DYNAMO_ENDPOINT
   awsConfig.sslEnabled = env.DYNAMO_ENDPOINT.indexOf('https://') === 0
 } else {
