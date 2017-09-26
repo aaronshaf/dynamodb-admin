@@ -1,20 +1,9 @@
+GUI for DynamoDB Local.
+
 ## Usage
 
 ```
 npm install dynamodb-admin -g
-```
-
-```
-dynamodb-admin
-```
-
-Set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` as needed.
-
-Example:
-
-```
-export AWS_ACCESS_KEY_ID=mykey
-export AWS_SECRET_ACCESS_KEY=mysecret
 export DYNAMO_ENDPOINT=http://localhost:8000
 dynamodb-admin
 ```

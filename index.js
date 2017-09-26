@@ -28,21 +28,9 @@ app.set('views', path.resolve(__dirname, 'views'))
 
 const env = process.env
 const awsConfig = {
-  region: env.AWS_REGION || 'us-east-1'
-}
-
-if (typeof env.AWS_ACCESS_KEY_ID === 'string') {
-  awsConfig.accessKeyId = env.AWS_ACCESS_KEY_ID
-} else {
-  console.log(clc.red(`  AWS_ACCESS_KEY_ID is not defined`))
-  process.exit(1)
-}
-
-if (typeof env.AWS_SECRET_ACCESS_KEY === 'string') {
-  awsConfig.secretAccessKey = env.AWS_SECRET_ACCESS_KEY
-} else {
-  console.log(clc.red(`  AWS_SECRET_ACCESS_KEY is not defined`))
-  process.exit(1)
+  region: env.AWS_REGION || 'us-east-1',
+  accessKeyId: env.AWS_ACCESS_KEY_ID || 'key', // DynamoDB Local doesn't care what the key/secret are
+  secretAccessKey: env.AWS_SECRET_ACCESS_KEY || 'secret'
 }
 
 if (typeof env.DYNAMO_ENDPOINT === 'string') {
