@@ -10,4 +10,49 @@ a pre {color: inherit;}
 form[autocomplete="off"] input[type="text"] {
   background-position: 150% 50% !important;
 }
+/* Tooltip container prefixed with my_ to avoid name collision with bootstrap */
+.my_tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.my_tooltip .my_tooltiptext {
+    visibility: hidden;
+    width: 250px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+
+    /* top */
+    bottom: 100%;
+    left: 50%;
+    margin-left: -125px; /* Use half of the width (120/2 = 60), to center the tooltip */   
+
+    /* fade in */
+    opacity: 0;
+    transition: opacity 1s;     
+}
+
+.my_tooltip:hover .my_tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+/* bottom arrow */
+.my_tooltip .my_tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
 </style>
