@@ -175,18 +175,19 @@
           <% for(let column = 0; column < keys.length; column++) { %>
               <% if (!ignored.includes(keys[column])) { %>
                   <!-- popup for EPOC dates (13 digits) -->
-                  <% const found = new String(Items[row][keys[column]]).match(/[0-9]{13}/); 
-                     if (found === null) { %>
+                  <% const data = Items[row][keys[column]];
+                     const found = new String(data).match(/[0-9]{13}/); 
+                     if (found !== null && typeof data === "number") { %>
+                      <td>
+                          <div class="my_tooltip">
+                              <%= Items[row][keys[column]] %>
+                              <span class="my_tooltiptext">
+                              <%= (new Date(Items[row][keys[column]])).toISOString(); %>
+                              </span>
+                          </div>  
+                        </td>
+                      <% } else { %>
                     <td><%= Items[row][keys[column]] %></td>
-                  <% } else { %>
-                    <td>
-                      <div class="my_tooltip">
-                          <%= Items[row][keys[column]] %>
-                          <span class="my_tooltiptext">
-                          <%= (new Date(Items[row][keys[column]])).toISOString(); %>
-                          </span>
-                      </div>  
-                    </td>
                   <% } %>
               <% } %>
           <% } %>
