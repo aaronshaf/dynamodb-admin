@@ -146,7 +146,6 @@
     }
     </script>
 
-    <% const keys = Items[0] !== undefined ? Object.keys(Items[0]): [] %>
     <% const primaryKeys = Items[0] !== undefined ? Object.keys(Items[0].__key): [] %>
     <% const ignored = ['__key'].concat(primaryKeys) %>
     <table class="table">
@@ -156,9 +155,9 @@
           <% for(let i = 0; i < primaryKeys.length; i++) { %>
             <td><%= primaryKeys[i] %></td>
           <% } %>
-          <% for(let i = 0; i < keys.length; i++) { %>
-              <% if (!ignored.includes(keys[i])) { %>
-                <td><%= keys[i] %></td>
+          <% for(const key of UniqueKeys) { %>
+              <% if (!ignored.includes(key)) { %>
+                <td><%= key %></td>
               <% } %>
           <% } %>
       </tr>
@@ -172,9 +171,9 @@
           <% for(let i = 0; i < primaryKeys.length; i++) { %>
             <td><%= Items[row][primaryKeys[i]] %></td>
           <% } %>
-          <% for(let column = 0; column < keys.length; column++) { %>
-              <% if (!ignored.includes(keys[column])) { %>
-                <td><%= Items[row][keys[column]] %></td>
+          <% for(let column = 0; column < UniqueKeys.length; column++) { %>
+              <% if (!ignored.includes(UniqueKeys[column])) { %>
+                <td><%= Items[row][UniqueKeys[column]] %></td>
               <% } %>
           <% } %>
       </tr>
