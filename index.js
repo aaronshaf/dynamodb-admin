@@ -4,7 +4,7 @@ const AWS = require('aws-sdk')
 const promisify = require('es6-promisify')
 const path = require('path')
 const errorhandler = require('errorhandler')
-const { extractKey, parseKey } = require('./util')
+const { extractKey, extractKeysForItems, parseKey } = require('./util')
 const bodyParser = require('body-parser')
 const pickBy = require('lodash/pickBy')
 const omit = require('lodash/omit')
@@ -362,6 +362,13 @@ app.get('/tables/:TableName', (req, res, next) => {
             ? encodeURIComponent(JSON.stringify(nextKey))
             : null
 
+          const Items = pageItems.map(item => {
+            return Object.assign({}, item, {
+              __key: extractKey(item, description.Table.KeySchema)
+            })
+          });
+          const UniqueKeys = extractKeysForItems(Items);
+
           const data = Object.assign({}, description, {
             query: req.query,
             yaml,
@@ -370,11 +377,8 @@ app.get('/tables/:TableName', (req, res, next) => {
             pageNum: pageNum,
             nextKey: nextKeyParam,
             filterQueryString: querystring.stringify(filters),
-            Items: pageItems.map(item => {
-              return Object.assign({}, item, {
-                __key: extractKey(item, description.Table.KeySchema)
-              })
-            })
+            Items,
+            UniqueKeys,
           })
           res.render('scan', data)
         }

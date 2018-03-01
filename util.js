@@ -20,6 +20,18 @@ exports.parseKey = function(keys, table) {
   }, {})
 }
 
+exports.extractKeysForItems = function(Items) {
+  const keys = new Set();
+  for (const item of Items) {
+    for (const key of Object.keys(item)) {
+      if (!keys.has(key)) {
+        keys.add(key);
+      }
+    }
+  }
+  return Array.from(keys);
+}
+
 function typecastKey(keyName, keyValue, table) {
   const definition = table.AttributeDefinitions.find(attribute => {
     return attribute.AttributeName === keyName
