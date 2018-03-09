@@ -3,7 +3,7 @@
 <head>
   <% include ./partials/head %>
 </head>
-<body class='container-fluid'>
+<body class='container'>
   <header>
     <ol class="breadcrumb">
       <a class="breadcrumb-item active" href="/">Tables</a>
@@ -33,7 +33,7 @@
           <a href="/" onClick="deleteTable('<%= data[i].TableName %>')" class="tag tag-danger tag-pill pull-xs-right" style="margin-left: 8px;">
             Delete
           </a>
-          <span class="tag tag-default tag-pill pull-xs-right">
+          <span class="tag tag-default tag-pill pull-xs-right m-l-1">
             <%= data[i].ItemCount %>
           </span>
         </li>
