@@ -176,7 +176,7 @@
               <% if (!ignored.includes(keys[column])) { %>
                   <!-- popup for EPOC dates (13 digits) -->
                   <% const data = Items[row][keys[column]];
-                     const found = new String(data).match(/[0-9]{13}/); 
+                     const found = new String(data).match(/^[0-9]{13}$/); 
                      if (found !== null && typeof data === "number") { %>
                       <td>
                           <div class="my_tooltip">
