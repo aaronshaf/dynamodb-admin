@@ -511,6 +511,8 @@ app.put(
 )
 
 const port = process.env.PORT || 8001
-app.listen(port, () => {
-  console.log(`  listening on port ${port}`)
+const server = app.listen(port, '127.0.0.1');
+server.on('listening', () => {
+  const address = server.address();
+  console.log(`  listening on http://${address.address}:${address.port}`);
 })
