@@ -30,10 +30,11 @@
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
           </a>
-          <a href="/" onClick="deleteTable('<%= data[i].TableName %>')" class="tag tag-danger tag-pill pull-xs-right" style="margin-left: 8px;">
+          <a href="/" onClick="deleteTable('<%= data[i].TableName %>')"
+              class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
-          <span class="tag tag-default tag-pill pull-xs-right m-l-1">
+          <span class="badge badge-secondary badge-pill float-right ml-1">
             <%= data[i].ItemCount %>
           </span>
         </li>
