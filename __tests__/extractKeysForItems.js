@@ -1,4 +1,4 @@
-const { extractKeysForItems } = require('../util')
+const { extractKeysForItems } = require('../lib/util')
 
 describe('extractKeysForItems', () => {
   it('extract keys from multiple items', () => {

@@ -1,4 +1,4 @@
-const { parseKey } = require('../util')
+const { parseKey } = require('../lib/util')
 
 describe('parseKey', () => {
   it('parses key with 1 attribute', () => {
