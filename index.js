@@ -513,8 +513,8 @@ app.put(
 )
 
 const port = process.env.PORT || 8001
-const server = app.listen(port, '127.0.0.1');
+const server = app.listen(port);
 server.on('listening', () => {
   const address = server.address();
-  console.log(`  listening on http://${address.address}:${address.port}`);
-})
+  console.log(`  listening on http://0.0.0.0:${address.port}`);
+});
