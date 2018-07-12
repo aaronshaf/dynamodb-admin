@@ -1,4 +1,4 @@
-const { extractKey } = require('../util')
+const { extractKey } = require('../lib/util')
 
 describe('extractKey', () => {
   it('serializes item with 1 key attribute', () => {
