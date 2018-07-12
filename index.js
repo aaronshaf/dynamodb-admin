@@ -362,6 +362,12 @@ app.get('/tables/:TableName', (req, res, next) => {
             : null
 
           const Items = pageItems.map(item => {
+            for (const [key, value] of Object.entries(item)) {
+              if (value && typeof (value) === 'object' &&
+                  !Array.isArray(value)) {
+                item[key] = JSON.stringify(value, null, 2);
+              }
+            }
             return Object.assign({}, item, {
               __key: extractKey(item, description.Table.KeySchema)
             })
