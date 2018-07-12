@@ -22,18 +22,17 @@
   },
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
-    "aws-sdk": "^2.7.27",
-    "body-parser": "^1.15.2",
+    "aws-sdk": "^2.273.1",
+    "body-parser": "^1.18.3",
     "cli-color": "^1.2.0",
-    "ejs": "^2.5.1",
+    "ejs": "^2.6.1",
     "errorhandler": "^1.4.3",
-    "es6-promisify": "^4.1.0",
-    "es7-object-polyfill": "0.0.1",
-    "express": "^4.14.0",
-    "js-yaml": "^3.6.1",
-    "lodash": "^4.16.4"
+    "es6-promisify": "^6.0.0",
+    "es7-object-polyfill": "0.0.7",
+    "express": "^4.16.3",
+    "lodash": "^4.17.10"
   },
   "devDependencies": {
-    "jest-cli": "^15.0.2"
+    "jest-cli": "^23.4.0"
   }
 }

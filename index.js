@@ -1,14 +1,13 @@
 const express = require('express')
 const _ = require('lodash')
 const AWS = require('aws-sdk')
-const promisify = require('es6-promisify')
+const {promisify} = require('es6-promisify')
 const path = require('path')
 const errorhandler = require('errorhandler')
 const { extractKey, parseKey } = require('./util')
 const bodyParser = require('body-parser')
 const pickBy = require('lodash/pickBy')
 const omit = require('lodash/omit')
-const yaml = require('js-yaml')
 const querystring = require('querystring')
 const clc = require('cli-color')
 
@@ -364,7 +363,6 @@ app.get('/tables/:TableName', (req, res, next) => {
 
           const data = Object.assign({}, description, {
             query: req.query,
-            yaml,
             omit,
             filters,
             pageNum: pageNum,
