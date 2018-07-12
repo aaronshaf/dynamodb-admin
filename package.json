@@ -5,6 +5,7 @@
   "main": "index.js",
   "bin": "./bin/dynamodb-admin.js",
   "scripts": {
+    "start": "node bin/dynamodb-admin.js",
     "test": "jest"
   },
   "repository": {
