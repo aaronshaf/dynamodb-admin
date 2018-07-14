@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <% include ./partials/head %>
+  <% include ./partials/bootstrap-deps %>
 </head>
 <body class="container-fluid">
   <header>
@@ -115,9 +116,9 @@
         <div class="col-md-6">
           <button type="submit" class="btn btn-primary">Scan</button>
         </div>
-        
+
       <div class="col-md-6">
-          
+
           <nav style="float: right">
             <ul class="pagination" style="margin: 0">
               <% if (nextKey) { %>
@@ -129,11 +130,11 @@
          <div style="float: right; line-height: 48px; text-align:right; margin-right: 20px">Page <%= pageNum %> </div>
       </div>
     </div>
-  
-      
-    
-    
-    
+
+
+
+
+
     </form>
     <script>
     const form = document.querySelector('#form')
@@ -152,8 +153,8 @@
       <thead>
       <tr>
         <td>Actions</td>
-          <% for(let i = 0; i < primaryKeys.length; i++) { %>
-            <td><%= primaryKeys[i] %></td>
+          <% for(const primaryKey of primaryKeys) { %>
+            <td><%= primaryKey %></td>
           <% } %>
           <% for(const key of UniqueKeys) { %>
               <% if (!ignored.includes(key)) { %>
@@ -163,19 +164,35 @@
       </tr>
       </thead>
       <tbody>
-      <% for(let row = 0; row < Items.length; row++) { %>
+      <% for(const item of Items) { %>
       <tr>
         <td>
-          <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(Items[row].__key).join(',')) %>">View</a>
+          <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(item.__key).join(',')) %>">View</a>
         </td>
-          <% for(let i = 0; i < primaryKeys.length; i++) { %>
-            <td><%= Items[row][primaryKeys[i]] %></td>
-          <% } %>
-          <% for(let column = 0; column < UniqueKeys.length; column++) { %>
-              <% if (!ignored.includes(UniqueKeys[column])) { %>
-                <td><%= Items[row][UniqueKeys[column]] %></td>
+        <% for(const primaryKey of primaryKeys) { %>
+          <td><%= item[primaryKey] %></td>
+        <% } %>
+        <% for(const column of UniqueKeys) { %>
+          <% if (!ignored.includes(column)) { %>
+            <td>
+              <% const value = item[column];
+              if (Number.isInteger(value) && value >= 0) {
+                let dateValue;
+                try {
+                  dateValue = new Date(value).toISOString();
+                } catch (error) {
+                  dateValue = error.message;
+                } %>
+                <abbr data-toggle="tooltip" data-placement="top"
+                    title="<%= dateValue %>">
+                  <%= item[column] %>
+                </abbr>
+              <% } else { %>
+                <%= item[column] %>
               <% } %>
+            </td>
           <% } %>
+        <% } %>
       </tr>
       <% } %>
       </tbody>
