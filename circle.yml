@@ -1,5 +1,0 @@
-machine:
-  node:
-    version: 8
-  post:
-    - npm install -g npm@3.x
