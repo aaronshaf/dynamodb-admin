@@ -13,20 +13,22 @@
   <main>
     <script>
     $(document).ready(() => {
-      $('#filter-input').on('input', event => {
-        const query = event.target.value.trim().toLowerCase()
-        const words = query.split(' ').map(word => word.trim()).filter(word => word)
-        $('#table-list .list-group-item').show().each((index, element) => {
-          const lowerTableName = element.dataset.tableName.toLowerCase()
-          for (const word of words) {
-            if (!lowerTableName.includes(word)) {
-              $(element).hide()
-              return
+      $('#filter-input')
+        .on('input', event => {
+          const query = event.target.value.trim().toLowerCase()
+          const words = query.split(' ').map(word => word.trim()).filter(word => word)
+          $('#table-list .list-group-item').show().each((index, element) => {
+            const lowerTableName = element.dataset.tableName.toLowerCase()
+            for (const word of words) {
+              if (!lowerTableName.includes(word)) {
+                $(element).hide()
+                return
+              }
             }
-          }
-          $(element).show()
+            $(element).show()
+          })
         })
-      })
+        .trigger('input')
     })
 
     function deleteTable (TableName) {
