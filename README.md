@@ -10,6 +10,9 @@ export DYNAMO_ENDPOINT=http://localhost:8000
 dynamodb-admin
 ```
 
+Options:
+ - --open - opens server URL in a default browser on start
+
 # Use as a library in your project
 
 ```
