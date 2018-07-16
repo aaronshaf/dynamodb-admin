@@ -3,21 +3,12 @@ jobs:
   build:
     working_directory: ~/aaronshaf/dynamodb-admin
     parallelism: 1
-    shell: /bin/bash --login
-    environment:
-      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
-      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
     # To see the list of pre-built images that CircleCI provides for most common languages see
     # https://circleci.com/docs/2.0/circleci-images/
     docker:
       - image: circleci/node:8-stretch-browsers
-        command: /sbin/init
     steps:
       - checkout
-      # Prepare for artifact and test results  collection equivalent to how it was done on 1.0.
-      # In many cases you can simplify this from what is generated here.
-      # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
-      - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
       # Restore the dependency cache
       - restore_cache:
         keys:
@@ -46,17 +37,7 @@ jobs:
           - ~/.gradle
           - ~/.cache/bower
           - ./node_modules
-      # Test
-      #   This would typically be a build job when using workflows, possibly combined with build
-      # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
       - run: npm test
-      # Teardown
-      #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
       # Save test results
       - store_test_results:
-        path: /tmp/circleci-test-results
-      # Save artifacts
-      - store_artifacts:
-        path: /tmp/circleci-artifacts
-      - store_artifacts:
         path: /tmp/circleci-test-results
