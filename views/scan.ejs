@@ -187,6 +187,8 @@
                     title="<%= dateValue %>">
                   <%= item[column] %>
                 </abbr>
+              <% } else if (value && typeof (value) === 'object') { %>
+                <div class="preformatted"><%= JSON.stringify(value, null, 4) %></div>
               <% } else { %>
                 <%= item[column] %>
               <% } %>
