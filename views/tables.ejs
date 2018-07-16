@@ -2,6 +2,7 @@
 <html lang='en'>
 <head>
   <% include ./partials/head %>
+  <% include ./partials/bootstrap-deps %>
 </head>
 <body class='container'>
   <header>
@@ -11,6 +12,25 @@
   </header>
   <main>
     <script>
+    $(document).ready(() => {
+      $('#filter-input')
+        .on('input', event => {
+          const query = event.target.value.trim().toLowerCase()
+          const words = query.split(' ').map(word => word.trim()).filter(word => word)
+          $('#table-list .list-group-item').show().each((index, element) => {
+            const lowerTableName = element.dataset.tableName.toLowerCase()
+            for (const word of words) {
+              if (!lowerTableName.includes(word)) {
+                $(element).hide()
+                return
+              }
+            }
+            $(element).show()
+          })
+        })
+        .trigger('input')
+    })
+
     function deleteTable (TableName) {
       fetch(`/tables/${TableName}`, {
         method: 'delete'
@@ -24,9 +44,15 @@
       })
     }
     </script>
-    <ul class="list-group">
+
+    <div class="form-group">
+      <label for="filter-input">Filter tables</label>
+      <input type="text" class="form-control mb-3" id="filter-input">
+    </div>
+
+    <ul class="list-group" id="table-list">
       <% for(var i = 0; i < data.length; i++) { %>
-        <li class="list-group-item">
+        <li class="list-group-item" data-table-name="<%= data[i].TableName %>">
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
           </a>
