@@ -2,7 +2,7 @@ GUI for [DynamoDB Local](https://aws.amazon.com/blogs/aws/dynamodb-local-for-des
 
 ## Usage
 
-# Use as a globally installed app
+### Use as a globally installed app
 
 ```
 npm install dynamodb-admin -g
@@ -11,9 +11,12 @@ dynamodb-admin
 ```
 
 Options:
- - --open - opens server URL in a default browser on start
+ - --open / -o - opens server URL in a default browser on start
+ - --port PORT / -p PORT -  Port to run on (default: 8001)
 
-# Use as a library in your project
+You can also specify port to run on by setting environment variable `PORT` to given number. This will override value specified on the command line. This is legacy way to specify PORT.
+
+### Use as a library in your project
 
 ```
 const AWS = require('aws-sdk');
@@ -31,6 +34,8 @@ server.on('listening', () => {
   console.log(`  listening on http://0.0.0.0:${address.port}`);
 });
 ```
+
+## Screencast
 
 ![Screencast](https://d3vv6lp55qjaqc.cloudfront.net/items/2S1m213N1o2L231e011o/Screen%20Recording%202016-10-17%20at%2001.11%20PM.gif?X-CloudApp-Visitor-Id=ab2071d5f76f8504ab6d3070d8a2c5c3&v=e6056da9)
 
