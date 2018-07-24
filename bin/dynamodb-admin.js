@@ -21,12 +21,18 @@ parser.addArgument(['-o', '--open'], {
   help: 'Open server URL in default browser on start',
 })
 
+parser.addArgument(['-p', '--port'], {
+  type: 'int',
+  default: 8001,
+  help: 'Port to run on (default: 8001)',
+})
+
 const args = parser.parseArgs()
 
 console.log('dynamodb-admin')
 
 const app = createServer();
-const port = process.env.PORT || 8001
+const port = process.env.PORT || args.port
 const server = app.listen(port);
 server.on('listening', () => {
   const address = server.address();
