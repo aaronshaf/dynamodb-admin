@@ -1,135 +1,129 @@
 <!DOCTYPE html>
 <html lang='en'>
+
 <head>
   <% include ./partials/head %>
-  <% include ./partials/ace-deps %>
+    <% include ./partials/code-mirror-deps %>
 </head>
+
 <body class='container-fluid'>
   <header>
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class='breadcrumb-item' href='/tables/<%= TableName %>'><%= TableName %></a>
+      <a class='breadcrumb-item' href='/tables/<%= TableName %>'>
+        <%= TableName %>
+      </a>
       <% if (Item.id) { %>
         <span class='breadcrumb-item'>
           <%= Item.id %>
         </span>
-      <% } %>
+        <% } %>
     </ol>
   </header>
 
   <main>
     <nav>
       <script>
-      function handleEditClick () {
-        const saveButton = document.getElementById('saveButton')
+        function handleEditClick() {
+          const saveButton = document.getElementById('saveButton')
 
-        fetch(document.location.pathname, {
-          method: 'put',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: editor.getValue()
-        }).then((response) => {
-          if (response.ok) {
-            return response.json()
-          } else {
-            throw new Error()
-          }
-        }).then((json) => {
-          if (document.location.pathname.endsWith('/add-item')) {
-            const urlPart1 = document.location.pathname.replace('/add-item', '')
-            const param = encodeURIComponent(Object.values(json).join(','))
+          fetch(document.location.pathname, {
+            method: 'put',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: editor.getValue()
+          }).then((response) => {
+            if (response.ok) {
+              return response.json()
+            } else {
+              throw new Error()
+            }
+          }).then((json) => {
+            if (document.location.pathname.endsWith('/add-item')) {
+              const urlPart1 = document.location.pathname.replace('/add-item', '')
+              const param = encodeURIComponent(Object.values(json).join(','))
 
-            window.location = `${urlPart1}/items/${param}`
-            return
-          }
-          editor.setValue(JSON.stringify(json, null, 2));
-          editor.focus()
-          saveButton.classList.remove('btn-primary')
-          saveButton.classList.add('btn-success')
-          setTimeout(() => {
-            saveButton.classList.add('btn-primary')
-            saveButton.classList.remove('btn-success')
-          }, 2000)
-        }).catch((error) => {
-          editor.focus()
-          saveButton.classList.remove('btn-primary')
-          saveButton.classList.add('btn-warning')
-          setTimeout(() => {
-            saveButton.classList.add('btn-primary')
-            saveButton.classList.remove('btn-warning')
-          }, 2000)
-          console.error(error)
-        })
-      }
-
-      // polyfill
-      if (!Object.values) {
-        const reduce = Function.bind.call(Function.call, Array.prototype.reduce)
-        const isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable)
-        const concat = Function.bind.call(Function.call, Array.prototype.concat)
-        const keys = Reflect.ownKeys
-        Object.values = function values(O) {
-        	return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), [])
+              window.location = `${urlPart1}/items/${param}`
+              return
+            }
+            editor.setValue(JSON.stringify(json, null, 2));
+            editor.focus()
+            saveButton.classList.remove('btn-primary')
+            saveButton.classList.add('btn-success')
+            setTimeout(() => {
+              saveButton.classList.add('btn-primary')
+              saveButton.classList.remove('btn-success')
+            }, 2000)
+          }).catch((error) => {
+            editor.focus()
+            saveButton.classList.remove('btn-primary')
+            saveButton.classList.add('btn-warning')
+            setTimeout(() => {
+              saveButton.classList.add('btn-primary')
+              saveButton.classList.remove('btn-warning')
+            }, 2000)
+            console.error(error)
+          })
         }
-      }
+
+        // polyfill
+        if (!Object.values) {
+          const reduce = Function.bind.call(Function.call, Array.prototype.reduce)
+          const isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable)
+          const concat = Function.bind.call(Function.call, Array.prototype.concat)
+          const keys = Reflect.ownKeys
+          Object.values = function values(O) {
+            return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), [])
+          }
+        }
       </script>
-      <button
-        class='btn btn-primary'
-        id='saveButton'
-        onclick='handleEditClick()'
-        type='button'
-      >
+      <button class='btn btn-primary' id='saveButton' onclick='handleEditClick()' type='button'>
         Save
       </button>
 
       <script>
-      function handleDeleteClick (event) {
-        event.preventDefault()
-        fetch(document.location.pathname, {
-          method: 'delete'
-        }).then((response) => {
-          if (response.ok) {
-            window.location = `/tables/<%= TableName %>`
-          }
-        }).catch((error) => {
-          console.error(error)
-          alert('There was an error.')
-        })
-      }
+        function handleDeleteClick(event) {
+          event.preventDefault()
+          fetch(document.location.pathname, {
+            method: 'delete'
+          }).then((response) => {
+            if (response.ok) {
+              window.location = `/tables/<%= TableName %>`
+            }
+          }).catch((error) => {
+            console.error(error)
+            alert('There was an error.')
+          })
+        }
       </script>
       <% if (!isNew) { %>
-        <button
-          class='btn btn-danger'
-          onclick='handleDeleteClick(event)'
-          type='button'
-        >
+        <button class='btn btn-danger' onclick='handleDeleteClick(event)' type='button'>
           Delete
         </button>
-      <% } %>
+        <% } %>
     </nav>
     <article id="documentWrapper" style='position: relative; margin-top: 16px; width: 100%; height: 100%'>
-      <div id='documentTextarea' style='
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;'><%= JSON.stringify(Item, null, 2) %></div>
+      <textarea id='documentTextarea'><%= JSON.stringify(Item, null, 2) %></textarea>
       <script>
-      const documentWrapper = document.getElementById('documentWrapper')
-      function setTextareaHeight (){
-          documentWrapper.style.height = `${window.innerHeight}px`
-      }
-      setTextareaHeight()
+        const editor = CodeMirror.fromTextArea(document.getElementById('documentTextarea'), {
+          // theme: "monokai"
+          autofocus: true,
+          gutters: ["CodeMirror-lint-markers"],
+          keymap: "sublime",
+          lineNumbers: true,
+          lint: true,
+          mode: "application/json",
+        });
 
-      const editor = ace.edit("documentTextarea")
-      editor.resize()
-      editor.getSession().setMode("ace/mode/json")
-      editor.setTheme("ace/theme/monokai")
-      editor.setFontSize(14)
-      editor.focus();
+        // 100% of window height
+        //editor.setSize('100%', '100%')
+
+        // match the height of the content in the editor
+        editor.setSize('100%', 'auto')
       </script>
     </article>
   </main>
 </body>
+
 </html>

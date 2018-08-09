@@ -4,11 +4,43 @@
 <meta http-equiv='x-ua-compatible' content='ie=edge'>
 <link rel='stylesheet' href='/assets/css/bootstrap.min.css'>
 <style>
-body {padding-top: 20px;}
-a pre {color: inherit;}
-.preformatted {white-space: pre;}
-/* go away, LastPass */
-form[autocomplete="off"] input[type="text"] {
-  background-position: 150% 50% !important;
-}
+  body {
+    padding-top: 20px;
+  }
+
+  a pre {
+    color: inherit;
+  }
+
+  .preformatted {
+    white-space: pre;
+  }
+
+  body {
+    padding-top: 20px;
+  }
+
+  /* for the sticky nav to follow the user all the way down the page, all parent elements must be full height too */
+
+  html,
+  body,
+  main {
+    min-height: 100vh;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100
+  }
+
+  a pre {
+    color: inherit;
+  }
+
+  /* go away, LastPass */
+
+  form[autocomplete="off"] input[type="text"] {
+    background-position: 150% 50% !important;
+  }
 </style>
