@@ -1,13 +1,5 @@
 GUI for [DynamoDB Local](https://aws.amazon.com/blogs/aws/dynamodb-local-for-desktop-development/) or [dynalite](https://github.com/mhart/dynalite).
 
-## Adam's CodeMirror fork
-
-This has a few edits to make this easier to use:
-
-- the editor expands to match the height of the DynamoDB document's JSON so the browser's native search tool can search all text
-- the save/delete buttons are fixed to the top of the browser window so I don't have to scroll to save
-- use CodeMirror instead of Ace because I like the docs more
-
 ## Usage
 
 ### Use as a globally installed app

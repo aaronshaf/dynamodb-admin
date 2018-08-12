@@ -3,7 +3,7 @@
 
 <head>
   <% include ./partials/head %>
-    <% include ./partials/code-mirror-deps %>
+  <% include ./partials/code-mirror-deps %>
 </head>
 
 <body class='container-fluid'>
@@ -107,7 +107,6 @@
       <textarea id='documentTextarea'><%= JSON.stringify(Item, null, 2) %></textarea>
       <script>
         const editor = CodeMirror.fromTextArea(document.getElementById('documentTextarea'), {
-          // theme: "monokai"
           autofocus: true,
           gutters: ["CodeMirror-lint-markers"],
           keymap: "sublime",
@@ -115,9 +114,6 @@
           lint: true,
           mode: "application/json",
         });
-
-        // 100% of window height
-        //editor.setSize('100%', '100%')
 
         // match the height of the content in the editor
         editor.setSize('100%', 'auto')

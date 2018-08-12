@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
   <% include ./partials/head %>
-  <% include ./partials/ace-deps %>
+  <% include ./partials/code-mirror-deps %>
 </head>
 <body class='container-fluid'>
   <header>
@@ -32,7 +32,9 @@
       <button id="deleteTable" type="button" class="btn btn-danger">Delete table</button>
     </div>
     <div id="documentWrapper" style="margin-top: 16px; margin-bottom: 16px; position: relative;">
-      <div id="documentArea" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"><%= JSON.stringify(Table, null, 2) %></div>
+      <!-- <div id="documentArea" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"><%= JSON.stringify(Table, null, 2) %></div> -->
+      <textarea id='documentTextarea' style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"><%= JSON.stringify(Table, null, 2) %></textarea>
+
     </div>
   </main>
   <script>
@@ -50,18 +52,17 @@
       });
 
       const documentWrapper = document.getElementById('documentWrapper')
-      function setTextareaHeight (){
-          documentWrapper.style.height = `${window.innerHeight}px`
-      }
-      setTextareaHeight()
+      const editor = CodeMirror.fromTextArea(document.getElementById('documentTextarea'), {
+          autofocus: true,
+          gutters: ["CodeMirror-lint-markers"],
+          keymap: "sublime",
+          lineNumbers: true,
+          lint: true,
+          mode: "application/json",
+        });
 
-
-      const editor = ace.edit("documentArea");
-      editor.resize();
-      editor.getSession().setMode("ace/mode/json");
-      editor.setTheme("ace/theme/monokai");
-      editor.setReadOnly(true);
-      editor.setFontSize(14);
+        // match the height of the content in the editor
+        editor.setSize('100%', 'auto')
   </script>
 </body>
 </html>
