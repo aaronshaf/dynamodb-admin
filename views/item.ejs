@@ -3,7 +3,7 @@
 
 <head>
   <% include ./partials/head %>
-  <% include ./partials/code-mirror-deps %>
+    <% include ./partials/code-mirror-deps %>
 </head>
 
 <body class='container-fluid'>
@@ -113,10 +113,14 @@
           lineNumbers: true,
           lint: true,
           mode: "application/json",
+          viewportMargin: Infinity,
+          // theme:'monokai',
         });
 
-        // match the height of the content in the editor
-        editor.setSize('100%', 'auto')
+        // at page load, fill all available vertical space with the editor
+        const height = window.innerHeight - document.querySelector('#documentWrapper').offsetTop;
+        editor.setSize('100%', height + 'px')
+
       </script>
     </article>
   </main>
