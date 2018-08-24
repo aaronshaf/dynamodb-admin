@@ -41,4 +41,4 @@ server.on('listening', () => {
 
 ## See also
 
-* [instructure/dynamo-local-admin-docker](https://github.com/instructure/dynamo-local-admin-docker)
+- [instructure/dynamo-local-admin-docker](https://github.com/instructure/dynamo-local-admin-docker)
