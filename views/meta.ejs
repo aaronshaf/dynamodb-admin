@@ -51,7 +51,7 @@
 
       const documentWrapper = document.getElementById('documentWrapper')
       function setTextareaHeight (){
-          documentWrapper.style.height = `${window.innerHeight}px`
+          documentWrapper.style.height = `${window.innerHeight - documentWrapper.offsetTop}px`
       }
       setTextareaHeight()
 
