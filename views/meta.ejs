@@ -59,10 +59,13 @@
           lineNumbers: true,
           lint: true,
           mode: "application/json",
+          viewportMargin: Infinity,
+          // theme:'monokai',
         });
 
-        // match the height of the content in the editor
-        editor.setSize('100%', 'auto')
-  </script>
+        // at page load, fill all available vertical space with the editor
+        const height = window.innerHeight - document.querySelector('#documentWrapper').offsetTop;
+        editor.setSize('100%', height + 'px')
+  </script> 
 </body>
 </html>
