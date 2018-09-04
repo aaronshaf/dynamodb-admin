@@ -34,8 +34,8 @@ const port = process.env.PORT || args.port
 const server = app.listen(port);
 server.on('listening', () => {
   const address = server.address();
-  const url = `http://0.0.0.0:${address.port}`;
-  console.log(`  dynamodb-admin listening on ${url}`);
+  const url = `http://localhost:${address.port}`;
+  console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`);
 
   if (args.open) {
     opn(url)
