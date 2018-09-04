@@ -29,15 +29,13 @@ parser.addArgument(['-p', '--port'], {
 
 const args = parser.parseArgs()
 
-console.log('dynamodb-admin')
-
 const app = createServer();
 const port = process.env.PORT || args.port
 const server = app.listen(port);
 server.on('listening', () => {
   const address = server.address();
   const url = `http://0.0.0.0:${address.port}`;
-  console.log(`  listening on ${url}`);
+  console.log(`  dynamodb-admin listening on ${url}`);
 
   if (args.open) {
     opn(url)
