@@ -32,15 +32,23 @@
     })
 
     function deleteTable (TableName) {
+      let answer = confirm(`Are you sure you want to delete table "${TableName}" ?`)
+
+      if(!answer){
+        return
+      }
+
       fetch(`/tables/${TableName}`, {
         method: 'delete'
-      }).then((response) => {
+      })
+      .then((response) => {
         if (!response.ok) {
           throw new Error
         }
         window.location.href = '/'
-      }).catch(() => {
-        window.alert('There was an error when attempting to delete the table.')
+      })
+      .catch((err) => {
+        window.alert('There was an error when attempting to delete the table. ', err)
       })
     }
     </script>
@@ -56,7 +64,7 @@
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
           </a>
-          <a href="/" onClick="deleteTable('<%= data[i].TableName %>')"
+          <a href="/" onClick="deleteTable('<%= data[i].TableName %>'); return false"
               class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
