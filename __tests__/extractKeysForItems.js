@@ -26,4 +26,4 @@ const items = [
     'attribute3': 'value',
     'attribute4': 'value',
   },
-];
+]
