@@ -7,6 +7,7 @@ const packageJson = require('../package.json')
 const { createServer } = require('../lib/backend')
 
 if (process.env.NODE_ENV === 'production') {
+  const clc = require('cli-color')
   console.error(clc.red('Do not run this in production!'))
   process.exit(1)
 }
@@ -29,16 +30,16 @@ parser.addArgument(['-p', '--port'], {
 
 const args = parser.parseArgs()
 
-const app = createServer();
+const app = createServer()
 const port = process.env.PORT || args.port
-const server = app.listen(port);
+const server = app.listen(port)
 server.on('listening', () => {
-  const address = server.address();
-  const url = `http://localhost:${address.port}`;
-  console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`);
+  const address = server.address()
+  const url = `http://localhost:${address.port}`
+  console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`)
 
   if (args.open) {
     opn(url)
   }
-});
+})
 

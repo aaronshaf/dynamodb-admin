@@ -1,0 +1,43 @@
+---
+env:
+    browser: true
+    commonjs: true
+    es6: true
+    jest: true
+    node: true
+parserOptions:
+    ecmaVersion: 2018
+    sourceType: module
+plugins:
+    - jest
+extends:
+    - 'eslint:recommended'
+    - 'plugin:jest/recommended'
+rules:
+    curly: error
+    dot-notation: error
+    eol-last: error
+    indent:
+        - error
+        - 2
+        - SwitchCase: 1
+          FunctionDeclaration:
+              parameters: first
+          FunctionExpression:
+              parameters: first
+          CallExpression:
+              arguments: first
+    linebreak-style: error
+    max-len:
+        - error
+        - 100
+    no-trailing-spaces: error
+    no-var: error
+    prefer-const: error
+    quotes:
+        - error
+        - single
+    semi:
+        - error
+        - never
+    no-console: 'off'
