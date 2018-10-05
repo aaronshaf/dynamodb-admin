@@ -4,7 +4,7 @@
   <% include ./partials/head %>
   <% include ./partials/ace-deps %>
 </head>
-<body class='container-fluid'>
+<body class='container-fluid d-flex flex-column'>
   <header>
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Tables</a>
@@ -17,7 +17,7 @@
     </ol>
   </header>
 
-  <main>
+  <main class='flex-fill d-flex flex-column'>
     <nav>
       <script>
       function handleEditClick () {
@@ -70,7 +70,7 @@
         const concat = Function.bind.call(Function.call, Array.prototype.concat)
         const keys = Reflect.ownKeys
         Object.values = function values(O) {
-        	return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), [])
+          return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), [])
         }
       }
       </script>
@@ -108,7 +108,10 @@
         </button>
       <% } %>
     </nav>
-    <article id="documentWrapper" style='position: relative; margin-top: 16px; width: 100%; height: 100%'>
+    <article
+        id="documentWrapper"
+        class="flex-fill"
+        style='position: relative; margin-top: 16px; width: 100%; height: 100%'>
       <div id='documentTextarea' style='
         position: absolute;
         top: 0;
@@ -116,12 +119,6 @@
         bottom: 0;
         left: 0;'><%= JSON.stringify(Item, null, 2) %></div>
       <script>
-      const documentWrapper = document.getElementById('documentWrapper')
-      function setTextareaHeight (){
-          documentWrapper.style.height = `${window.innerHeight - documentWrapper.offsetTop}px`
-      }
-      setTextareaHeight()
-
       const editor = ace.edit("documentTextarea")
       editor.resize()
       editor.getSession().setMode("ace/mode/json")

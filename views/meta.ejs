@@ -4,7 +4,7 @@
   <% include ./partials/head %>
   <% include ./partials/ace-deps %>
 </head>
-<body class='container-fluid'>
+<body class='container-fluid d-flex flex-column'>
   <header>
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Tables</a>
@@ -27,11 +27,14 @@
     </ul>
   </header>
 
-  <main>
+  <main class="flex-fill d-flex flex-column">
     <div style="margin: 16px 0;">
       <button id="deleteTable" type="button" class="btn btn-danger">Delete table</button>
     </div>
-    <div id="documentWrapper" style="margin-top: 16px; margin-bottom: 16px; position: relative;">
+    <div
+        id="documentWrapper"
+        class="flex-fill"
+        style="position: relative;">
       <div id="documentArea" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"><%= JSON.stringify(Table, null, 2) %></div>
     </div>
   </main>
