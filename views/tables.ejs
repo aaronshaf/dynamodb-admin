@@ -49,6 +49,23 @@
         window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
       })
     }
+
+    function purgeTable(TableName) {
+      if(!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)){
+        return
+      }
+
+      fetch(`/tables/${TableName}/all`, {
+        method: 'delete'
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error
+        }
+        window.location.href = '/'
+      }).catch(() => {
+        window.alert('There was an error when attempting to purge the table.')
+      })
+    }
     </script>
 
     <div class="form-group">
@@ -64,6 +81,10 @@
           <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
               class="badge badge-danger badge-pill float-right ml-1">
             Delete
+          </a>
+          <a href="/" onClick="purgeTable('<%= data[i].TableName %>'); return false"
+             class="badge badge-warning badge-pill float-right ml-1">
+            Purge
           </a>
           <span class="badge badge-secondary badge-pill float-right ml-1">
             <%= data[i].ItemCount %>
