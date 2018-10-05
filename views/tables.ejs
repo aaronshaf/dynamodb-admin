@@ -62,7 +62,7 @@
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
           </a>
-          <a href="#" onClick="deleteTable('<%= data[i].TableName %>')"
+          <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
               class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
