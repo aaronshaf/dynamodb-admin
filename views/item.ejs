@@ -8,7 +8,12 @@
   <header>
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class='breadcrumb-item' href='/tables/<%= TableName %>'><%= TableName %></a>
+      <a class='breadcrumb-item' href='/tables/<%= TableName %>'>
+        <%= Table.TableName %>
+        <span class="badge badge-secondary badge-pill ml-1">
+          <%= Table.ItemCount %>
+        </span>
+      </a>
       <% if (Item.id) { %>
         <span class='breadcrumb-item'>
           <%= Item.id %>

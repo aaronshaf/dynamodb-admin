@@ -8,13 +8,18 @@
   <header>
     <ol class='breadcrumb'>
       <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class='breadcrumb-item active'><%= Table.TableName %></a>
+      <a class="breadcrumb-item active">
+        <%= Table.TableName %>
+        <span class="badge badge-secondary badge-pill ml-1">
+          <%= Table.ItemCount %>
+        </span>
+      </a>
     </ol>
 
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
         <a class='nav-link' href='/tables/<%= Table.TableName %>'>
-          Scan (<%= Table.ItemCount %>)
+          Scan
         </a>
       </li><li class="nav-item">
         <a class="nav-link" href="/tables/<%= Table.TableName %>/get">
