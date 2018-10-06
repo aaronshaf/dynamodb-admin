@@ -3,6 +3,64 @@
 <head>
   <% include ./partials/head %>
   <% include ./partials/bootstrap-deps %>
+  <script src='/assets/vendor/json-formatter/json-formatter.js'></script>
+  <style>
+    .table-container {
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .scroll-indicator {
+      height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    .scroll-indicator::before {
+      background-image: linear-gradient(to right, rgba(146, 146, 146, 0.5), #fff);
+      content: '';
+      height: 100%;
+      left: 0;
+      position: absolute;
+      width: 5px;
+    }
+
+    .scroll-indicator::after {
+      background-image: linear-gradient(to left, rgba(146, 146, 146, 0.5), #fff);
+      content: '';
+      height: 100%;
+      position: absolute;
+      right: 0;
+      width: 5px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .items-table {
+      margin-bottom: 0;
+      /* Need to reset max-width set by bootstrap to avoid
+         problems with scroll indicator mask in Safari. */
+      max-width: none;
+      position: relative;
+    }
+
+    /* mask for scroll indicators */
+    .items-table::before {
+      background-image:
+        linear-gradient(to right, #fff, #fff 5px, transparent 5px),
+        linear-gradient(to left, #fff, #fff 5px, transparent 5px);
+      content: '';
+      height: 100%;
+      left: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+  </style>
 </head>
 <body class="container-fluid">
   <header>
@@ -18,7 +76,7 @@
 
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active" href="/tables/<%= Table.TableName %>">
+        <a class="nav-link active item-count" href="/tables/<%= Table.TableName %>">
           Scan
         </a>
       </li>
@@ -122,88 +180,139 @@
           <button type="submit" class="btn btn-primary">Scan</button>
         </div>
 
-      <div class="col-md-6">
-
-          <nav style="float: right">
-            <ul class="pagination" style="margin: 0">
-              <% if (nextKey) { %>
-                 <li class="page-item"><a class="page-link" href="?startKey=<%= nextKey %>&pageNum=<%= pageNum+1 %>&<%= filterQueryString %>">Next Page</a></li>
-              <% } %>
-            </ul>
-         </nav>
-
-         <div style="float: right; line-height: 48px; text-align:right; margin-right: 20px">Page <%= pageNum %> </div>
+        <div class="col-md-6 pagination-container">
+            <nav style="float: right">
+              <ul class="pagination" style="margin: 0">
+                <li class="page-item page-item-previous disabled">
+                  <a class="page-link page-link-previous" href="#">Previous Page</a>
+                </li>
+                <li class="page-item active">
+                  <span class="page-link">Page <%= pageNum %></span>
+                </li>
+                 <li class="page-item page-item-next disabled">
+                   <a class="page-link page-link-next" href="#">Next Page</a>
+                 </li>
+              </ul>
+           </nav>
+        </div>
       </div>
-    </div>
-
-
-
-
-
     </form>
+
     <script>
     const form = document.querySelector('#form')
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', () => {
       form.param.setAttribute('name', form.key.value)
       form.param.value = form.value.value
     })
     function removeFilter (node) {
       node.closest('tr').remove()
     }
+
+    function renderItems(data) {
+      const primaryKeys = data.Items[0] !== undefined ? Object.keys(data.Items[0].__key): []
+      const ignored = ['__key'].concat(primaryKeys)
+
+      $('#actions-row').append(
+        primaryKeys.map(primaryKey => '<td>' + primaryKey + '</td>'))
+      $('#actions-row').append(
+        data.UniqueKeys
+          .filter(key => !ignored.includes(key))
+          .map(key => '<td>' + key + '</td>'))
+
+      if (data.Items.length) {
+        $('#items-container').append(data.Items.map(item => {
+          const viewUrl = '/tables/<%= Table.TableName %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
+          const rowEl = $('<tr><td><a href="' + viewUrl + '">View</a></td></tr>')
+
+          for (const primaryKey of primaryKeys) {
+            const keyEl = $('<td class="preformatted"></td>')
+            rowEl.append(keyEl.append(new JSONFormatter.default(item[primaryKey]).render()))
+          }
+
+          for (const column of data.UniqueKeys) {
+            if (ignored.includes(column)) {
+              continue
+            }
+
+            const columnEl = $('<td></td>')
+
+            const value = item[column]
+            const valueEl = value ? new JSONFormatter.default(value).render() : $('<span></span>')
+            let wrapperEl = null;
+
+            if (Number.isInteger(value) && value >= 0) {
+              let dateValue;
+              try {
+                dateValue = new Date(value).toISOString()
+              } catch (error) {
+                dateValue = error.message
+              }
+
+              wrapperEl = $('<abbr data-toggle="tooltip" data-placement="top" title="' + dateValue + '"></abbr>')
+            } else {
+              wrapperEl = $('<div class="preformatted"></div>')
+            }
+
+            rowEl.append(columnEl.append(wrapperEl.append(valueEl)))
+          }
+
+          return rowEl
+        }))
+
+        if (data.pageNum > 1) {
+          $('.page-link-previous')
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&'  + data.filterQueryString)
+          $('.page-item-previous').removeClass('disabled')
+        }
+
+        if (data.nextKey) {
+          $('.page-link-next')
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&'  + data.filterQueryString)
+          $('.page-item-next').removeClass('disabled')
+        }
+      } else {
+        $('#items-container').append('<div class="text-danger">No results</div>')
+        $('.pagination-container').addClass('d-none')
+      }
+
+      const rangeFrom = ((data.pageNum - 1) * 25) + 1
+      const rangeTo = rangeFrom + (data.Items.length - 1)
+      $('.item-count').append(' (showing items ' + rangeFrom + ' - ' + rangeTo + ')')
+
+      $('#table-placeholder').addClass('d-none');
+      $('.table-container').removeClass('d-none')
+    }
+
+    window.addEventListener('load', () => {
+      fetch(document.location.pathname + '/items' + document.location.search)
+        .then(response => response.json())
+        .then(json => {
+          renderItems(json)
+        })
+        .catch(error => {
+          alert('Error loading data: ' + error)
+        })
+    });
     </script>
 
-    <% const primaryKeys = Items[0] !== undefined ? Object.keys(Items[0].__key): [] %>
-    <% const ignored = ['__key'].concat(primaryKeys) %>
-    <table class="table">
-      <thead>
-      <tr>
-        <td>Actions</td>
-          <% for(const primaryKey of primaryKeys) { %>
-            <td><%= primaryKey %></td>
-          <% } %>
-          <% for(const key of UniqueKeys) { %>
-              <% if (!ignored.includes(key)) { %>
-                <td><%= key %></td>
-              <% } %>
-          <% } %>
-      </tr>
-      </thead>
-      <tbody>
-      <% for(const item of Items) { %>
-      <tr>
-        <td>
-          <a href="/tables/<%= Table.TableName %>/items/<%= encodeURIComponent(Object.values(item.__key).join(',')) %>">View</a>
-        </td>
-        <% for(const primaryKey of primaryKeys) { %>
-          <td><%= item[primaryKey] %></td>
-        <% } %>
-        <% for(const column of UniqueKeys) { %>
-          <% if (!ignored.includes(column)) { %>
-            <td>
-              <% const value = item[column];
-              if (Number.isInteger(value) && value >= 0) {
-                let dateValue;
-                try {
-                  dateValue = new Date(value).toISOString();
-                } catch (error) {
-                  dateValue = error.message;
-                } %>
-                <abbr data-toggle="tooltip" data-placement="top"
-                    title="<%= dateValue %>">
-                  <%= item[column] %>
-                </abbr>
-              <% } else if (value && typeof (value) === 'object') { %>
-                <div class="preformatted"><%= JSON.stringify(value, null, 4) %></div>
-              <% } else { %>
-                <%= item[column] %>
-              <% } %>
-            </td>
-          <% } %>
-        <% } %>
-      </tr>
-      <% } %>
-      </tbody>
-    </table>
+    <div id="table-placeholder">
+      Loading data...
+    </div>
+
+    <div class="table-container d-none">
+      <div class="scroll-indicator"></div>
+      <div class="table-wrapper">
+        <table class="table items-table">
+          <thead>
+            <tr id="actions-row">
+              <td>Actions</td>
+            </tr>
+          </thead>
+          <tbody id="items-container">
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
 </body>
 </html>
