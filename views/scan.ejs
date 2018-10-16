@@ -180,7 +180,7 @@
           <button type="submit" class="btn btn-primary">Scan</button>
         </div>
 
-        <div class="col-md-6 pagination-container">
+        <div class="col-md-6 pagination-container d-none">
             <nav style="float: right">
               <ul class="pagination" style="margin: 0">
                 <li class="page-item page-item-previous disabled">
@@ -270,17 +270,18 @@
             .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&'  + data.filterQueryString)
           $('.page-item-next').removeClass('disabled')
         }
+
+        const rangeFrom = ((data.pageNum - 1) * 25) + 1
+        const rangeTo = rangeFrom + (data.Items.length - 1)
+        $('.item-count').append(' (showing items ' + rangeFrom + ' - ' + rangeTo + ')')
+
+        $('.table-container').removeClass('d-none')
+        $('.pagination-container').removeClass('d-none')
       } else {
-        $('#items-container').append('<div class="text-danger">No results</div>')
-        $('.pagination-container').addClass('d-none')
+        $('.no-results').removeClass('d-none')
       }
 
-      const rangeFrom = ((data.pageNum - 1) * 25) + 1
-      const rangeTo = rangeFrom + (data.Items.length - 1)
-      $('.item-count').append(' (showing items ' + rangeFrom + ' - ' + rangeTo + ')')
-
-      $('#table-placeholder').addClass('d-none');
-      $('.table-container').removeClass('d-none')
+      $('#table-placeholder').addClass('d-none')
     }
 
     window.addEventListener('load', () => {
@@ -295,9 +296,9 @@
     });
     </script>
 
-    <div id="table-placeholder">
-      Loading data...
-    </div>
+    <div id="table-placeholder" class="text-center">Loading data...</div>
+
+    <div class="no-results text-danger text-center d-none">No results</div>
 
     <div class="table-container d-none">
       <div class="scroll-indicator"></div>
