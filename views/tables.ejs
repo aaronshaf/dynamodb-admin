@@ -43,7 +43,7 @@
         if (!response.ok) {
           throw new Error
         }
-        window.location.href = '/'
+        location.reload()
       })
       .catch((err) => {
         window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
@@ -61,7 +61,7 @@
         if (!response.ok) {
           throw new Error
         }
-        window.location.href = '/'
+        location.reload()
       }).catch(() => {
         window.alert('There was an error when attempting to purge the table.')
       })
