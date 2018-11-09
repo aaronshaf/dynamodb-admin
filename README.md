@@ -16,6 +16,14 @@ Options:
 
 You can also specify port to run on by setting environment variable `PORT` to given number. This will override value specified on the command line. This is legacy way to specify PORT.
 
+If you use a local dynamodb that cares about credentials, you can configure them by using the following environment variables `AWS_REGION` `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY`
+
+For example with the `amazon/dynamodb-local` docker image you can launch `dynamodb-admin` with:
+
+```bash
+AWS_REGION=eu-west-1 AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local dynamodb-admin
+```
+
 ### Use as a library in your project
 
 ```
