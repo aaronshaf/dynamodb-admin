@@ -199,6 +199,9 @@
     </form>
 
     <script>
+    /* global JSONFormatter */
+    const JSONRender = value => new JSONFormatter.default(value).render()
+
     const form = document.querySelector('#form')
     form.addEventListener('submit', () => {
       form.param.setAttribute('name', form.key.value)
@@ -226,7 +229,7 @@
 
           for (const primaryKey of primaryKeys) {
             const keyEl = $('<td class="preformatted"></td>')
-            rowEl.append(keyEl.append(new JSONFormatter.default(item[primaryKey]).render()))
+            rowEl.append(keyEl.append(JSONRender(item[primaryKey])))
           }
 
           for (const column of data.UniqueKeys) {
@@ -237,11 +240,11 @@
             const columnEl = $('<td></td>')
 
             const value = item[column]
-            const valueEl = value ? new JSONFormatter.default(value).render() : $('<span></span>')
-            let wrapperEl = null;
+            const valueEl = JSONRender(value)
+            let wrapperEl = null
 
             if (Number.isInteger(value) && value >= 0) {
-              let dateValue;
+              let dateValue
               try {
                 dateValue = new Date(value).toISOString()
               } catch (error) {
@@ -293,7 +296,7 @@
         .catch(error => {
           alert('Error loading data: ' + error)
         })
-    });
+    })
     </script>
 
     <div id="table-placeholder" class="text-center">Loading data...</div>
