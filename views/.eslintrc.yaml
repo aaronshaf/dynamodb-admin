@@ -1,0 +1,4 @@
+---
+rules:
+    indent: 'off'
+    max-len: 'off'
