@@ -211,6 +211,12 @@
       node.closest('tr').remove()
     }
 
+    function updateFilterAutocomplete(uniqueKeys) {
+      const listContainer = $('#attributes')
+      listContainer.empty()
+      listContainer.append(uniqueKeys.map(key => $(`<option value="${key}"></option>`)))
+    }
+
     function renderItems(data) {
       $('#actions-row').append(data.uniqueKeys.map(key => '<td>' + key + '</td>'))
 
@@ -267,6 +273,8 @@
       }
 
       $('#table-placeholder').addClass('d-none')
+
+      updateFilterAutocomplete(data.uniqueKeys)
     }
 
     window.addEventListener('load', () => {
