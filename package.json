@@ -31,7 +31,6 @@
     "cli-color": "^1.3.0",
     "ejs": "^2.6.1",
     "errorhandler": "^1.4.3",
-    "es6-promisify": "^6.0.0",
     "es7-object-polyfill": "0.0.7",
     "express": "^4.16.3",
     "lodash": "^4.17.11",
