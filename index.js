@@ -29,7 +29,7 @@ let awsConfig = {
 };
 
 if(env.AWS_ACCESS_KEY_ID) {
- awsConfig.accessKeyId = env.AWS_ACCESS_KEY_ID; 
+ awsConfig.accessKeyId = env.AWS_ACCESS_KEY_ID;
 }
 if(env.AWS_SECRET_ACCESS_KEY) {
  awsConfig.secretAccessKey = env.AWS_SECRET_ACCESS_KEY;
@@ -54,14 +54,20 @@ app.use(errorhandler())
 app.use('/assets', express.static(path.join(__dirname, '/public')))
 
 app.get('/', (req, res) => {
-  dynamodb.listTables({}, (error, data) => {
+  const last = req.query.cursor
+  dynamodb.listTables({ ExclusiveStartTableName: last }, (error, data) => {
     if (error) {
       res.json({error})
     } else {
       Promise.all(data.TableNames.map((TableName) => {
         return describeTable({TableName}).then((data) => data.Table)
-      })).then((data) => {
-        res.render('tables', {data})
+      })).then((tables) => {
+        res.render('tables', {
+          data: {
+            tables: tables,
+            last: data.LastEvaluatedTableName
+          }
+        })
       }).catch((error) => {
         res.json({error})
       })
@@ -203,7 +209,7 @@ var doSearch = function (docClient, tableName, scanParams, limit, startKey, done
             var lastStartKey = null;
             if (data)
                 lastStartKey = data.LastEvaluatedKey;
-    
+
             if (progress) {
                 var stop = progress(err, data.Items, lastStartKey);
                 if (!stop) {
@@ -290,7 +296,7 @@ app.get('/tables/:TableName', (req, res, next) => {
         console.log("page done!", pageItems.length, nextKey);
 
         let nextKeyParam = nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null;
-      
+
         const data = Object.assign({}, description, {
           query: req.query,
           yaml,
