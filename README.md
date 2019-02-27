@@ -1,8 +1,7 @@
 # dynamodb-admin
 
 [![npm](https://img.shields.io/npm/v/dynamodb-admin.svg)](https://www.npmjs.com/package/dynamodb-admin)
-[![CircleCI (all branches)](https://img.shields.io/circleci/project/github/aaronshaf/dynamodb-admin.svg)](https://circleci.com/gh/aaronshaf/dynamodb-admin)
-
+[![CircleCI](https://circleci.com/gh/aaronshaf/dynamodb-admin/tree/master.svg?style=svg)](https://circleci.com/gh/aaronshaf/dynamodb-admin/tree/master)
 > GUI for [DynamoDB Local](https://aws.amazon.com/blogs/aws/dynamodb-local-for-desktop-development/) or [dynalite](https://github.com/mhart/dynalite).
 
 ## Usage
