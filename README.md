@@ -8,7 +8,7 @@
 
 ### Use as a globally installed app
 
-```
+```bash
 npm install dynamodb-admin -g
 export DYNAMO_ENDPOINT=http://localhost:8000
 dynamodb-admin
@@ -30,7 +30,7 @@ AWS_REGION=eu-west-1 AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local dynamod
 
 ### Use as a library in your project
 
-```
+```js
 const AWS = require('aws-sdk');
 const {createServer} = require('dynamodb-admin');
 
