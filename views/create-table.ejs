@@ -1,85 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <% include ./partials/head %>
+    <% include ./partials/bootstrap-deps %>
+
+    <script>
+        let secondaryIndexCount = 0;
+        $(document).ready(() => {
+            
+
+            $("#new-index").click(event => {
+                event.preventDefault();
+                $('.secondary-indexes').append([
+                    { index: secondaryIndexCount }
+                ].map(Item).join(''));
+                secondaryIndexCount++;
+
+            });
+
+            $("form").submit(async (event) => {
+                event.preventDefault();
+
+                const formValues = $("form").serializeArray();
+                const secondaryIndexes = [];
+                for (let i = 0; i < secondaryIndexCount; i++) {
+                    if(!formValues.find(formInput => formInput.name === `secondary-index-${i}-IndexName`)) {
+                        continue;
+                    }
+                    secondaryIndexes.push({
+                        IndexName: findFormInputValue(formValues, `secondary-index-${i}-IndexName`),
+                        IndexType: findFormInputValue(formValues, `secondary-index-${i}-IndexType`),
+                        HashAttributeName: findFormInputValue(formValues, `secondary-index-${i}-HashAttributeName`),
+                        HashAttributeType: findFormInputValue(formValues, `secondary-index-${i}-HashAttributeType`),
+                        RangeAttributeName: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeName`),
+                        RangeAttributeType: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeType`),
+                        ReadCapacityUnits: findFormInputValue(formValues, `secondary-index-${i}-ReadCapacityUnits`),
+                        WriteCapacityUnits: findFormInputValue(formValues, `secondary-index-${i}-WriteCapacityUnits`)
+                    });
+                }
+                const createTableRequest = {
+                    TableName: findFormInputValue(formValues, 'TableName'),
+                    HashAttributeName: findFormInputValue(formValues, 'HashAttributeName'),
+                    HashAttributeType: findFormInputValue(formValues, 'HashAttributeType'),
+                    RangeAttributeName: findFormInputValue(formValues, 'RangeAttributeName'),
+                    RangeAttributeType: findFormInputValue(formValues, 'RangeAttributeType'),
+                    ReadCapacityUnits: findFormInputValue(formValues, 'ReadCapacityUnits'),
+                    WriteCapacityUnits: findFormInputValue(formValues, 'WriteCapacityUnits'),
+                    SecondaryIndexes: secondaryIndexes
+                };
+                const response = await fetch(document.location.pathname, {
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(createTableRequest)
+                })
+                if (response.ok) {
+                    window.location = '/';
+                } else {
+                    const value = await response.text();
+                    $("#error-wrapper").html("<span class='alert alert-danger'>" + JSON.parse(value).message + "</span>");
+                }
+            });
+            function findFormInputValue(formValues, formInputName) {
+                return formValues.find(formInput => formInput.name === formInputName).value;
+            }
+
+            const Item = ({ index }) => `
+                <div class="row" id="secondary-index-${index}">
+                    <div class="col-md-11">
+                        <h4>Secondary Index - ${index}</h4>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-danger" onclick="removeIndex('secondary-index-${index}')">Remove Index </button>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="IndexName">Index Name</label>
+                            <input type="text" name="secondary-index-${index}-IndexName" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="IndexType">Index Type</label>
+                            <select name="secondary-index-${index}-IndexType" class="form-control">
+                                <option></option>
+                                <option value="global">Global Secondary Index (GSI)</option>
+                                <option value="local">Local Secondary Index (LSI)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="HashAttributeName">Hash Attribute Name</label>
+                            <input type="text" name="secondary-index-${index}-HashAttributeName" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="HashAttributeType">Hash Attribute Type</label>
+                            <select name="secondary-index-${index}-HashAttributeType" class="form-control">
+                                <option></option>
+                                <option value="S">String</option>
+                                <option value="N">Number</option>
+                                <option value="B">Binary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="RangeAttributeName">Range Attribute Name(Optional)</label>
+                            <input type="text" name="secondary-index-${index}-RangeAttributeName" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="RangeAttributeType">Range Attribute Type(Optional)</label>
+                            <select name="secondary-index-${index}-RangeAttributeType" class="form-control">
+                                <option></option>
+                                <option value="S">String</option>
+                                <option value="N">Number</option>
+                                <option value="B">Binary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ReadCapacityUnits">ReadCapacityUnits</label>
+                            <input type="text" id="ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
+                                value="3" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="WriteCapacityUnits">WriteCapacityUnits</label>
+                            <input type="text" id="WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
+                                value="3" />
+                        </div>
+                    </div>
+
+                </div>                    <hr />
+
+                    `;
+        });
+
+        function removeIndex(id) {
+
+            $(`#${id}`).remove();
+        }
+    </script>
 </head>
+
 <body class="container-fluid">
-<header>
-    <ol class="breadcrumb">
-        <a class="breadcrumb-item" href="/">Tables</a>
-        <a class="breadcrumb-item active">Create Table</a>
-    </ol>
-</header>
-<main>
-    <form id="form" method="post">
-        <div class="container">
-            <h1>Create Table</h1>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="TableName">Table Name</label>
-                        <input type="text" id="TableName" name="TableName" class="form-control" autofocus/>
+    <header>
+        <ol class="breadcrumb">
+            <a class="breadcrumb-item" href="/">Tables</a>
+            <a class="breadcrumb-item active">Create Table</a>
+        </ol>
+    </header>
+    <main>
+        <div class="list-items"></div>
+        <form id="form" method="post">
+            <div class="container">
+                <h1>Create Table</h1>
+                <div class="row" id="error-wrapper">
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="TableName">Table Name</label>
+                            <input type="text" id="TableName" name="TableName" class="form-control" autofocus />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="HashAttributeName">Hash Attribute Name</label>
+                            <input type="text" id="HashAttributeName" name="HashAttributeName" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Hash Attribute Type</label>
+                            <select name="HashAttributeType" class="form-control">
+                                <option value="S">String</option>
+                                <option value="N">Number</option>
+                                <option value="B">Binary</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="HashAttributeName">Range Attribute Name (Optional)</label>
+                            <input type="text" id="RangeAttributeName" name="RangeAttributeName" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Range Attribute Type (Optional)</label>
+                            <select name="RangeAttributeType" class="form-control">
+                                <option></option>
+                                <option value="S">String</option>
+                                <option value="N">Number</option>
+                                <option value="B">Binary</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ReadCapacityUnits">ReadCapacityUnits</label>
+                            <input type="text" id="ReadCapacityUnits" name="ReadCapacityUnits" class="form-control"
+                                value="3" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="WriteCapacityUnits">WriteCapacityUnits</label>
+                            <input type="text" id="WriteCapacityUnits" name="WriteCapacityUnits" class="form-control"
+                                value="3" />
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <h3>Secondary Indexes</h3>
+                </div>
+                <div class="secondary-indexes row"></div>
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-success" id="new-index">New Secondary Index</button>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col">
+                        <button id="saveButton" type="submit" class="btn btn-primary">Submit</button>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="HashAttributeName">Hash Attribute Name</label>
-                        <input type="text" id="HashAttributeName" name="HashAttributeName" class="form-control"/>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Hash Attribute Type</label>
-                        <select name="HashAttributeType" class="form-control">
-                            <option value="S">String</option>
-                            <option value="N">Number</option>
-                            <option value="B">Binary</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="HashAttributeName">Range Attribute Name (Optional)</label>
-                        <input type="text" id="RangeAttributeName" name="RangeAttributeName" class="form-control"/>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Range Attribute Type (Optional)</label>
-                        <select name="RangeAttributeType" class="form-control">
-                            <option></option>
-                            <option value="S">String</option>
-                            <option value="N">Number</option>
-                            <option value="B">Binary</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="ReadCapacityUnits">ReadCapacityUnits</label>
-                        <input type="text" id="ReadCapacityUnits" name="ReadCapacityUnits" class="form-control"
-                               value="3"/>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="WriteCapacityUnits">WriteCapacityUnits</label>
-                        <input type="text" id="WriteCapacityUnits" name="WriteCapacityUnits" class="form-control"
-                               value="3"/>
-                    </div>
-                </div>
-                <div class="col">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</main>
+        </form>
+    </main>
 </body>
+
 </html>
