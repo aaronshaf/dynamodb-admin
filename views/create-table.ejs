@@ -6,27 +6,24 @@
     <% include ./partials/bootstrap-deps %>
 
     <script>
-        let secondaryIndexCount = 0;
+        let secondaryIndexCount = 0
         $(document).ready(() => {
-
-
-            $("#new-index").click(event => {
-                event.preventDefault();
+            $('#new-index').click(event => {
+                event.preventDefault()
                 $('.secondary-indexes').append([
                     { index: secondaryIndexCount }
-                ].map(Item).join(''));
-                secondaryIndexCount++;
+                ].map(Item).join(''))
+                secondaryIndexCount++
+            })
 
-            });
+            $('form').submit(async (event) => {
+                event.preventDefault()
 
-            $("form").submit(async (event) => {
-                event.preventDefault();
-
-                const formValues = $("form").serializeArray();
-                const secondaryIndexes = [];
+                const formValues = $('form').serializeArray()
+                const secondaryIndexes = []
                 for (let i = 0; i < secondaryIndexCount; i++) {
                     if (!formValues.find(formInput => formInput.name === `secondary-index-${i}-IndexName`)) {
-                        continue;
+                        continue
                     }
                     const index = {
                         IndexName: findFormInputValue(formValues, `secondary-index-${i}-IndexName`),
@@ -37,12 +34,12 @@
                         RangeAttributeType: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeType`)
                     }
 
-                    if(index.IndexType !== 'local') {
-                        index.ReadCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-ReadCapacityUnits`);
-                        index.WriteCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-WriteCapacityUnits`);
+                    if (index.IndexType !== 'local') {
+                        index.ReadCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-ReadCapacityUnits`)
+                        index.WriteCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-WriteCapacityUnits`)
                     }
 
-                    secondaryIndexes.push(index);
+                    secondaryIndexes.push(index)
                 }
                 const createTableRequest = {
                     TableName: findFormInputValue(formValues, 'TableName'),
@@ -53,7 +50,7 @@
                     ReadCapacityUnits: findFormInputValue(formValues, 'ReadCapacityUnits'),
                     WriteCapacityUnits: findFormInputValue(formValues, 'WriteCapacityUnits'),
                     SecondaryIndexes: secondaryIndexes
-                };
+                }
                 const response = await fetch(document.location.pathname, {
                     method: 'post',
                     headers: {
@@ -62,109 +59,107 @@
                     body: JSON.stringify(createTableRequest)
                 })
                 if (response.ok) {
-                    window.location = '/';
+                    window.location = '/'
                 } else {
-                    const value = await response.text();
-                    $("#error-wrapper").html("<div class='alert alert-danger' role='alert'>" + JSON.parse(value).message + "</div>");
+                    const value = await response.text()
+                    $('#error-wrapper').html('<div class="alert alert-danger" role="alert">' + JSON.parse(value).message + '</div>')
                 }
-            });
+            })
+
             function findFormInputValue(formValues, formInputName) {
-                return formValues.find(formInput => formInput.name === formInputName).value;
+                return formValues.find(formInput => formInput.name === formInputName).value
             }
 
             const Item = ({ index }) => `
                 <div class="col-md-12 mb-4">
-                <div class="row" id="secondary-index-${index}">
-                    <div class="col-md-10">
-                        <h4>Secondary Index - ${index}</h4>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-danger float-right" onclick="removeIndex('secondary-index-${index}')">Remove Index </button>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="IndexName">Index Name</label>
-                            <input type="text" name="secondary-index-${index}-IndexName" class="form-control" autofocus />
+                    <div class="row" id="secondary-index-${index}">
+                        <div class="col-md-10">
+                            <h4>Secondary Index - ${index}</h4>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-danger float-right" onclick="removeIndex('secondary-index-${index}')">Remove Index </button>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="IndexName">Index Name</label>
+                                <input type="text" name="secondary-index-${index}-IndexName" class="form-control" autofocus />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="IndexType">Index Type</label>
+                                <select onchange="onSecondaryIndexTypeSelect(this, ${index})" name="secondary-index-${index}-IndexType" class="form-control">
+                                    <option value="global">Global Secondary Index (GSI)</option>
+                                    <option value="local">Local Secondary Index (LSI)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="HashAttributeName">Hash Attribute Name</label>
+                                <input type="text" name="secondary-index-${index}-HashAttributeName" class="form-control" autofocus />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="HashAttributeType">Hash Attribute Type</label>
+                                <select name="secondary-index-${index}-HashAttributeType" class="form-control">
+                                    <option></option>
+                                    <option value="S">String</option>
+                                    <option value="N">Number</option>
+                                    <option value="B">Binary</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="RangeAttributeName">Range Attribute Name(Optional)</label>
+                                <input type="text" name="secondary-index-${index}-RangeAttributeName" class="form-control" autofocus />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="RangeAttributeType">Range Attribute Type(Optional)</label>
+                                <select name="secondary-index-${index}-RangeAttributeType" class="form-control">
+                                    <option></option>
+                                    <option value="S">String</option>
+                                    <option value="N">Number</option>
+                                    <option value="B">Binary</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ReadCapacityUnits">ReadCapacityUnits</label>
+                                <input type="text" id="secondary-index-${index}-ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
+                                    value="3" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="WriteCapacityUnits">WriteCapacityUnits</label>
+                                <input type="text" id="secondary-index-${index}-WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
+                                    value="3" />
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="IndexType">Index Type</label>
-                            <select onchange='onSecondaryIndexTypeSelect(this, ${index})' name="secondary-index-${index}-IndexType" class="form-control">
-                                <option value="global">Global Secondary Index (GSI)</option>
-                                <option value="local">Local Secondary Index (LSI)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="HashAttributeName">Hash Attribute Name</label>
-                            <input type="text" name="secondary-index-${index}-HashAttributeName" class="form-control" autofocus />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="HashAttributeType">Hash Attribute Type</label>
-                            <select name="secondary-index-${index}-HashAttributeType" class="form-control">
-                                <option></option>
-                                <option value="S">String</option>
-                                <option value="N">Number</option>
-                                <option value="B">Binary</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="RangeAttributeName">Range Attribute Name(Optional)</label>
-                            <input type="text" name="secondary-index-${index}-RangeAttributeName" class="form-control" autofocus />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="RangeAttributeType">Range Attribute Type(Optional)</label>
-                            <select name="secondary-index-${index}-RangeAttributeType" class="form-control">
-                                <option></option>
-                                <option value="S">String</option>
-                                <option value="N">Number</option>
-                                <option value="B">Binary</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="ReadCapacityUnits">ReadCapacityUnits</label>
-                            <input type="text" id="secondary-index-${index}-ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
-                                value="3" />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="WriteCapacityUnits">WriteCapacityUnits</label>
-                            <input type="text" id="secondary-index-${index}-WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
-                                value="3" />
-                        </div>
-                    </div>
-
-
-                </div>  
-                <hr />
-            </div>                  
-
-                    `;
-        });
+                <hr>
+            </div>
+            `
+        })
 
         function onSecondaryIndexTypeSelect(event, index) {
-            if(event.value === 'local') {
-                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', true);
-                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', true);
+            if (event.value === 'local') {
+                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', true)
+                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', true)
             } else {
-                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', false);
-                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', false);
+                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', false)
+                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', false)
             }
         }
 
         function removeIndex(id) {
-            $(`#${id}`).remove();
+            $(`#${id}`).remove()
         }
     </script>
 </head>
@@ -246,7 +241,7 @@
                         </div>
                     </div>
                 </div>
-                <hr />
+                <hr>
                 <div class="row">
                     <div class="col">
                         <h3>Secondary Indexes</h3>
@@ -258,7 +253,7 @@
                         <button class="btn btn-success" id="new-index">New Secondary Index</button>
                     </div>
                 </div>
-                <hr />
+                <hr>
                 <div class="row">
                     <div class="col">
                         <button id="saveButton" type="submit" class="btn btn-primary">Submit</button>
