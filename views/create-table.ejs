@@ -8,7 +8,7 @@
     <script>
         let secondaryIndexCount = 0;
         $(document).ready(() => {
-            
+
 
             $("#new-index").click(event => {
                 event.preventDefault();
@@ -25,19 +25,24 @@
                 const formValues = $("form").serializeArray();
                 const secondaryIndexes = [];
                 for (let i = 0; i < secondaryIndexCount; i++) {
-                    if(!formValues.find(formInput => formInput.name === `secondary-index-${i}-IndexName`)) {
+                    if (!formValues.find(formInput => formInput.name === `secondary-index-${i}-IndexName`)) {
                         continue;
                     }
-                    secondaryIndexes.push({
+                    const index = {
                         IndexName: findFormInputValue(formValues, `secondary-index-${i}-IndexName`),
                         IndexType: findFormInputValue(formValues, `secondary-index-${i}-IndexType`),
                         HashAttributeName: findFormInputValue(formValues, `secondary-index-${i}-HashAttributeName`),
                         HashAttributeType: findFormInputValue(formValues, `secondary-index-${i}-HashAttributeType`),
                         RangeAttributeName: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeName`),
-                        RangeAttributeType: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeType`),
-                        ReadCapacityUnits: findFormInputValue(formValues, `secondary-index-${i}-ReadCapacityUnits`),
-                        WriteCapacityUnits: findFormInputValue(formValues, `secondary-index-${i}-WriteCapacityUnits`)
-                    });
+                        RangeAttributeType: findFormInputValue(formValues, `secondary-index-${i}-RangeAttributeType`)
+                    }
+
+                    if(index.IndexType !== 'local') {
+                        index.ReadCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-ReadCapacityUnits`);
+                        index.WriteCapacityUnits = findFormInputValue(formValues, `secondary-index-${i}-WriteCapacityUnits`);
+                    }
+
+                    secondaryIndexes.push(index);
                 }
                 const createTableRequest = {
                     TableName: findFormInputValue(formValues, 'TableName'),
@@ -60,7 +65,7 @@
                     window.location = '/';
                 } else {
                     const value = await response.text();
-                    $("#error-wrapper").html("<span class='alert alert-danger'>" + JSON.parse(value).message + "</span>");
+                    $("#error-wrapper").html("<div class='alert alert-danger' role='alert'>" + JSON.parse(value).message + "</div>");
                 }
             });
             function findFormInputValue(formValues, formInputName) {
@@ -68,12 +73,13 @@
             }
 
             const Item = ({ index }) => `
+                <div class="col-md-12 mb-4">
                 <div class="row" id="secondary-index-${index}">
-                    <div class="col-md-11">
+                    <div class="col-md-10">
                         <h4>Secondary Index - ${index}</h4>
                     </div>
-                    <div class="col-md-1">
-                        <button class="btn btn-danger" onclick="removeIndex('secondary-index-${index}')">Remove Index </button>
+                    <div class="col-md-2">
+                        <button class="btn btn-danger float-right" onclick="removeIndex('secondary-index-${index}')">Remove Index </button>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
@@ -84,8 +90,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="IndexType">Index Type</label>
-                            <select name="secondary-index-${index}-IndexType" class="form-control">
-                                <option></option>
+                            <select onchange='onSecondaryIndexTypeSelect(this, ${index})' name="secondary-index-${index}-IndexType" class="form-control">
                                 <option value="global">Global Secondary Index (GSI)</option>
                                 <option value="local">Local Secondary Index (LSI)</option>
                             </select>
@@ -128,25 +133,37 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="ReadCapacityUnits">ReadCapacityUnits</label>
-                            <input type="text" id="ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
+                            <input type="text" id="secondary-index-${index}-ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
                                 value="3" />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="WriteCapacityUnits">WriteCapacityUnits</label>
-                            <input type="text" id="WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
+                            <input type="text" id="secondary-index-${index}-WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
                                 value="3" />
                         </div>
                     </div>
 
-                </div>                    <hr />
+
+                </div>  
+                <hr />
+            </div>                  
 
                     `;
         });
 
-        function removeIndex(id) {
+        function onSecondaryIndexTypeSelect(event, index) {
+            if(event.value === 'local') {
+                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', true);
+                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', true);
+            } else {
+                $(`#secondary-index-${index}-WriteCapacityUnits`).prop('disabled', false);
+                $(`#secondary-index-${index}-ReadCapacityUnits`).prop('disabled', false);
+            }
+        }
 
+        function removeIndex(id) {
             $(`#${id}`).remove();
         }
     </script>
@@ -160,11 +177,13 @@
         </ol>
     </header>
     <main>
-        <div class="list-items"></div>
         <form id="form" method="post">
             <div class="container">
                 <h1>Create Table</h1>
-                <div class="row" id="error-wrapper">
+                <div class="row">
+                    <div class="col">
+                        <span id="error-wrapper"></span>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
@@ -229,7 +248,9 @@
                 </div>
                 <hr />
                 <div class="row">
-                    <h3>Secondary Indexes</h3>
+                    <div class="col">
+                        <h3>Secondary Indexes</h3>
+                    </div>
                 </div>
                 <div class="secondary-indexes row"></div>
                 <div class="row">
