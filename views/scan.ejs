@@ -217,6 +217,22 @@
       listContainer.append(uniqueKeys.map(key => $(`<option value="${key}"></option>`)))
     }
 
+    function extractValue(attrMap) {
+      if (!attrMap) {
+        return undefined
+      }
+      const attrType = Object.keys(attrMap)[0]
+      const rawValue = attrMap[attrType]
+      if (attrType === 'N') {
+        try {
+          return BigInt(rawValue)
+        } catch (error) {
+          return Number(rawValue)
+        }
+      }
+      return rawValue
+    }
+
     function renderItems(data) {
       $('#actions-row').append(data.uniqueKeys.map(key => '<td>' + key + '</td>'))
 
@@ -228,10 +244,14 @@
           for (const column of data.uniqueKeys) {
             const columnEl = $('<td></td>')
 
-            const value = item[column]
+            const attrMap = item[column]
+            const attrType = attrMap ? Object.keys(attrMap)[0] : null
+            const value = extractValue(attrMap)
+
             let wrapperEl = null
 
-            if (Number.isInteger(value) && value >= 0) {
+            // TODO: fix "can't convert bigint to number"
+            if (attrType === 'N' && value >= 0) {
               let dateValue
               try {
                 dateValue = new Date(value).toISOString()
