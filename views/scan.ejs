@@ -77,7 +77,7 @@
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link active item-count" href="/tables/<%= Table.TableName %>">
-          Scan
+          Items
         </a>
       </li>
       <li class="nav-item">
@@ -110,6 +110,31 @@
       <table class="table table-bordered">
         <tbody>
           <tr>
+            <th>
+              <select name="operationType">
+                <option value="scan"<% if (query.operationType === 'scan') { %> selected<% } %>>Scan</option>
+                <option value="query"<% if (query.operationType === 'query') { %> selected<% } %>>Query</option>
+              </select>
+            </th>
+            <td>
+              <select name="queryableSelection">
+                <option value="table"<% if (query.queryableSelection === 'table') { %> selected<% } %>>[Table] <%= Table.TableName %></option>
+                <% for (const index of Table.GlobalSecondaryIndexes) { %>
+                  <option value="<%= index.IndexName %>"
+                    <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
+                    >[Index] <%= index.IndexName %><%
+                    if (index.KeySchema) {
+                      const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName);
+                      %>
+                      : <%= attributes.join(', '); %>
+                      <%
+                    }
+                  %></option>
+                <% } %>
+              </select>
+            </td>
+          </tr>
+          <tr>
             <th>Filter</th>
             <td>
               <table class="table table-bordered">
@@ -131,8 +156,14 @@
                         />
                       </td>
                       <td>
-                        <select class="form-control" readonly>
-                          <option>=</option>
+                        <select class="form-control" id="<%= filterKey %>Operator">
+                          <% for (const operator in operators) { %>
+                            <option value="<%= operator %>"
+                              <% if (filters[filterKey].operator === operator) { %>
+                                selected
+                              <% } %>
+                              ><%= operators[operator] %></option>
+                          <% } %>
                         </select>
                       </td>
                       <td>
@@ -140,8 +171,8 @@
                           type="text"
                           class="form-control"
                           placeholder="Value"
-                          name="<%= filterKey %>"
-                          value="<%= filters[filterKey] %>"
+                          id="<%= filterKey %>Value"
+                          value="<%= filters[filterKey].value %>"
                         />
                       </td>
                     </tr>
@@ -150,7 +181,6 @@
                     <td style="width: 95px;"></td>
                     <td style="width: 300px">
                       <input
-                        data-filter-key
                         type="text"
                         class="form-control"
                         id="key"
@@ -159,8 +189,10 @@
                       />
                     </td>
                     <td>
-                      <select class="form-control" readonly>
-                        <option>=</option>
+                      <select class="form-control" id="operator">
+                        <% for (const operator in operators) { %>
+                          <option value="<%= operator %>"><%= operators[operator] %></option>
+                        <% } %>
                       </select>
                     </td>
                     <td>
@@ -173,7 +205,7 @@
           </tr>
         </tbody>
       </table>
-      <input id="param" type="hidden" />
+      <input id="filters" name="filters" type="hidden" />
 
       <div class="row">
         <div class="col-md-6">
@@ -204,8 +236,24 @@
 
     const form = document.querySelector('#form')
     form.addEventListener('submit', () => {
-      form.param.setAttribute('name', form.key.value)
-      form.param.value = form.value.value
+      const filters = {}
+
+      $('input[data-filter-key]').each((i, input) => {
+        const filterKey = input.value
+        filters[filterKey] = {
+          operator: document.getElementById(`${filterKey}Operator`).value,
+          value: document.getElementById(`${filterKey}Value`).value,
+        }
+      })
+
+      if (form.key.value) {
+        filters[form.key.value] = {
+          operator: form.operator.value,
+          value: form.value.value,
+        }
+      }
+
+      form.filters.value = JSON.stringify(filters)
     })
     function removeFilter (node) {
       node.closest('tr').remove()
@@ -252,13 +300,13 @@
 
         if (data.pageNum > 1) {
           $('.page-link-previous')
-            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&'  + data.filterQueryString)
-          $('.page-item-previous').removeClass('disabled')
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&' + data.filterQueryString)
+         $('.page-item-previous').removeClass('disabled')
         }
 
         if (data.nextKey) {
           $('.page-link-next')
-            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&'  + data.filterQueryString)
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&' + data.filterQueryString)
           $('.page-item-next').removeClass('disabled')
         }
 
