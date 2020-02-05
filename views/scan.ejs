@@ -279,7 +279,13 @@
 
     window.addEventListener('load', () => {
       fetch(document.location.pathname + '/items' + document.location.search)
-        .then(response => response.json())
+        .then(response => {
+          if (response.ok) {
+            return response.json()
+          }
+
+          return response.text().then(text => Promise.reject(new Error(text)))
+        })
         .then(json => {
           renderItems(json)
         })
