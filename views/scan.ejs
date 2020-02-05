@@ -119,13 +119,19 @@
             <td>
               <select name="queryableSelection"<% if (!Table.GlobalSecondaryIndexes) { %> disabled<% } %>>
                 <option value="table"
-                  data-required-query-keys="<%= Table.KeySchema.map(keySchemaItem => keySchemaItem.AttributeName).join(',') %>"
+                  <% Table.KeySchema.forEach(keySchemaItem => { %>
+                    data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
+                  <% }) %>
+                  <% if (sortKey) { %> data-sort-key="<%= sortKey.AttributeName %>" <% } %>
                   <% if (query.queryableSelection === 'table') { %> selected<% } %>
                 >[Table] <%= Table.TableName %></option>
                 <% if (Table.GlobalSecondaryIndexes) { %>
                   <% for (const index of Table.GlobalSecondaryIndexes) { %>
                     <% const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName) %>
-                    <option value="<%= index.IndexName %>" data-required-query-keys="<%= attributes.join(',') %>"
+                    <option value="<%= index.IndexName %>"
+                      <% Table.KeySchema.forEach(keySchemaItem => { %>
+                        data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
+                      <% }) %>
                       <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
                       >[Index] <%= index.IndexName %>: <%= attributes.join(', ') %>
                     </option>
@@ -267,12 +273,16 @@
       if (event.target.value === 'query') {
         const querySelection = document.querySelector('select[name="queryableSelection"]')
         const option = querySelection.selectedOptions[0]
-        const requiredKeys = option.getAttribute('data-required-query-keys')
+        // const requiredKeys = option.getAttribute('data-required-query-keys')
+        const hashKey = option.getAttribute('data-key-hash')
+        const rangeKey = option.getAttribute('data-key-range')
 
-        if (requiredKeys && requiredKeys.length > 0) {
-          for (const requiredKey of requiredKeys.split(',')) {
-            addFilter(requiredKey, true)
-          }
+        if (hashKey) {
+          addFilter(hashKey, true, ['='])
+        }
+
+        if (rangeKey) {
+          addFilter(rangeKey, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
         }
       } else {
         document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
@@ -281,6 +291,11 @@
           keyField.removeAttribute('readonly')
           filterRow.querySelector('.filter-row-value').removeAttribute('required')
           filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+          const operatorField = filterRow.querySelector('.filter-row-operator')
+          operatorField.removeAttribute('disabled')
+          operatorField.querySelectorAll('option').forEach((option) => {
+            option.removeAttribute('disabled')
+          })
         })
       }
     })
@@ -290,7 +305,7 @@
       addFilter()
     })
 
-    function addFilter (key, required) {
+    function addFilter (key, required, availableOperators) {
       let filterRow
       let lastRow
       if (key) {
@@ -320,6 +335,26 @@
         keyField.removeAttribute('readonly')
         filterRow.querySelector('.filter-row-value').removeAttribute('required')
         filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+      }
+
+      const operatorField = filterRow.querySelector('.filter-row-operator')
+      operatorField.querySelectorAll('option').forEach((option) => {
+        const enabled = availableOperators ? availableOperators.includes(option.value) : true
+        if (enabled) {
+          option.removeAttribute('disabled')
+        } else {
+          option.setAttribute('disabled', true)
+        }
+      })
+
+      if (availableOperators && !availableOperators.includes(operatorField.value)) {
+        operatorField.value = availableOperators[0]
+      }
+
+      if (availableOperators && availableOperators.length === 1) {
+        operatorField.setAttribute('disabled', true)
+      } else {
+        operatorField.removeAttribute('disabled')
       }
 
       if (lastRow) {
