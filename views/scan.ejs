@@ -446,14 +446,14 @@
             const rangeKey = option.getAttribute('data-key-range')
 
             if (filterKey === hashKey) {
-              addHashKeyFilter(filterKey, filterParams.value)
+              addHashKeyFilter(filterKey, filterParams.value, filterParams.operator)
             } else if (filterKey === rangeKey) {
-              addRangeKeyFilter(filterKey, filterParams.value)
+              addRangeKeyFilter(filterKey, filterParams.value, filterParams.operator)
             } else {
-              addFilter(filterKey, filterParams.value)
+              addFilter(filterKey, filterParams.value, filterParams.operator)
             }
           } else {
-            addFilter(filterKey, filterParams.value)
+            addFilter(filterKey, filterParams.value, filterParams.operator)
           }
         }
       }
