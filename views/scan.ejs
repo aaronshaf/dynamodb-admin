@@ -153,7 +153,7 @@
                         <input
                           type="text"
                           class="form-control filter-row-key"
-                          <% if (filters[filterKey].required) { %> required readonly <% } %>
+                          <% if (filters[filterKey].required) { %> required="required" readonly <% } %>
                           value="<%= filterKey %>"
                         />
                       </td>
