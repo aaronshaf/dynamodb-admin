@@ -162,6 +162,13 @@
                       />
                     </td>
                     <td>
+                      <select class="form-control filter-row-type">
+                        <% for (const type in attributeTypes) { %>
+                          <option value="<%= type %>"><%= attributeTypes[type] %></option>
+                        <% } %>
+                      </select>
+                    </td>
+                    <td>
                       <select class="form-control filter-row-operator">
                         <% for (const operator in operators) { %>
                           <option value="<%= operator %>"><%= operators[operator] %></option>
@@ -213,6 +220,7 @@
 
       document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
         const keyField = filterRow.querySelector('.filter-row-key')
+        const typeField = filterRow.querySelector('.filter-row-type')
         const operatorField = filterRow.querySelector('.filter-row-operator')
         const valueField = filterRow.querySelector('.filter-row-value')
 
@@ -220,6 +228,7 @@
           filters[keyField.value] = {
             operator: operatorField.value,
             value: valueField.value,
+            type: typeField.value,
           }
         }
       })
@@ -279,7 +288,7 @@
       })
     }
 
-    function addFilter (key, filterValue, operatorValue, required, availableOperators) {
+    function addFilter (key, values, required, availableOperators) {
       let filterRow
       let lastRow
       if (key) {
@@ -293,7 +302,7 @@
       if (!filterRow) {
         lastRow = document.querySelector('#filters-table tr:last-child')
         filterRow = lastRow.cloneNode(true)
-        filterRow.querySelector('.filter-row-value').value = filterValue || ''
+        filterRow.querySelector('.filter-row-value').value = values && values.value ? values.value : ''
       }
 
       const keyField = filterRow.querySelector('.filter-row-key')
@@ -311,10 +320,15 @@
         filterRow.querySelector('.filter-remove').removeAttribute('hidden')
       }
 
+      if (values && values.type) {
+        const typeField = filterRow.querySelector('.filter-row-type')
+        typeField.value = values.type
+      }
+
       const operatorField = filterRow.querySelector('.filter-row-operator')
 
-      if (operatorValue) {
-        operatorField.value = operatorValue
+      if (values && values.operator) {
+        operatorField.value = values.operator
       }
 
       operatorField.querySelectorAll('option').forEach((option) => {
@@ -341,12 +355,12 @@
       }
     }
 
-    function addHashKeyFilter (hashKey, searchValue, operatorValue) {
-      addFilter(hashKey, searchValue, operatorValue, true, ['='])
+    function addHashKeyFilter (hashKey, values) {
+      addFilter(hashKey, values, true, ['='])
     }
 
-    function addRangeKeyFilter (rangeKey, searchValue, operatorValue) {
-      addFilter(rangeKey, searchValue, operatorValue, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
+    function addRangeKeyFilter (rangeKey, values) {
+      addFilter(rangeKey, values, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
     }
 
     function removeFilter (node) {
@@ -446,14 +460,14 @@
             const rangeKey = option.getAttribute('data-key-range')
 
             if (filterKey === hashKey) {
-              addHashKeyFilter(filterKey, filterParams.value, filterParams.operator)
+              addHashKeyFilter(filterKey, filterParams)
             } else if (filterKey === rangeKey) {
-              addRangeKeyFilter(filterKey, filterParams.value, filterParams.operator)
+              addRangeKeyFilter(filterKey, filterParams)
             } else {
-              addFilter(filterKey, filterParams.value, filterParams.operator)
+              addFilter(filterKey, filterParams)
             }
           } else {
-            addFilter(filterKey, filterParams.value, filterParams.operator)
+            addFilter(filterKey, filterParams)
           }
         }
       }
