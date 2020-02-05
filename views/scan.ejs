@@ -117,19 +117,19 @@
               </select>
             </th>
             <td>
-              <select name="queryableSelection">
-                <option value="table"<% if (query.queryableSelection === 'table') { %> selected<% } %>>[Table] <%= Table.TableName %></option>
-                <% for (const index of Table.GlobalSecondaryIndexes) { %>
-                  <option value="<%= index.IndexName %>"
-                    <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
-                    >[Index] <%= index.IndexName %><%
-                    if (index.KeySchema) {
-                      const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName);
-                      %>
-                      : <%= attributes.join(', '); %>
-                      <%
-                    }
-                  %></option>
+              <select name="queryableSelection"<% if (!Table.GlobalSecondaryIndexes) { %> disabled<% } %>>
+                <option value="table"
+                  data-required-query-keys="<%= Table.KeySchema.map(keySchemaItem => keySchemaItem.AttributeName).join(',') %>"
+                  <% if (query.queryableSelection === 'table') { %> selected<% } %>
+                >[Table] <%= Table.TableName %></option>
+                <% if (Table.GlobalSecondaryIndexes) { %>
+                  <% for (const index of Table.GlobalSecondaryIndexes) { %>
+                    <% const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName) %>
+                    <option value="<%= index.IndexName %>" data-required-query-keys="<%= attributes.join(',') %>"
+                      <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
+                      >[Index] <%= index.IndexName %>: <%= attributes.join(', ') %>
+                    </option>
+                  <% } %>
                 <% } %>
               </select>
             </td>
@@ -137,26 +137,28 @@
           <tr>
             <th>Filter</th>
             <td>
-              <table class="table table-bordered">
+              <table id="filters-table" class="table table-bordered">
                 <tbody>
                   <% for (let filterKey in filters) { %>
                     <tr>
                       <td style="width: 95px;">
-                        <button type="button" onclick="removeFilter(this)" class='btn btn-danger'>Remove</button>
+                        <button
+                          type="button"
+                          onclick="removeFilter(this)"
+                          <% if (filters[filterKey].required) { %> hidden <% } %>
+                          class="filter-remove btn btn-danger"
+                        >Remove</button>
                       </td>
-                      <td
-                        style="width: 300px"
-                      >
+                      <td style="width: 300px">
                         <input
-                          data-filter-key
                           type="text"
-                          class="form-control"
-                          readonly
+                          class="form-control filter-row-key"
+                          <% if (filters[filterKey].required) { %> required readonly <% } %>
                           value="<%= filterKey %>"
                         />
                       </td>
                       <td>
-                        <select class="form-control" id="<%= filterKey %>Operator">
+                        <select class="form-control filter-row-operator">
                           <% for (const operator in operators) { %>
                             <option value="<%= operator %>"
                               <% if (filters[filterKey].operator === operator) { %>
@@ -169,34 +171,35 @@
                       <td>
                         <input
                           type="text"
-                          class="form-control"
+                          class="form-control filter-row-value"
                           placeholder="Value"
-                          id="<%= filterKey %>Value"
+                          <% if (filters[filterKey].required) { %> required <% } %>
                           value="<%= filters[filterKey].value %>"
                         />
                       </td>
                     </tr>
                   <% } %>
                   <tr>
-                    <td style="width: 95px;"></td>
+                    <td style="width: 95px;">
+                      <button type="button" onclick="removeFilter(this)" class="filter-remove btn btn-danger">Remove</button>
+                    </td>
                     <td style="width: 300px">
                       <input
                         type="text"
-                        class="form-control"
-                        id="key"
+                        class="form-control filter-row-key"
                         placeholder="Key"
                         list="attributes"
                       />
                     </td>
                     <td>
-                      <select class="form-control" id="operator">
+                      <select class="form-control filter-row-operator">
                         <% for (const operator in operators) { %>
                           <option value="<%= operator %>"><%= operators[operator] %></option>
                         <% } %>
                       </select>
                     </td>
                     <td>
-                      <input id="value" type="text" class="form-control" placeholder="Value" />
+                      <input id="value" type="text" class="form-control filter-row-value" placeholder="Value" />
                     </td>
                   </tr>
                 </tbody>
@@ -209,7 +212,8 @@
 
       <div class="row">
         <div class="col-md-6">
-          <button type="submit" class="btn btn-primary">Scan</button>
+          <button type="submit" class="btn btn-primary">Search</button>
+          <button id="add-filter" class="btn btn-secondary">Add Filter</button>
         </div>
 
         <div class="col-md-6 pagination-container d-none">
@@ -238,23 +242,87 @@
     form.addEventListener('submit', () => {
       const filters = {}
 
-      $('input[data-filter-key]').each((i, input) => {
-        const filterKey = input.value
-        filters[filterKey] = {
-          operator: document.getElementById(`${filterKey}Operator`).value,
-          value: document.getElementById(`${filterKey}Value`).value,
+      document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
+        const keyField = filterRow.querySelector('.filter-row-key')
+        const operatorField = filterRow.querySelector('.filter-row-operator')
+        const valueField = filterRow.querySelector('.filter-row-value')
+
+        if (keyField.value && valueField.value) {
+          filters[keyField.value] = {
+            operator: operatorField.value,
+            value: valueField.value,
+            required: !!keyField.getAttribute('required'),
+          }
         }
       })
 
-      if (form.key.value) {
-        filters[form.key.value] = {
-          operator: form.operator.value,
-          value: form.value.value,
-        }
-      }
-
       form.filters.value = JSON.stringify(filters)
     })
+
+    document.querySelector('select[name="operationType"]').addEventListener('change', (event) => {
+      if (event.target.value === 'query') {
+        const querySelection = document.querySelector('select[name="queryableSelection"]')
+        const option = querySelection.selectedOptions[0]
+        const requiredKeys = option.getAttribute('data-required-query-keys')
+
+        if (requiredKeys && requiredKeys.length > 0) {
+          for (const requiredKey of requiredKeys.split(',')) {
+            addFilter(requiredKey, true)
+          }
+        }
+      } else {
+        document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
+          const keyField = filterRow.querySelector('.filter-row-key')
+          keyField.removeAttribute('required')
+          keyField.removeAttribute('readonly')
+          filterRow.querySelector('.filter-row-value').removeAttribute('required')
+          filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+        })
+      }
+    })
+
+    document.querySelector('#add-filter').addEventListener('click', (event) => {
+      event.preventDefault()
+      addFilter()
+    })
+
+    function addFilter (key, required) {
+      let filterRow
+      let lastRow
+      if (key) {
+        document.querySelectorAll('#filters-table tr').forEach((row) => {
+          if (row.querySelector('.filter-row-key').value === key) {
+            filterRow = row
+          }
+        })
+      }
+
+      if (!filterRow) {
+        lastRow = document.querySelector('#filters-table tr:last-child')
+        filterRow = lastRow.cloneNode(true)
+        filterRow.querySelector('.filter-row-value').value = ''
+      }
+
+      const keyField = filterRow.querySelector('.filter-row-key')
+      keyField.value = key || ''
+
+      if (required) {
+        keyField.setAttribute('required', true)
+        keyField.setAttribute('readonly', true)
+        filterRow.querySelector('.filter-row-value').setAttribute('required', true)
+        filterRow.querySelector('.filter-remove').setAttribute('hidden', true)
+      } else {
+        keyField.removeAttribute('required')
+        keyField.removeAttribute('readonly')
+        filterRow.querySelector('.filter-row-value').removeAttribute('required')
+        filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+      }
+
+      if (lastRow) {
+        document.querySelector('#filters-table tbody').appendChild(filterRow)
+      }
+    }
+
     function removeFilter (node) {
       node.closest('tr').remove()
     }
@@ -300,19 +368,19 @@
 
         if (data.pageNum > 1) {
           $('.page-link-previous')
-            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&' + data.filterQueryString)
-         $('.page-item-previous').removeClass('disabled')
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString)
+          $('.page-item-previous').removeClass('disabled')
         }
 
         if (data.nextKey) {
           $('.page-link-next')
-            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&' + data.filterQueryString)
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString)
           $('.page-item-next').removeClass('disabled')
         }
 
         const rangeFrom = ((data.pageNum - 1) * 25) + 1
         const rangeTo = rangeFrom + (data.Items.length - 1)
-        $('.item-count').append(' (showing items ' + rangeFrom + ' - ' + rangeTo + ')')
+        $('.item-count').append(' (showing ' + rangeFrom + ' - ' + rangeTo + ')')
 
         $('.table-container').removeClass('d-none')
         $('.pagination-container').removeClass('d-none')
