@@ -122,7 +122,6 @@
                   <% Table.KeySchema.forEach(keySchemaItem => { %>
                     data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
                   <% }) %>
-                  <% if (sortKey) { %> data-sort-key="<%= sortKey.AttributeName %>" <% } %>
                   <% if (query.queryableSelection === 'table') { %> selected<% } %>
                 >[Table] <%= Table.TableName %></option>
                 <% if (Table.GlobalSecondaryIndexes) { %>
