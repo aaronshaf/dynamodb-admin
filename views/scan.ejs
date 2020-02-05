@@ -128,7 +128,7 @@
                   <% for (const index of Table.GlobalSecondaryIndexes) { %>
                     <% const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName) %>
                     <option value="<%= index.IndexName %>"
-                      <% Table.KeySchema.forEach(keySchemaItem => { %>
+                      <% index.KeySchema.forEach(keySchemaItem => { %>
                         data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
                       <% }) %>
                       <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
@@ -149,46 +149,6 @@
             <td>
               <table id="filters-table" class="table table-bordered">
                 <tbody>
-                  <% for (let filterKey in filters) { %>
-                    <tr>
-                      <td style="width: 95px;">
-                        <button
-                          type="button"
-                          onclick="removeFilter(this)"
-                          <% if (filters[filterKey].required) { %> hidden <% } %>
-                          class="filter-remove btn btn-danger"
-                        >Remove</button>
-                      </td>
-                      <td style="width: 300px">
-                        <input
-                          type="text"
-                          class="form-control filter-row-key"
-                          <% if (filters[filterKey].required) { %> required="required" readonly <% } %>
-                          value="<%= filterKey %>"
-                        />
-                      </td>
-                      <td>
-                        <select class="form-control filter-row-operator">
-                          <% for (const operator in operators) { %>
-                            <option value="<%= operator %>"
-                              <% if (filters[filterKey].operator === operator) { %>
-                                selected
-                              <% } %>
-                              ><%= operators[operator] %></option>
-                          <% } %>
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          class="form-control filter-row-value"
-                          placeholder="Value"
-                          <% if (filters[filterKey].required) { %> required <% } %>
-                          value="<%= filters[filterKey].value %>"
-                        />
-                      </td>
-                    </tr>
-                  <% } %>
                   <tr>
                     <td style="width: 95px;">
                       <button type="button" onclick="removeFilter(this)" class="filter-remove btn btn-danger">Remove</button>
@@ -260,7 +220,6 @@
           filters[keyField.value] = {
             operator: operatorField.value,
             value: valueField.value,
-            required: !!keyField.getAttribute('required'),
           }
         }
       })
@@ -268,33 +227,20 @@
       form.filters.value = JSON.stringify(filters)
     })
 
+    document.querySelector('select[name="queryableSelection"]').addEventListener('change', (event) => {
+      const operationType = document.querySelector('select[name="operationType"]')
+
+      if (operationType.value === 'query') {
+        unrequireAllFilters()
+        requireIndexFilters()
+      }
+    })
+
     document.querySelector('select[name="operationType"]').addEventListener('change', (event) => {
       if (event.target.value === 'query') {
-        const querySelection = document.querySelector('select[name="queryableSelection"]')
-        const option = querySelection.selectedOptions[0]
-        const hashKey = option.getAttribute('data-key-hash')
-        const rangeKey = option.getAttribute('data-key-range')
-
-        if (hashKey) {
-          addFilter(hashKey, true, ['='])
-        }
-
-        if (rangeKey) {
-          addFilter(rangeKey, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
-        }
+        requireIndexFilters()
       } else {
-        document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
-          const keyField = filterRow.querySelector('.filter-row-key')
-          keyField.removeAttribute('required')
-          keyField.removeAttribute('readonly')
-          filterRow.querySelector('.filter-row-value').removeAttribute('required')
-          filterRow.querySelector('.filter-remove').removeAttribute('hidden')
-          const operatorField = filterRow.querySelector('.filter-row-operator')
-          operatorField.removeAttribute('disabled')
-          operatorField.querySelectorAll('option').forEach((option) => {
-            option.removeAttribute('disabled')
-          })
-        })
+        unrequireAllFilters()
       }
     })
 
@@ -303,7 +249,37 @@
       addFilter()
     })
 
-    function addFilter (key, required, availableOperators) {
+    function requireIndexFilters () {
+      const querySelection = document.querySelector('select[name="queryableSelection"]')
+      const option = querySelection.selectedOptions[0]
+      const hashKey = option.getAttribute('data-key-hash')
+      const rangeKey = option.getAttribute('data-key-range')
+
+      if (hashKey) {
+        addHashKeyFilter(hashKey)
+      }
+
+      if (rangeKey) {
+        addRangeKeyFilter(rangeKey)
+      }
+    }
+
+    function unrequireAllFilters () {
+      document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
+        const keyField = filterRow.querySelector('.filter-row-key')
+        keyField.removeAttribute('required')
+        keyField.removeAttribute('readonly')
+        filterRow.querySelector('.filter-row-value').removeAttribute('required')
+        filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+        const operatorField = filterRow.querySelector('.filter-row-operator')
+        operatorField.removeAttribute('disabled')
+        operatorField.querySelectorAll('option').forEach((option) => {
+          option.removeAttribute('disabled')
+        })
+      })
+    }
+
+    function addFilter (key, filterValue, operatorValue, required, availableOperators) {
       let filterRow
       let lastRow
       if (key) {
@@ -317,7 +293,7 @@
       if (!filterRow) {
         lastRow = document.querySelector('#filters-table tr:last-child')
         filterRow = lastRow.cloneNode(true)
-        filterRow.querySelector('.filter-row-value').value = ''
+        filterRow.querySelector('.filter-row-value').value = filterValue || ''
       }
 
       const keyField = filterRow.querySelector('.filter-row-key')
@@ -336,6 +312,11 @@
       }
 
       const operatorField = filterRow.querySelector('.filter-row-operator')
+
+      if (operatorValue) {
+        operatorField.value = operatorValue
+      }
+
       operatorField.querySelectorAll('option').forEach((option) => {
         const enabled = availableOperators ? availableOperators.includes(option.value) : true
         if (enabled) {
@@ -358,6 +339,14 @@
       if (lastRow) {
         document.querySelector('#filters-table tbody').appendChild(filterRow)
       }
+    }
+
+    function addHashKeyFilter (hashKey, searchValue, operatorValue) {
+      addFilter(hashKey, searchValue, operatorValue, true, ['='])
+    }
+
+    function addRangeKeyFilter (rangeKey, searchValue, operatorValue) {
+      addFilter(rangeKey, searchValue, operatorValue, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
     }
 
     function removeFilter (node) {
@@ -438,6 +427,37 @@
     }
 
     window.addEventListener('load', () => {
+      const startOfNextQueryParam = location.search.substr(location.search.indexOf('filters=')).indexOf('&')
+      const queryStringFilters = location.search.substr(location.search.indexOf('filters='), startOfNextQueryParam === -1 ? undefined : startOfNextQueryParam).substr(8)
+
+      if (queryStringFilters.length > 0) {
+        let queryFilters = {}
+        try {
+          queryFilters = JSON.parse(decodeURIComponent(queryStringFilters))
+        } catch (ex) {}
+
+        const operationType = document.querySelector('select[name="operationType"]').value
+        for (const filterKey of Object.keys(queryFilters)) {
+          const filterParams = queryFilters[filterKey]
+          if (operationType === 'query') {
+            const querySelection = document.querySelector('select[name="queryableSelection"]')
+            const option = querySelection.selectedOptions[0]
+            const hashKey = option.getAttribute('data-key-hash')
+            const rangeKey = option.getAttribute('data-key-range')
+
+            if (filterKey === hashKey) {
+              addHashKeyFilter(filterKey, filterParams.value)
+            } else if (filterKey === rangeKey) {
+              addRangeKeyFilter(filterKey, filterParams.value)
+            } else {
+              addFilter(filterKey, filterParams.value)
+            }
+          } else {
+            addFilter(filterKey, filterParams.value)
+          }
+        }
+      }
+
       fetch(document.location.pathname + '/items' + document.location.search)
         .then(response => response.json())
         .then(json => {
