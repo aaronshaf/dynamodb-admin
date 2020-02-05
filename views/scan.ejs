@@ -324,7 +324,14 @@
     }
 
     function removeFilter (node) {
-      node.closest('tr').remove()
+      // prevent removal of the last filter row, instead, just clear it out
+      if (document.querySelectorAll('#filters-table tr').length === 1) {
+        const filterRow = document.querySelector('#filters-table tr')
+        filterRow.querySelector('.filter-row-key').value = ''
+        filterRow.querySelector('.filter-row-value').value = ''
+      } else {
+        node.closest('tr').remove()
+      }
     }
 
     function updateFilterAutocomplete(uniqueKeys) {
