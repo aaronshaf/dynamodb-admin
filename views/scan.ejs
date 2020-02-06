@@ -111,13 +111,13 @@
         <tbody>
           <tr>
             <th>
-              <select name="operationType">
+              <select name="operationType" class="form-control">
                 <option value="scan"<% if (query.operationType === 'scan') { %> selected<% } %>>Scan</option>
                 <option value="query"<% if (query.operationType === 'query') { %> selected<% } %>>Query</option>
               </select>
             </th>
             <td>
-              <select name="queryableSelection"<% if (!Table.GlobalSecondaryIndexes) { %> disabled<% } %>>
+              <select name="queryableSelection" class="form-control"<% if (!Table.GlobalSecondaryIndexes) { %> disabled<% } %>>
                 <option value="table"
                   <% Table.KeySchema.forEach(keySchemaItem => { %>
                     data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
@@ -161,14 +161,14 @@
                         list="attributes"
                       />
                     </td>
-                    <td>
+                    <td style="width: 125px">
                       <select class="form-control filter-row-type">
                         <% for (const type in attributeTypes) { %>
                           <option value="<%= type %>"><%= attributeTypes[type] %></option>
                         <% } %>
                       </select>
                     </td>
-                    <td>
+                    <td style="width: 80px">
                       <select class="form-control filter-row-operator">
                         <% for (const operator in operators) { %>
                           <option value="<%= operator %>"><%= operators[operator] %></option>
