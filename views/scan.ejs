@@ -77,7 +77,7 @@
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link active item-count" href="/tables/<%= Table.TableName %>">
-          Scan
+          Items
         </a>
       </li>
       <li class="nav-item">
@@ -110,61 +110,73 @@
       <table class="table table-bordered">
         <tbody>
           <tr>
-            <th>Filter</th>
+            <th>
+              <select name="operationType" class="form-control">
+                <option value="scan"<% if (query.operationType === 'scan') { %> selected<% } %>>Scan</option>
+                <option value="query"<% if (query.operationType === 'query') { %> selected<% } %>>Query</option>
+              </select>
+            </th>
             <td>
-              <table class="table table-bordered">
-                <tbody>
-                  <% for (let filterKey in filters) { %>
-                    <tr>
-                      <td style="width: 95px;">
-                        <button type="button" onclick="removeFilter(this)" class='btn btn-danger'>Remove</button>
-                      </td>
-                      <td
-                        style="width: 300px"
-                      >
-                        <input
-                          data-filter-key
-                          type="text"
-                          class="form-control"
-                          readonly
-                          value="<%= filterKey %>"
-                        />
-                      </td>
-                      <td>
-                        <select class="form-control" readonly>
-                          <option>=</option>
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Value"
-                          name="<%= filterKey %>"
-                          value="<%= filters[filterKey] %>"
-                        />
-                      </td>
-                    </tr>
+              <select name="queryableSelection" class="form-control"<% if (!Table.GlobalSecondaryIndexes) { %> disabled<% } %>>
+                <option value="table"
+                  <% Table.KeySchema.forEach(keySchemaItem => { %>
+                    data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
+                  <% }) %>
+                  <% if (query.queryableSelection === 'table') { %> selected<% } %>
+                >[Table] <%= Table.TableName %></option>
+                <% if (Table.GlobalSecondaryIndexes) { %>
+                  <% for (const index of Table.GlobalSecondaryIndexes) { %>
+                    <% const attributes = index.KeySchema.map((keySchemaItem) => keySchemaItem.AttributeName) %>
+                    <option value="<%= index.IndexName %>"
+                      <% index.KeySchema.forEach(keySchemaItem => { %>
+                        data-key-<%= keySchemaItem.KeyType.toLowerCase() %>="<%= keySchemaItem.AttributeName %>"
+                      <% }) %>
+                      <% if (query.queryableSelection === index.IndexName) { %> selected<% } %>
+                      >[Index] <%= index.IndexName %>: <%= attributes.join(', ') %>
+                    </option>
                   <% } %>
+                <% } %>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Filter
+              <div style="margin-top: 1em">
+                <button id="add-filter" class="btn btn-secondary">Add Filter</button>
+              </div>
+            </th>
+            <td>
+              <table id="filters-table" class="table table-bordered">
+                <tbody>
                   <tr>
-                    <td style="width: 95px;"></td>
+                    <td style="width: 95px;">
+                      <button type="button" onclick="removeFilter(this)" class="filter-remove btn btn-danger">Remove</button>
+                    </td>
                     <td style="width: 300px">
                       <input
-                        data-filter-key
                         type="text"
-                        class="form-control"
-                        id="key"
+                        class="form-control filter-row-key"
                         placeholder="Key"
                         list="attributes"
                       />
                     </td>
-                    <td>
-                      <select class="form-control" readonly>
-                        <option>=</option>
+                    <td style="width: 125px">
+                      <select class="form-control filter-row-type">
+                        <% for (const type in attributeTypes) { %>
+                          <option value="<%= type %>"><%= attributeTypes[type] %></option>
+                        <% } %>
+                      </select>
+                    </td>
+                    <td style="width: 80px">
+                      <select class="form-control filter-row-operator">
+                        <% for (const operator in operators) { %>
+                          <option value="<%= operator %>"><%= operators[operator] %></option>
+                        <% } %>
                       </select>
                     </td>
                     <td>
-                      <input id="value" type="text" class="form-control" placeholder="Value" />
+                      <input id="value" type="text" class="form-control filter-row-value" placeholder="Value" />
                     </td>
                   </tr>
                 </tbody>
@@ -173,11 +185,11 @@
           </tr>
         </tbody>
       </table>
-      <input id="param" type="hidden" />
+      <input id="filters" name="filters" type="hidden" />
 
       <div class="row">
         <div class="col-md-6">
-          <button type="submit" class="btn btn-primary">Scan</button>
+          <button type="submit" class="btn btn-primary">Search</button>
         </div>
 
         <div class="col-md-6 pagination-container d-none">
@@ -204,11 +216,162 @@
 
     const form = document.querySelector('#form')
     form.addEventListener('submit', () => {
-      form.param.setAttribute('name', form.key.value)
-      form.param.value = form.value.value
+      const filters = {}
+
+      document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
+        const keyField = filterRow.querySelector('.filter-row-key')
+        const typeField = filterRow.querySelector('.filter-row-type')
+        const operatorField = filterRow.querySelector('.filter-row-operator')
+        const valueField = filterRow.querySelector('.filter-row-value')
+
+        if (keyField.value && valueField.value) {
+          filters[keyField.value] = {
+            operator: operatorField.value,
+            value: valueField.value,
+            type: typeField.value,
+          }
+        }
+      })
+
+      form.filters.value = JSON.stringify(filters)
     })
+
+    document.querySelector('select[name="queryableSelection"]').addEventListener('change', (event) => {
+      const operationType = document.querySelector('select[name="operationType"]')
+
+      if (operationType.value === 'query') {
+        unrequireAllFilters()
+        requireIndexFilters()
+      }
+    })
+
+    document.querySelector('select[name="operationType"]').addEventListener('change', (event) => {
+      if (event.target.value === 'query') {
+        requireIndexFilters()
+      } else {
+        unrequireAllFilters()
+      }
+    })
+
+    document.querySelector('#add-filter').addEventListener('click', (event) => {
+      event.preventDefault()
+      addFilter()
+    })
+
+    function requireIndexFilters () {
+      const querySelection = document.querySelector('select[name="queryableSelection"]')
+      const option = querySelection.selectedOptions[0]
+      const hashKey = option.getAttribute('data-key-hash')
+      const rangeKey = option.getAttribute('data-key-range')
+
+      if (hashKey) {
+        addHashKeyFilter(hashKey)
+      }
+
+      if (rangeKey) {
+        addRangeKeyFilter(rangeKey)
+      }
+    }
+
+    function unrequireAllFilters () {
+      document.querySelectorAll('#filters-table tr').forEach((filterRow) => {
+        const keyField = filterRow.querySelector('.filter-row-key')
+        keyField.removeAttribute('required')
+        keyField.removeAttribute('readonly')
+        filterRow.querySelector('.filter-row-value').removeAttribute('required')
+        filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+        const operatorField = filterRow.querySelector('.filter-row-operator')
+        operatorField.removeAttribute('disabled')
+        operatorField.querySelectorAll('option').forEach((option) => {
+          option.removeAttribute('disabled')
+        })
+      })
+    }
+
+    function addFilter (key, values, required, availableOperators) {
+      let filterRow
+      let lastRow
+      if (key) {
+        document.querySelectorAll('#filters-table tr').forEach((row) => {
+          if (row.querySelector('.filter-row-key').value === key) {
+            filterRow = row
+          }
+        })
+      }
+
+      if (!filterRow) {
+        lastRow = document.querySelector('#filters-table tr:last-child')
+        filterRow = lastRow.cloneNode(true)
+        filterRow.querySelector('.filter-row-value').value = values && values.value ? values.value : ''
+      }
+
+      const keyField = filterRow.querySelector('.filter-row-key')
+      keyField.value = key || ''
+
+      if (required) {
+        keyField.setAttribute('required', true)
+        keyField.setAttribute('readonly', true)
+        filterRow.querySelector('.filter-row-value').setAttribute('required', true)
+        filterRow.querySelector('.filter-remove').setAttribute('hidden', true)
+      } else {
+        keyField.removeAttribute('required')
+        keyField.removeAttribute('readonly')
+        filterRow.querySelector('.filter-row-value').removeAttribute('required')
+        filterRow.querySelector('.filter-remove').removeAttribute('hidden')
+      }
+
+      if (values && values.type) {
+        const typeField = filterRow.querySelector('.filter-row-type')
+        typeField.value = values.type
+      }
+
+      const operatorField = filterRow.querySelector('.filter-row-operator')
+
+      if (values && values.operator) {
+        operatorField.value = values.operator
+      }
+
+      operatorField.querySelectorAll('option').forEach((option) => {
+        const enabled = availableOperators ? availableOperators.includes(option.value) : true
+        if (enabled) {
+          option.removeAttribute('disabled')
+        } else {
+          option.setAttribute('disabled', true)
+        }
+      })
+
+      if (availableOperators && !availableOperators.includes(operatorField.value)) {
+        operatorField.value = availableOperators[0]
+      }
+
+      if (availableOperators && availableOperators.length === 1) {
+        operatorField.setAttribute('disabled', true)
+      } else {
+        operatorField.removeAttribute('disabled')
+      }
+
+      if (lastRow) {
+        document.querySelector('#filters-table tbody').appendChild(filterRow)
+      }
+    }
+
+    function addHashKeyFilter (hashKey, values) {
+      addFilter(hashKey, values, true, ['='])
+    }
+
+    function addRangeKeyFilter (rangeKey, values) {
+      addFilter(rangeKey, values, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
+    }
+
     function removeFilter (node) {
-      node.closest('tr').remove()
+      // prevent removal of the last filter row, instead, just clear it out
+      if (document.querySelectorAll('#filters-table tr').length === 1) {
+        const filterRow = document.querySelector('#filters-table tr')
+        filterRow.querySelector('.filter-row-key').value = ''
+        filterRow.querySelector('.filter-row-value').value = ''
+      } else {
+        node.closest('tr').remove()
+      }
     }
 
     function updateFilterAutocomplete(uniqueKeys) {
@@ -252,19 +415,19 @@
 
         if (data.pageNum > 1) {
           $('.page-link-previous')
-            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&'  + data.filterQueryString)
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString)
           $('.page-item-previous').removeClass('disabled')
         }
 
         if (data.nextKey) {
           $('.page-link-next')
-            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&'  + data.filterQueryString)
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString)
           $('.page-item-next').removeClass('disabled')
         }
 
         const rangeFrom = ((data.pageNum - 1) * 25) + 1
         const rangeTo = rangeFrom + (data.Items.length - 1)
-        $('.item-count').append(' (showing items ' + rangeFrom + ' - ' + rangeTo + ')')
+        $('.item-count').append(' (showing ' + rangeFrom + ' - ' + rangeTo + ')')
 
         $('.table-container').removeClass('d-none')
         $('.pagination-container').removeClass('d-none')
@@ -278,6 +441,37 @@
     }
 
     window.addEventListener('load', () => {
+      const startOfNextQueryParam = location.search.substr(location.search.indexOf('filters=')).indexOf('&')
+      const queryStringFilters = location.search.substr(location.search.indexOf('filters='), startOfNextQueryParam === -1 ? undefined : startOfNextQueryParam).substr(8)
+
+      if (queryStringFilters.length > 0) {
+        let queryFilters = {}
+        try {
+          queryFilters = JSON.parse(decodeURIComponent(queryStringFilters))
+        } catch (ex) {}
+
+        const operationType = document.querySelector('select[name="operationType"]').value
+        for (const filterKey of Object.keys(queryFilters)) {
+          const filterParams = queryFilters[filterKey]
+          if (operationType === 'query') {
+            const querySelection = document.querySelector('select[name="queryableSelection"]')
+            const option = querySelection.selectedOptions[0]
+            const hashKey = option.getAttribute('data-key-hash')
+            const rangeKey = option.getAttribute('data-key-range')
+
+            if (filterKey === hashKey) {
+              addHashKeyFilter(filterKey, filterParams)
+            } else if (filterKey === rangeKey) {
+              addRangeKeyFilter(filterKey, filterParams)
+            } else {
+              addFilter(filterKey, filterParams)
+            }
+          } else {
+            addFilter(filterKey, filterParams)
+          }
+        }
+      }
+
       fetch(document.location.pathname + '/items' + document.location.search)
         .then(response => {
           if (response.ok) {
