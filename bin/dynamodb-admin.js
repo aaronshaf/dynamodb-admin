@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const ArgumentParser = require('argparse').ArgumentParser
-const opn = require('opn')
+const open = require('open')
 const packageJson = require('../package.json')
 
 const { createServer } = require('../lib/backend')
@@ -39,7 +39,7 @@ server.on('listening', () => {
   console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`)
 
   if (args.open) {
-    opn(url)
+    open(url)
   }
 })
 
