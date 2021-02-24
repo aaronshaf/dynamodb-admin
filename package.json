@@ -32,21 +32,21 @@
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
     "argparse": "^1.0.10",
-    "aws-sdk": "^2.614.0",
+    "aws-sdk": "^2.851.0",
     "body-parser": "^1.19.0",
     "cli-color": "^2.0.0",
-    "ejs": "^3.0.1",
+    "ejs": "^3.1.6",
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "lodash.pickby": "^4.6.0",
-    "open": "^7.0.2"
+    "open": "^7.4.2"
   },
   "devDependencies": {
-    "ejs-lint": "^1.0.1",
+    "ejs-lint": "^1.1.0",
     "eslint": "^6.8.0",
-    "eslint-plugin-jest": "^23.7.0",
-    "husky": "^4.2.1",
-    "jest-cli": "^25.1.0",
-    "nodemon": "^2.0.2"
+    "eslint-plugin-jest": "^23.20.0",
+    "husky": "^4.3.8",
+    "jest-cli": "^25.5.4",
+    "nodemon": "^2.0.7"
   }
 }
