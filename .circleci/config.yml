@@ -1,80 +1,13 @@
----
-
-# The following stanza defines a map named defaults with a variable that may be
-# inserted using the YAML merge (<<: *) key later in the file to save some
-# typing. See http://yaml.org/type/merge.html for details.
-defaults: &defaults
-  docker:
-    - image: circleci/node:8-stretch-browsers
-
-version: 2
-jobs:
-  build:
-    <<: *defaults
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            # This branch if available
-            - v1-dep-{{ .Branch }}-
-            # Default branch if not
-            - v1-dep-master-
-            # Any branch if there are none on the default branch - this shouldbe
-            # unnecessary if you have your default branch configured correctly
-            - v1-dep-
-      - run: npm install
-      - save_cache:
-          key: v1-dep-{{ .Branch }}-{{ epoch }}
-          paths:
-            # This is a broad list of cache paths to include many possible
-            # development environments.
-            # You can probably delete some of these entries
-            - vendor/bundle
-            - ~/virtualenvs
-            - ~/.m2
-            - ~/.ivy2
-            - ~/.bundle
-            - ~/.go_workspace
-            - ~/.gradle
-            - ~/.cache/bower
-            - ./node_modules
-  test:
-    <<: *defaults
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            # This branch if available
-            - v1-dep-{{ .Branch }}-
-            # Default branch if not
-            - v1-dep-master-
-            # Any branch if there are none on the default branch - this shouldbe
-            # unnecessary if you have your default branch configured correctly
-            - v1-dep-
-      - run: npm test
-  lint:
-    <<: *defaults
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            # This branch if available
-            - v1-dep-{{ .Branch }}-
-            # Default branch if not
-            - v1-dep-master-
-            # Any branch if there are none on the default branch - this shouldbe
-            # unnecessary if you have your default branch configured correctly
-            - v1-dep-
-      - run: npm run lint
-
+version: 2.1
+orbs:
+  node: circleci/node@4.2.0
 workflows:
-  version: 2
   build_and_test:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
-      - lint:
-          requires:
-            - build
+      - node/test:
+          matrix:
+            parameters:
+              version:
+                - 14.16.0
+                - 12.21.0
+                - 10.24.0
