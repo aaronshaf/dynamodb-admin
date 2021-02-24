@@ -43,10 +43,10 @@
   },
   "devDependencies": {
     "ejs-lint": "^1.1.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-jest": "^23.20.0",
+    "eslint": "^7.20.0",
+    "eslint-plugin-jest": "^24.1.5",
     "husky": "^4.3.8",
-    "jest-cli": "^25.5.4",
+    "jest": "^26.6.3",
     "nodemon": "^2.0.7"
   }
 }
