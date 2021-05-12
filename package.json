@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
-    "argparse": "^1.0.10",
+    "argparse": "^2.0.1",
     "aws-sdk": "^2.851.0",
     "body-parser": "^1.19.0",
     "cli-color": "^2.0.0",
