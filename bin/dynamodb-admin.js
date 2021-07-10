@@ -24,7 +24,7 @@ parser.addArgument(['-o', '--open'], {
 
 parser.addArgument(['-p', '--port'], {
   type: 'int',
-  defaultValue: 8001,
+  defaultValue: 8002,
   help: 'Port to run on (default: 8001)',
 })
 
