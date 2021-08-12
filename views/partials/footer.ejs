@@ -1,15 +1,18 @@
+<div class="myclear"></div>
 <footer class="footer">
-  <!-- <div class="container"> -->
   <span class="text-muted">Dark Theme</span>
-  <% let checked=theme.toString()=="dark" ? "checked" : "" %>
-    <input id="dark-theme-toggle" type="checkbox" <%=checked %> data-toggle="toggle"
-    data-onstyle="dark" data-size="xs">
-    <!-- </div> -->
+  <input id="dark-theme-toggle" type="checkbox" data-toggle="toggle" data-onstyle="dark" data-size="xs">
 </footer>
 
 <style>
+  .myclear {
+    clear: both;
+    height: 60px;
+  }
+
   .footer {
     position: fixed;
+    margin-top: 20px;
     bottom: 0;
     width: 100%;
     /* Set the fixed height of the footer here */
@@ -20,40 +23,52 @@
   }
 </style>
 
-<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css"
-  rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
-
-
 <script>
-  async function postData(url = '', data = {}) {
-    // Default options are marked with *
-    const response = await fetch(url, {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-    });
-    return response.json(); // parses JSON response into native JavaScript objects
+  const DEFAULT_THEME = 'light'
+
+  function detectColorScheme() {
+    var theme = DEFAULT_THEME;    //default to light
+
+    //local storage is used to override OS theme settings
+    if (localStorage.getItem("theme")) {
+      if (localStorage.getItem("theme") == "dark") {
+        var theme = "dark";
+      }
+    } else if (!window.matchMedia) {
+      //matchMedia method not supported
+      return false;
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      //OS theme setting detected as dark
+      var theme = "dark";
+    }
+
+    //dark theme preferred, set document with a `data-theme` attribute
+    if (theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+
+    //also check or uncheck the toggle
+    $('#dark-theme-toggle').attr('checked', theme == "dark");
   }
 
   $(function () {
     $('#dark-theme-toggle').change(function () {
       const themes = ['light', 'dark'];
-      let newTheme;
-      if ($('body').attr('data-theme') == themes[0]) {
-        newTheme = themes[1];
-      } else {
-        newTheme = themes[0];
-      }
-      $('body').attr('data-theme', newTheme);
-      $('html').attr('data-theme', newTheme);
 
-      postData('/config/cookie', { theme: newTheme }) //persist it to cookie 
-        .then(data => {
-          // console.log(data);
-        })
+      let newTheme, curTheme = document.documentElement.getAttribute("data-theme") || DEFAULT_THEME;
+
+      if (curTheme == themes[1]) {
+        newTheme = themes[0];
+      } else {
+        newTheme = themes[1];
+      }
+
+      localStorage.setItem('theme', newTheme);
+      detectColorScheme();
     });
+
+    detectColorScheme();
   });
 </script>
