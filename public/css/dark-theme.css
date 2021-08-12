@@ -1,0 +1,10 @@
+ body[data-theme='dark'] {
+    color: rgb(216, 213, 208) !important;
+    background-color: rgb(14, 16, 17) !important;
+} 
+
+html {
+    --text-color-normal: #0a244d;
+    --text-color-light: #8cabd9;
+}
+
