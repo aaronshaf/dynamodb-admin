@@ -29,6 +29,10 @@
   function detectColorScheme(firstTime = false) {
     var theme = DEFAULT_THEME;    //default to light
 
+    if (firstTime) { //avoid flickering
+      $("body").addClass('fade-in');
+    }
+
     //local storage is used to override OS theme settings
     if (localStorage.getItem("theme")) {
       if (localStorage.getItem("theme") == "dark") {
@@ -51,10 +55,6 @@
 
     //also check or uncheck the toggle
     $('#dark-theme-toggle').attr('checked', theme == "dark");
-
-    if (firstTime) { //avoid flickering
-      $("body").addClass('fade-in');
-    }
   }
 
   $(function () {
