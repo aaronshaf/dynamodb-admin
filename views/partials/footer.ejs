@@ -26,7 +26,7 @@
 <script>
   const DEFAULT_THEME = 'light'
 
-  function detectColorScheme() {
+  function detectColorScheme(firstTime = false) {
     var theme = DEFAULT_THEME;    //default to light
 
     //local storage is used to override OS theme settings
@@ -51,6 +51,10 @@
 
     //also check or uncheck the toggle
     $('#dark-theme-toggle').attr('checked', theme == "dark");
+
+    if (firstTime) { //avoid flickering
+      $("body").addClass('fade-in');
+    }
   }
 
   $(function () {
@@ -69,6 +73,6 @@
       detectColorScheme();
     });
 
-    detectColorScheme();
+    detectColorScheme(true);
   });
 </script>
