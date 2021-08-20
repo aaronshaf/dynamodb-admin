@@ -38,6 +38,16 @@
 
 /* END VARS */
 
+/* BEGIN SMOOTH TRANSITION */
+
+:root {
+    -webkit-transition: all 0.5s ease;
+    -ms-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+/* END SMOOTH TRANSITION */
+
 html, body, input, select, button {
     color: var(--font-color);
     background-color: var(--bg-color);
