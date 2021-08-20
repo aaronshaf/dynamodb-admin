@@ -3,7 +3,7 @@
 
 <head>
   <%- include('partials/head') %>
-    <%- include('partials/bootstrap-deps') %>
+  <%- include('partials/bootstrap-deps') %>
 </head>
 
 <body class='container'>
@@ -81,11 +81,11 @@
             <%= data[i].TableName %>
           </a>
           <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
-            class="badge badge-danger badge-pill float-right ml-1">
+          class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
           <a href="/" onClick="purgeTable('<%= data[i].TableName %>'); return false"
-            class="badge badge-warning badge-pill float-right ml-1">
+          class="badge badge-warning badge-pill float-right ml-1">
             Purge
           </a>
           <span class="badge badge-secondary badge-pill float-right ml-1">

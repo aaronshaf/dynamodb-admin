@@ -26,6 +26,7 @@
     --bg-color-strongest: #fff;
     --border-color: #dee2e6 #dee2e6 #fff;
     --border-color-1: #ced4da;
+    --background-image-gradient-before: linear-gradient(to right, #fff, #fff 5px, transparent 5px), linear-gradient(to left, #fff, #fff 5px, transparent 5px);
 }
 
 [data-theme="dark"] {
@@ -34,6 +35,8 @@
     --bg-color-strongest: rgb(14, 16, 17);
     --border-color: rgb(50, 54, 56) rgb(50, 54, 56) rgb(41, 44, 46);
     --border-color-1: #282929;
+    --background-image-gradient-before: linear-gradient(to right, var(--border-color-1), var(--border-color-1) 5px, transparent 5px), linear-gradient(to left, var(--border-color-1), var(--border-color-1) 5px, transparent 5px);
+    ;
 }
 
 /* END VARS */
@@ -66,10 +69,14 @@ html, body, input, select, button {
     color: #6c757d;
 }
 
-.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active, .table td, .table th {
     background-color: var(--bg-color-strongest);
     border-color: var(--border-color);
     color: var(--font-color-1);
+}
+
+.items-table::before {
+    background-image: var(--background-image-gradient-before);
 }
 
 .breadcrumb {
@@ -108,7 +115,7 @@ input, .form-control {
 /* NAV TABS */
 
 .nav-tabs {
-    border-bottom-color: var (--tabs-border-bottom-color);
+    border-bottom-color: var(--tabs-border-bottom-color);
 }
 
 .nav-tabs .nav-link {

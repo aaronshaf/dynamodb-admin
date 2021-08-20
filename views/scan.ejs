@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang='en' data-theme="<%= theme %>"></html>
+<html lang='en' data-theme="<%= theme %>">
 <head>
   <%- include('partials/head') %>
   <%- include('partials/bootstrap-deps') %>
@@ -49,9 +49,6 @@
 
     /* mask for scroll indicators */
     .items-table::before {
-      background-image:
-        linear-gradient(to right, #fff, #fff 5px, transparent 5px),
-        linear-gradient(to left, #fff, #fff 5px, transparent 5px);
       content: '';
       height: 100%;
       left: 0;
