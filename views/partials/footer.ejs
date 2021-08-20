@@ -1,7 +1,8 @@
 <div class="myclear"></div>
 <footer class="footer">
   <span class="text-muted">Dark Theme</span>
-  <input id="dark-theme-toggle" type="checkbox" data-toggle="toggle" data-onstyle="dark" data-size="xs">
+  <% let checked=theme.toString()=="dark" ? "checked" : "" %>
+  <input id="dark-theme-toggle" type="checkbox" <%=checked %> data-toggle="toggle" data-onstyle="dark" data-size="xs">
 </footer>
 
 <style>
@@ -26,26 +27,7 @@
 <script>
   const DEFAULT_THEME = 'light'
 
-  function detectColorScheme(firstTime = false) {
-    var theme = DEFAULT_THEME;    //default to light
-
-    if (firstTime) { //avoid flickering
-      $("body").addClass('fade-in');
-    }
-
-    //local storage is used to override OS theme settings
-    if (localStorage.getItem("theme")) {
-      if (localStorage.getItem("theme") == "dark") {
-        var theme = "dark";
-      }
-    } else if (!window.matchMedia) {
-      //matchMedia method not supported
-      return false;
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      //OS theme setting detected as dark
-      var theme = "dark";
-    }
-
+  function changeColorScheme(theme) {
     //dark theme preferred, set document with a `data-theme` attribute
     if (theme == "dark") {
       document.documentElement.setAttribute("data-theme", "dark");
@@ -55,6 +37,16 @@
 
     //also check or uncheck the toggle
     $('#dark-theme-toggle').attr('checked', theme == "dark");
+  }
+
+  function setCookie(theme) {
+    $.cookie("theme", theme, { path: '/' });
+  }
+
+  function detectColorScheme() {
+    let curTheme = document.documentElement.getAttribute("data-theme") || DEFAULT_THEME;
+
+    setCookie(curTheme);
   }
 
   $(function () {
@@ -69,10 +61,10 @@
         newTheme = themes[1];
       }
 
-      localStorage.setItem('theme', newTheme);
-      detectColorScheme();
+      setCookie(newTheme);
+      changeColorScheme(newTheme);
     });
 
-    detectColorScheme(true);
+    detectColorScheme();
   });
 </script>

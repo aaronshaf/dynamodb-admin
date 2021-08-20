@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='en' data-theme="<%= theme %>">
+
 <head>
   <%- include('partials/head') %>
-  <%- include('partials/bootstrap-deps') %>
+    <%- include('partials/bootstrap-deps') %>
 </head>
+
 <body class='container'>
   <header>
     <ol class="breadcrumb">
@@ -12,60 +14,60 @@
   </header>
   <main>
     <script>
-    $(document).ready(() => {
-      $('#filter-input')
-        .on('input', event => {
-          const query = event.target.value.trim().toLowerCase()
-          const words = query.split(' ').map(word => word.trim()).filter(word => word)
-          $('#table-list .list-group-item').show().each((index, element) => {
-            const lowerTableName = element.dataset.tableName.toLowerCase()
-            for (const word of words) {
-              if (!lowerTableName.includes(word)) {
-                $(element).hide()
-                return
+      $(document).ready(() => {
+        $('#filter-input')
+          .on('input', event => {
+            const query = event.target.value.trim().toLowerCase()
+            const words = query.split(' ').map(word => word.trim()).filter(word => word)
+            $('#table-list .list-group-item').show().each((index, element) => {
+              const lowerTableName = element.dataset.tableName.toLowerCase()
+              for (const word of words) {
+                if (!lowerTableName.includes(word)) {
+                  $(element).hide()
+                  return
+                }
               }
-            }
-            $(element).show()
+              $(element).show()
+            })
           })
+          .trigger('input')
+      })
+
+      function deleteTable(TableName) {
+        if (!confirm(`Are you sure you want to delete table "${TableName}" ?`)) {
+          return
+        }
+
+        fetch(`/tables/${TableName}`, {
+          method: 'delete'
         })
-        .trigger('input')
-    })
-
-    function deleteTable (TableName) {
-      if(!confirm(`Are you sure you want to delete table "${TableName}" ?`)){
-        return
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error
+            }
+            location.reload()
+          })
+          .catch((err) => {
+            window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
+          })
       }
 
-      fetch(`/tables/${TableName}`, {
-        method: 'delete'
-      })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error
+      function purgeTable(TableName) {
+        if (!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)) {
+          return
         }
-        location.reload()
-      })
-      .catch((err) => {
-        window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
-      })
-    }
 
-    function purgeTable(TableName) {
-      if(!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)){
-        return
+        fetch(`/tables/${TableName}/all`, {
+          method: 'delete'
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error
+          }
+          location.reload()
+        }).catch(() => {
+          window.alert('There was an error when attempting to purge the table.')
+        })
       }
-
-      fetch(`/tables/${TableName}/all`, {
-        method: 'delete'
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error
-        }
-        location.reload()
-      }).catch(() => {
-        window.alert('There was an error when attempting to purge the table.')
-      })
-    }
     </script>
 
     <div class="form-group">
@@ -73,24 +75,24 @@
     </div>
 
     <ul class="list-group" id="table-list">
-      <% for(var i = 0; i < data.length; i++) { %>
+      <% for(var i=0; i < data.length; i++) { %>
         <li class="list-group-item" data-table-name="<%= data[i].TableName %>">
           <a href='/tables/<%= data[i].TableName %>'>
             <%= data[i].TableName %>
           </a>
           <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
-              class="badge badge-danger badge-pill float-right ml-1">
+            class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
           <a href="/" onClick="purgeTable('<%= data[i].TableName %>'); return false"
-             class="badge badge-warning badge-pill float-right ml-1">
+            class="badge badge-warning badge-pill float-right ml-1">
             Purge
           </a>
           <span class="badge badge-secondary badge-pill float-right ml-1">
             <%= data[i].ItemCount %>
           </span>
         </li>
-      <% } %>
+        <% } %>
     </ul>
     <div style="margin-top: 12px;">
       <a href='/create-table' class="btn btn-primary">
@@ -102,4 +104,5 @@
   <%- include('partials/footer') %>
 
 </body>
+
 </html>
