@@ -22,6 +22,7 @@
 
 :root {
     --font-color-1: rgb(10, 10, 10);
+    --font-color-2: #495057;
     --bg-color-1: #e9ecef;
     --bg-color-strongest: #fff;
     --border-color: #dee2e6 #dee2e6 #fff;
@@ -31,6 +32,7 @@
 
 [data-theme="dark"] {
     --font-color-1: #b9b4ac;
+    --font-color-2: #495057;
     --bg-color-1: rgb(26, 29, 30);
     --bg-color-strongest: rgb(14, 16, 17);
     --border-color: rgb(50, 54, 56) rgb(50, 54, 56) rgb(41, 44, 46);
@@ -69,7 +71,7 @@ html, body, input, select, button {
     color: #6c757d;
 }
 
-.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active, .table td, .table th {
+.table td, .table th {
     background-color: var(--bg-color-strongest);
     border-color: var(--border-color);
     color: var(--font-color-1);
@@ -92,12 +94,13 @@ html, body, input, select, button {
 
 .form-control:disabled, .form-control[readonly] {
     background-color: var(--bg-color-1);
+    color: var(--font-color-2);
 }
 
 /* BEGIN VARS */
 
 :root {
-    --tabs-border-bottom-color: var(--border-color);
+    --tabs-border-bottom-color: #dee2e6;
     --border-color-dim: rgba(139, 130, 117, 0.13);
 }
 
@@ -134,6 +137,7 @@ input, .form-control {
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     /* color: rgb(185, 180, 172); */
+    color: var(--font-color-2);
     background-color: var(--bg-color);
     border-color: var(--border-color);
 }
