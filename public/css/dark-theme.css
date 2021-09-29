@@ -46,9 +46,9 @@
 /* BEGIN SMOOTH TRANSITION */
 
 :root {
-    -webkit-transition: all 0.5s ease;
-    -ms-transition: all 0.5s ease;
-    transition: all 0.5s ease;
+    -webkit-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    transition: all 1s ease;
 }
 
 /* END SMOOTH TRANSITION */
