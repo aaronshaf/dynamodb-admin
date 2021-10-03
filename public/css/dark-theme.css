@@ -38,7 +38,6 @@
     --border-color: rgb(50, 54, 56) rgb(50, 54, 56) rgb(41, 44, 46);
     --border-color-1: #282929;
     --background-image-gradient-before: linear-gradient(to right, var(--border-color-1), var(--border-color-1) 5px, transparent 5px), linear-gradient(to left, var(--border-color-1), var(--border-color-1) 5px, transparent 5px);
-    ;
 }
 
 /* END VARS */
@@ -88,7 +87,6 @@ html, body, input, select, button {
 
 .form-control {
     background-color: var(--bg-color);
-    /* border-color: var(--border-color); */
     color: var(--font-color-1);
 }
 
@@ -130,13 +128,11 @@ input, .form-control {
 }
 
 .nav-tabs .nav-link.disabled {
-    /* color: rgb(159, 152, 141); */
     background-color: transparent;
     border-color: transparent;
 }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    /* color: rgb(185, 180, 172); */
     color: var(--font-color-2);
     background-color: var(--bg-color);
     border-color: var(--border-color);
