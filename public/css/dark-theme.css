@@ -71,6 +71,10 @@ html, body, input, select, button {
     color: #6c757d;
 }
 
+.page-link {
+    border-color: #4a4b4c !important;
+}
+
 .table td, .table th {
     background-color: var(--bg-color-strongest);
     border-color: var(--border-color);
@@ -179,10 +183,18 @@ a {
 /* END VARS */
 
 .json-formatter-row, .json-formatter-row a, .json-formatter-row a:hover {
-    color: rgb(242, 240, 238);
+    color: var(--font-color-1) !important;
     text-decoration-color: initial;
 }
 
 .json-formatter-row .json-formatter-string, .json-formatter-row .json-formatter-stringifiable {
     color: var(--json-formatter-string) !important;
+}
+
+.json-formatter-number, .json-formatter-bracket {
+    color: #7cbbf3 !important;
+}
+
+.json-formatter-key{
+    color: #349df8;
 }
