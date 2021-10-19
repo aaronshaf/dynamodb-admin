@@ -1,0 +1,196 @@
+/* root default variables */
+
+/* basic colors */
+
+:root {
+    --font-color: #000;
+    --link-color: #007bff;
+    --link-white-color: #fff;
+    --bg-color: rgb(253, 253, 253);
+}
+
+[data-theme="dark"] {
+    --font-color: #f2f0ee;
+    --link-color: #3d90f1;
+    --link-white-color: #c1bfbd;
+    --bg-color: #0f1112;
+}
+
+/* extended colors */
+
+/* BEGIN VARS */
+
+:root {
+    --font-color-1: rgb(10, 10, 10);
+    --font-color-2: #495057;
+    --bg-color-1: #e9ecef;
+    --bg-color-strongest: #fff;
+    --border-color: #dee2e6 #dee2e6 #fff;
+    --border-color-1: #ced4da;
+    --background-image-gradient-before: linear-gradient(to right, #fff, #fff 5px, transparent 5px), linear-gradient(to left, #fff, #fff 5px, transparent 5px);
+}
+
+[data-theme="dark"] {
+    --font-color-1: #b9b4ac;
+    --font-color-2: #495057;
+    --bg-color-1: rgb(26, 29, 30);
+    --bg-color-strongest: rgb(14, 16, 17);
+    --border-color: rgb(50, 54, 56) rgb(50, 54, 56) rgb(41, 44, 46);
+    --border-color-1: #282929;
+    --background-image-gradient-before: linear-gradient(to right, var(--border-color-1), var(--border-color-1) 5px, transparent 5px), linear-gradient(to left, var(--border-color-1), var(--border-color-1) 5px, transparent 5px);
+}
+
+/* END VARS */
+
+/* BEGIN SMOOTH TRANSITION */
+
+:root {
+    -webkit-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    transition: all 1s ease;
+}
+
+/* END SMOOTH TRANSITION */
+
+html, body, input, select, button {
+    color: var(--font-color);
+    background-color: var(--bg-color);
+}
+
+.table, input:focus, .form-control:focus {
+    color: var(--font-color) !important;
+    background-color: var(--bg-color) !important;
+}
+
+.page-item:not(.active) .page-link {
+    background-color: var(--bg-color);
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+.page-link {
+    border-color: #4a4b4c !important;
+}
+
+.table td, .table th {
+    background-color: var(--bg-color-strongest);
+    border-color: var(--border-color);
+    color: var(--font-color-1);
+}
+
+.items-table::before {
+    background-image: var(--background-image-gradient-before);
+}
+
+.breadcrumb {
+    list-style-image: initial;
+    background-color: var(--bg-color-1);
+}
+
+.form-control {
+    background-color: var(--bg-color);
+    color: var(--font-color-1);
+}
+
+.form-control:disabled, .form-control[readonly] {
+    background-color: var(--bg-color-1);
+    color: var(--font-color-2);
+}
+
+/* BEGIN VARS */
+
+:root {
+    --tabs-border-bottom-color: #dee2e6;
+    --border-color-dim: rgba(139, 130, 117, 0.13);
+}
+
+[data-theme="dark"] {
+    --tabs-border-bottom-color: rgb(50, 54, 56);
+    --border-color-dim: rgba(139, 130, 117, 0.13);
+}
+
+/* END VARS */
+
+input, .form-control {
+    border-color: var(--border-color-1);
+}
+
+/* NAV TABS */
+
+.nav-tabs {
+    border-bottom-color: var(--tabs-border-bottom-color);
+}
+
+.nav-tabs .nav-link {
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border-color: var(--tabs-border-bottom-color);
+}
+
+.nav-tabs .nav-link.disabled {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: var(--font-color-2);
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+}
+
+.table-bordered td, .table-bordered th {
+    border-color: var(--border-color);
+}
+
+.list-group-item {
+    background-color: var(--bg-color-strongest);
+    border-color: var(--border-color-dim)
+}
+
+.footer {
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+}
+
+a {
+    color: var(--link-color);
+}
+
+/* **************************** */
+
+/* json formatter */
+
+/* **************************** */
+
+/* BEGIN VARS */
+
+:root {
+    --json-formatter-string: green;
+}
+
+[data-theme="dark"] {
+    --json-formatter-string: #03bf03;
+}
+
+/* END VARS */
+
+.json-formatter-row, .json-formatter-row a, .json-formatter-row a:hover {
+    color: var(--font-color-1) !important;
+    text-decoration-color: initial;
+}
+
+.json-formatter-row .json-formatter-string, .json-formatter-row .json-formatter-stringifiable {
+    color: var(--json-formatter-string) !important;
+}
+
+.json-formatter-number, .json-formatter-bracket {
+    color: #7cbbf3 !important;
+}
+
+.json-formatter-key{
+    color: #349df8;
+}

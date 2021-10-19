@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='en' data-theme="<%= theme %>">
 <head>
   <%- include('partials/head') %>
   <%- include('partials/ace-deps') %>
+  <%- include('partials/bootstrap-deps') %>
 </head>
 <body class='container-fluid d-flex flex-column'>
   <header>
@@ -122,5 +123,13 @@
       </script>
     </article>
   </main>
+
+  <%- include('partials/footer') %>
+
+  <style>
+    .footer {
+      display: none;
+    }
+  </style>
 </body>
 </html>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='en' data-theme="<%= theme %>">
 <head>
   <%- include('partials/head') %>
+  <%- include('partials/bootstrap-deps') %>
 </head>
 <body class='container-fluid'>
   <header>
@@ -62,5 +63,7 @@
       <button type="submit" class="btn btn-primary">Get</button>
     </form>
   </main>
+
+  <%- include('partials/footer') %>
 </body>
 </html>
