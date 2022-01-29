@@ -1,6 +1,6 @@
 {
   "name": "dynamodb-admin",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "lib/backend.js",
   "bin": "./bin/dynamodb-admin.js",
@@ -31,22 +31,23 @@
   },
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
-    "argparse": "^1.0.10",
+    "argparse": "^2.0.1",
     "aws-sdk": "^2.851.0",
     "body-parser": "^1.19.0",
     "cli-color": "^2.0.0",
+    "cookie-parser": "^1.4.5",
     "ejs": "^3.1.6",
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "lodash.pickby": "^4.6.0",
-    "open": "^7.4.2"
+    "open": "^8.2.1"
   },
   "devDependencies": {
     "ejs-lint": "^1.1.0",
-    "eslint": "^7.20.0",
-    "eslint-plugin-jest": "^24.1.5",
+    "eslint": "^8.0.1",
+    "eslint-plugin-jest": "^25.2.2",
     "husky": "^4.3.8",
-    "jest": "^26.6.3",
+    "jest": "^27.0.6",
     "nodemon": "^2.0.7"
   }
 }

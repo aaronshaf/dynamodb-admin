@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const ArgumentParser = require('argparse').ArgumentParser
+const { ArgumentParser } = require('argparse')
 const open = require('open')
 const packageJson = require('../package.json')
 
@@ -14,21 +14,25 @@ if (process.env.NODE_ENV === 'production') {
 
 const parser = new ArgumentParser({
   description: packageJson.description,
-  version: packageJson.version,
 })
 
-parser.addArgument(['-o', '--open'], {
-  action: 'storeTrue',
+parser.add_argument('-v', '--version', {
+  action: 'version',
+  version: packageJson.version
+})
+
+parser.add_argument('-o', '--open', {
+  action: 'store_true',
   help: 'Open server URL in default browser on start',
 })
 
-parser.addArgument(['-p', '--port'], {
+parser.add_argument('-p', '--port', {
   type: 'int',
-  defaultValue: 8002,
+  default: 8001,
   help: 'Port to run on (default: 8001)',
 })
 
-const args = parser.parseArgs()
+const args = parser.parse_args()
 
 const app = createServer()
 const port = process.env.PORT || args.port

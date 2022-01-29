@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='en' data-theme="<%= theme %>">
+
 <head>
   <%- include('partials/head') %>
   <%- include('partials/bootstrap-deps') %>
 </head>
+
 <body class='container'>
   <header>
     <ol class="breadcrumb">
@@ -31,27 +33,27 @@
         .trigger('input')
     })
 
-    function deleteTable (TableName) {
-      if(!confirm(`Are you sure you want to delete table "${TableName}" ?`)){
+    function deleteTable(TableName) {
+      if (!confirm(`Are you sure you want to delete table "${TableName}" ?`)) {
         return
       }
 
       fetch(`/tables/${TableName}`, {
         method: 'delete'
       })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error
-        }
-        location.reload()
-      })
-      .catch((err) => {
-        window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
-      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error
+          }
+          location.reload()
+        })
+        .catch((err) => {
+          window.alert(`There was an error when attempting to delete the table:\n\n${err}`)
+        })
     }
 
     function purgeTable(TableName) {
-      if(!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)){
+      if (!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)) {
         return
       }
 
@@ -98,5 +100,7 @@
       </a>
     </div>
   </main>
+
+  <%- include('partials/footer') %>
 </body>
 </html>

@@ -1,4 +1,6 @@
-FROM mhart/alpine-node:8.5.0
+FROM node:12-alpine
+
+RUN npm -g install npm@7
 
 ADD . .
 
