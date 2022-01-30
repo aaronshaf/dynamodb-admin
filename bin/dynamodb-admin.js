@@ -28,7 +28,7 @@ parser.add_argument('-o', '--open', {
 
 parser.add_argument('-p', '--port', {
   type: 'int',
-  default: 8002,
+  default: 8001,
   help: 'Port to run on (default: 8001)',
 })
 
