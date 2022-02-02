@@ -1,5 +1,5 @@
 ---
-name: ci
+name: docker-publish
 
 on:
   push:
@@ -19,9 +19,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Get Tag
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: aaronshaf/dynamodb-admin:latest,aaronshaf/dynamodb-admin:${{ GITHUB_REF/refs\/tags\/v/ }}
+          tags: aaronshaf/dynamodb-admin:latest,aaronshaf/dynamodb-admin:${{ env.VERSION }}
