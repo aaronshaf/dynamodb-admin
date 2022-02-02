@@ -5,7 +5,7 @@
 
 ## Usage
 
-### Use as a globally installed app
+### Use as globally installed app
 
 ```bash
 npm install -g dynamodb-admin
