@@ -24,4 +24,4 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: aaronshaf/dynamodb-admin:latest,aaronshaf/dynamodb-admin:${GITHUB_REF/refs\/tags\/v/}
+          tags: aaronshaf/dynamodb-admin:latest,aaronshaf/dynamodb-admin:${{ GITHUB_REF/refs\/tags\/v/ }}
