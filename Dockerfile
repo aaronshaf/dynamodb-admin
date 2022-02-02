@@ -1,10 +1,19 @@
 FROM node:12-alpine
+EXPOSE 8001
+
+WORKDIR /home/node/app
 
 RUN npm -g install npm@7
 
-ADD . .
+ADD package.json .
+ADD package-lock.json .
 
-RUN npm install
+RUN npm ci --production
 
-EXPOSE 8001
+ADD bin bin
+ADD lib lib
+ADD public public
+ADD views views
+ADD README.md README.md
+
 CMD ["node", "bin/dynamodb-admin.js"]
