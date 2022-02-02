@@ -9,7 +9,8 @@
     "start": "node bin/dynamodb-admin.js",
     "lint": "eslint --ext .js . && ejslint views",
     "fix": "eslint --ext .js --fix .",
-    "test": "jest"
+    "test": "jest",
+    "postversion": "git push --follow-tags"
   },
   "husky": {
     "hooks": {
