@@ -357,7 +357,7 @@
     }
 
     function addRangeKeyFilter (rangeKey, values) {
-      addFilter(rangeKey, values, true, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
+      addFilter(rangeKey, values, false, ['=', '<', '<=', '>', '>=', 'BETWEEN', 'begins_with'])
     }
 
     function removeFilter (node) {
