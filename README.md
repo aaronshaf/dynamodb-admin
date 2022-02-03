@@ -21,8 +21,9 @@ DYNAMO_ENDPOINT=http://localhost:8000 dynamodb-admin
 Options:
  - --open / -o - opens server URL in a default browser on start
  - --port PORT / -p PORT -  Port to run on (default: 8001)
+ - --host HOST / -h HOST -  Host to run on (default: localhost)
 
-You can also specify port to run on by setting environment variable `PORT` to given number. This will override value specified on the command line. This is legacy way to specify PORT.
+You can specify host & port to run on by setting environment variables `HOST` and `PORT` respectively. This will override value specified on the command line. This is legacy way to specify the HOST & PORT.
 
 If you use a local dynamodb that cares about credentials, you can configure them by using the following environment variables `AWS_REGION` `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY`
 
@@ -43,11 +44,12 @@ const dynClient = new AWS.DynamoDB.DocumentClient({service: dynamodb});
 
 const app = createServer(dynamodb, dynClient);
 
+const host = 'localhost';
 const port = 8001;
-const server = app.listen(port);
+const server = app.listen(port, host);
 server.on('listening', () => {
   const address = server.address();
-  console.log(`  listening on http://0.0.0.0:${address.port}`);
+  console.log(`  listening on http://${address.address}:${address.port}`);
 });
 ```
 
