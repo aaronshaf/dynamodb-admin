@@ -28,8 +28,8 @@ parser.add_argument('-o', '--open', {
 
 parser.add_argument('-H', '--host', {
   type: 'str',
-  default: 'localhost',
-  help: 'Host to run on (default: localhost)',
+  required: false,
+  help: 'Host to run on (default: undefined)',
 })
 
 parser.add_argument('-p', '--port', {
@@ -45,9 +45,12 @@ const host = process.env.HOST || args.host
 const port = process.env.PORT || args.port
 const server = app.listen(port, host)
 server.on('listening', () => {
-  const address = server.address()
-  const url = `http://${address.address}:${address.port}`
-  console.log(`  dynamodb-admin listening on ${url})`)
+  const { address, port } = server.address()
+  let url = `http://${address}:${port}`
+  if (!host && address !== '0.0.0.0') {
+    url += ` (alternatively http://0.0.0.0:${port})`
+  }
+  console.log(`  dynamodb-admin listening on ${url}`)
 
   if (args.open) {
     open(url)
