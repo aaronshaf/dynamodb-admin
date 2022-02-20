@@ -69,6 +69,15 @@
         })
       }
       </script>
+      <div>
+        <input type="checkbox"
+          id='rawCheckbox'
+          onclick='handleCheckboxClick()'
+          <% if (isRaw) { %>
+          checked
+          <% } %>
+        > Raw
+      </div>
       <button
         class='btn btn-primary'
         id='saveButton'
@@ -79,6 +88,18 @@
       </button>
 
       <script>
+      function handleCheckboxClick (event) {
+        const checked = document.getElementById('rawCheckbox').checked
+        if (!checked && <%= isRaw %> && <%= !isNew %>) {
+          window.location.href = window.location.href.replace('/raw-items/', '/items/')
+        } else if (checked && <%= !isRaw %> && <%= !isNew %>) {
+          window.location.href = window.location.href.replace('/items/', '/raw-items/')
+        } else if (!checked && <%= isRaw %> && <%= isNew %>) {
+          window.location.href = window.location.href.replace('/add-raw-item', '/add-item')
+        } else if (checked && <%= !isRaw %> && <%= isNew %>) {
+          window.location.href = window.location.href.replace('/add-item', '/add-raw-item')
+        }
+      }
       function handleDeleteClick (event) {
         event.preventDefault()
         fetch(document.location.pathname, {
