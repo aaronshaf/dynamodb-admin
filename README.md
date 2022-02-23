@@ -33,6 +33,8 @@ For example with the `amazon/dynamodb-local` docker image you can launch `dynamo
 AWS_REGION=eu-west-1 AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local dynamodb-admin
 ```
 
+If you are accessing your database from another piece of software, the `AWS_ACCESS_KEY_ID` used by that application must match the `AWS_ACCESS_KEY_ID` you used with `dynamodb-admin` if you want both to see the same data.
+
 ### Use as a library in your project
 
 ```js
