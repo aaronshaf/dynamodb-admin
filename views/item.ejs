@@ -7,20 +7,26 @@
 </head>
 <body class='container-fluid d-flex flex-column'>
   <header>
-    <ol class='breadcrumb'>
-      <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class='breadcrumb-item' href='/tables/<%= TableName %>'>
-        <%= Table.TableName %>
-        <span class="badge badge-secondary badge-pill ml-1">
-          <%= Table.ItemCount %>
-        </span>
-      </a>
-      <% if (Item.id) { %>
-        <span class='breadcrumb-item'>
-          <%= Item.id %>
-        </span>
-      <% } %>
-    </ol>
+    <%
+      const breadcrumb = [
+        {
+          href: '/',
+          text: 'Tables',
+        },
+        {
+          href: `/tables/${TableName}`,
+          text: Table.TableName,
+          badge: Table.ItemCount,
+        },
+      ]
+
+      if (Item.id) {
+        breadcrumb.push({ text: Item.id })
+      } else {
+        breadcrumb.push({ text: 'Item' })
+      }
+    %>
+    <%- include('partials/breadcrumb', { breadcrumb }) %>
   </header>
 
   <main class='flex-fill d-flex flex-column'>
@@ -123,13 +129,5 @@
       </script>
     </article>
   </main>
-
-  <%- include('partials/footer') %>
-
-  <style>
-    .footer {
-      display: none;
-    }
-  </style>
 </body>
 </html>

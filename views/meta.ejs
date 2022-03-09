@@ -7,15 +7,20 @@
 </head>
 <body class='container-fluid d-flex flex-column'>
   <header>
-    <ol class='breadcrumb'>
-      <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class="breadcrumb-item active">
-        <%= Table.TableName %>
-        <span class="badge badge-secondary badge-pill ml-1">
-          <%= Table.ItemCount %>
-        </span>
-      </a>
-    </ol>
+    <%
+      const breadcrumb = [
+        {
+          href: '/',
+          text: 'Tables',
+        },
+        {
+          active: true,
+          text: Table.TableName,
+          badge: Table.ItemCount
+        },
+      ]
+    %>
+    <%- include('partials/breadcrumb', { breadcrumb }) %>
 
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
@@ -73,13 +78,5 @@
       editor.setReadOnly(true);
       editor.setFontSize(14);
     </script>
-
-    <%- include('partials/footer') %>
-
-    <style>
-      .footer {
-        display: none;
-      }
-    </style>
 </body>
 </html>

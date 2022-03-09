@@ -6,15 +6,20 @@
 </head>
 <body class='container-fluid'>
   <header>
-    <ol class='breadcrumb'>
-      <a class='breadcrumb-item' href='/'>Tables</a>
-      <a class="breadcrumb-item active">
-        <%= Table.TableName %>
-        <span class="badge badge-secondary badge-pill ml-1">
-          <%= Table.ItemCount %>
-        </span>
-      </a>
-    </ol>
+    <%
+      const breadcrumb = [
+        {
+          href: '/',
+          text: 'Tables',
+        },
+        {
+          active: true,
+          text: Table.TableName,
+          badge: Table.ItemCount,
+        },
+      ]
+    %>
+    <%- include('partials/breadcrumb', { breadcrumb }) %>
 
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
@@ -63,7 +68,5 @@
       <button type="submit" class="btn btn-primary">Get</button>
     </form>
   </main>
-
-  <%- include('partials/footer') %>
 </body>
 </html>
