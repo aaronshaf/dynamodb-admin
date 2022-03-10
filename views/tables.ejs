@@ -8,9 +8,16 @@
 
 <body class='container'>
   <header>
-    <ol class="breadcrumb">
-      <a class="breadcrumb-item active" href="/">Tables</a>
-    </ol>
+    <%
+      const breadcrumb = [
+        {
+          active: true,
+          href: '/',
+          text: 'Tables',
+        },
+      ]
+    %>
+    <%- include('partials/breadcrumb', { breadcrumb }) %>
   </header>
   <main>
     <script>
@@ -100,7 +107,5 @@
       </a>
     </div>
   </main>
-
-  <%- include('partials/footer') %>
 </body>
 </html>

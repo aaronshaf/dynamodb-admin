@@ -164,12 +164,21 @@
     </script>
 </head>
 
-<body class="container-fluid">
+<body class="container">
     <header>
-        <ol class="breadcrumb">
-            <a class="breadcrumb-item" href="/">Tables</a>
-            <a class="breadcrumb-item active">Create Table</a>
-        </ol>
+        <%
+          const breadcrumb = [
+            {
+              href: '/',
+              text: 'Tables',
+            },
+            {
+              active: true,
+              text: 'Create Table',
+            },
+          ]
+        %>
+        <%- include('partials/breadcrumb', { breadcrumb }) %>
     </header>
     <main>
         <form id="form" method="post">
@@ -262,8 +271,6 @@
             </div>
         </form>
     </main>
-
-    <%- include('partials/footer') %>
 </body>
 
 </html>

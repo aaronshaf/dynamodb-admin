@@ -1,28 +1,17 @@
-<div class="myclear"></div>
-<footer class="footer">
-  <span class="text-muted">Dark Theme</span>
-  <% let checked = theme.toString() === "dark" ? "checked" : "" %>
-  <input id="dark-theme-toggle" type="checkbox" <%=checked %> data-toggle="toggle" data-onstyle="dark" data-size="xs">
-</footer>
-
-<style>
-  .myclear {
-    clear: both;
-    height: 60px;
-  }
-
-  .footer {
-    position: fixed;
-    margin-top: 20px;
-    bottom: 0;
-    width: 100%;
-    /* Set the fixed height of the footer here */
-    height: 60px;
-    line-height: 60px;
-    /* Vertically center the text there */
-    /* background-color: #f5f5f5; */
-  }
-</style>
+<ol class="breadcrumb">
+  <% for (const item of breadcrumb) { %>
+  <a class="breadcrumb-item<%= item.active ? ' active' : '' %>" <%- item.href ? `href="${item.href}"`: '' %>><%= item.text %>
+    <% if (item.badge) { %>
+      <span class="badge badge-secondary badge-pill ml-1"><%= item.badge %></span>
+    <% } %>
+  </a>
+  <% } %>
+  <div class="flex-fill"></div>
+  <div>
+    Dark Theme <% let checked = theme.toString() === "dark" ? "checked" : "" %>
+    <input id="dark-theme-toggle" type="checkbox" <%= checked %> data-toggle="toggle" data-onstyle="dark" data-size="xs">
+  </div>
+</ol>
 
 <script>
   const DEFAULT_THEME = 'light'
