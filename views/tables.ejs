@@ -77,36 +77,38 @@
     }
 
       function purgeAllTables () {
-        if (!confirm('Are you sure you want to purge all tables ?')) {
+        if (!confirm('Are you sure you want to purge all tables?')) {
           return
         }
-        fetch('/api/purgeAllTables', {
+        fetch('/tables-purge', {
           method: 'delete'
         }).then((response) => {
           if (!response.ok) {
             throw new Error
           }
-          response.text().then(text => text && window.alert(text)
-          )
-          location.reload()
+          response.text().then(text => {
+            window.alert(text)
+            location.reload()
+          })
         }).catch(() => {
           window.alert('There was an error when attempting to purge all tables.')
         })
       }
 
       function deleteAllTables () {
-        if (!confirm('Are you sure you want to delete all tables ?')) {
+        if (!confirm('Are you sure you want to delete all tables?')) {
           return
         }
-        fetch('/api/deleteAllTables', {
+        fetch('/tables', {
           method: 'delete'
         }).then((response) => {
           if (!response.ok) {
             throw new Error
           }
-          response.text().then(text => text && window.alert(text)
-          )
-          location.reload()
+          response.text().then(text => {
+            window.alert(text)
+            location.reload()
+          })
         }).catch(() => {
           window.alert('There was an error when attempting to delete all tables.')
         })
@@ -143,10 +145,10 @@
         Create table
       </a>
       <div>
-        <a href='#' class="btn btn-warning" onclick="purgeAllTables()">
+        <a href='#' class="btn btn-warning" onclick="purgeAllTables(); return false;">
           Purge all tables
         </a>
-        <a href='#' class="btn btn-danger" onclick="deleteAllTables()">
+        <a href='#' class="btn btn-danger" onclick="deleteAllTables(); return false;">
           Delete all tables
         </a>
       </div>
