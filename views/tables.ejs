@@ -75,6 +75,43 @@
         window.alert('There was an error when attempting to purge the table.')
       })
     }
+
+      function purgeAllTables () {
+        if (!confirm('Are you sure you want to purge all tables ?')) {
+          return
+        }
+        fetch('/api/purgeAllTables', {
+          method: 'delete'
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error
+          }
+          response.text().then(text => text && window.alert(text)
+          )
+          location.reload()
+        }).catch(() => {
+          window.alert('There was an error when attempting to purge all tables.')
+        })
+      }
+
+      function deleteAllTables () {
+        if (!confirm('Are you sure you want to delete all tables ?')) {
+          return
+        }
+        fetch('/api/deleteAllTables', {
+          method: 'delete'
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error
+          }
+          response.text().then(text => text && window.alert(text)
+          )
+          location.reload()
+        }).catch(() => {
+          window.alert('There was an error when attempting to delete all tables.')
+        })
+      }
+
     </script>
 
     <div class="form-group">
@@ -101,10 +138,18 @@
         </li>
       <% } %>
     </ul>
-    <div style="margin-top: 12px;">
+    <div style="margin-top: 12px; display: flex; justify-content: space-between;">
       <a href='/create-table' class="btn btn-primary">
         Create table
       </a>
+      <div>
+        <a href='#' class="btn btn-warning" onclick="purgeAllTables()">
+          Purge all tables
+        </a>
+        <a href='#' class="btn btn-danger" onclick="deleteAllTables()">
+          Delete all tables
+        </a>
+      </div>
     </div>
   </main>
 </body>
