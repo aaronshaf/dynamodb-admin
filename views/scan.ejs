@@ -57,6 +57,16 @@
       top: 0;
       width: 100%;
     }
+
+    .items-table th:first-child,
+    .items-table td:first-child {
+      position: sticky;
+      left: 0;
+    }
+
+    .items-table td:first-child {
+      background-color: white;
+    }
   </style>
 </head>
 <body class="container-fluid">
@@ -383,7 +393,7 @@
     }
 
     function renderItems(data) {
-      $('#actions-row').append(data.uniqueKeys.map(key => '<td>' + key + '</td>'))
+      $('#actions-row').append(data.uniqueKeys.map(key => '<th scope="col">' + key + '</th>'))
 
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
@@ -497,11 +507,11 @@
 
     <div class="table-container d-none">
       <div class="scroll-indicator"></div>
-      <div class="table-wrapper">
-        <table class="table items-table">
-          <thead>
+      <div class="table-wrapper table-responsive">
+        <table class="table items-table table-hover">
+          <thead class="thead-light">
             <tr id="actions-row">
-              <td>Actions</td>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody id="items-container">
