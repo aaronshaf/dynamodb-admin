@@ -218,6 +218,17 @@
                  </li>
               </ul>
            </nav>
+           <div style="width: 100px; float: right; margin-right: 12px">
+             <select name="pageSize" class="form-control">
+               <option value="25"<% if (query.pageSize === '25' || !query.pageSize) { %> selected<% } %>>25</option>
+               <option value="100"<% if (query.pageSize === '100') { %> selected<% } %>>100</option>
+               <option value="250"<% if (query.pageSize === '250') { %> selected<% } %>>250</option>
+               <option value="500"<% if (query.pageSize === '500') { %> selected<% } %>>500</option>
+               <option value="1000"<% if (query.pageSize === '1000') { %> selected<% } %>>1000</option>
+               <option value="3000"<% if (query.pageSize === '3000') { %> selected<% } %>>3000</option>
+               <option value="10000"<% if (query.pageSize === '10000') { %> selected<% } %>>10000</option>
+             </select>
+           </div>
         </div>
       </div>
     </form>
@@ -425,15 +436,23 @@
           return rowEl
         }))
 
+        $('select[name="pageSize"]').on('change', (e) => {
+          const search = new URLSearchParams(location.search);
+          search.set('pageSize', e.target.value);
+          location.search = search.toString();
+        })
+
+        const pageSize = document.querySelector('select[name="pageSize"]').value
+
         if (data.pageNum > 1) {
           $('.page-link-previous')
-            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString)
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString + '&pageSize=' + pageSize)
           $('.page-item-previous').removeClass('disabled')
         }
 
         if (data.nextKey) {
           $('.page-link-next')
-            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString)
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString + '&pageSize=' + pageSize)
           $('.page-item-next').removeClass('disabled')
         }
 
