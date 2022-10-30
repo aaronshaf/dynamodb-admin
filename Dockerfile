@@ -1,9 +1,9 @@
-FROM node:12-alpine
+FROM node:16-alpine
 EXPOSE 8001
 
 WORKDIR /home/node/app
 
-RUN npm -g install npm@7
+RUN npm -g install npm@8
 
 ADD package.json .
 ADD package-lock.json .
