@@ -218,6 +218,13 @@
                  </li>
               </ul>
            </nav>
+           <div style="float: right; margin-right: 1em">
+             <select name="pageSize" class="form-control">
+               <% for (const [i, size] of [25, 100, 250, 500, 1000, 3000, 10000].entries()) { %>
+                 <option value="<%= size %>"<% if (Number.parseInt(query.pageSize) === size || (!query.pageSize && i === 0)) { %> selected<% } %>><%= size %></option>
+               <% } %>
+             </select>
+           </div>
         </div>
       </div>
     </form>
@@ -425,15 +432,23 @@
           return rowEl
         }))
 
+        $('select[name="pageSize"]').on('change', (e) => {
+          const search = new URLSearchParams(location.search);
+          search.set('pageSize', e.target.value);
+          location.search = search.toString();
+        })
+
+        const pageSize = $('select[name="pageSize"]').val();
+
         if (data.pageNum > 1) {
           $('.page-link-previous')
-            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString)
+            .attr('href', '?startKey=' + data.prevKey + '&pageNum=' + (data.pageNum-1) + '&filters=' + data.filterQueryString + '&pageSize=' + pageSize)
           $('.page-item-previous').removeClass('disabled')
         }
 
         if (data.nextKey) {
           $('.page-link-next')
-            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString)
+            .attr('href', '?startKey=' + data.nextKey + '&prevKey=' + data.prevKey + '&pageNum=' + (data.pageNum+1) + '&filters=' + data.filterQueryString + '&pageSize=' + pageSize)
           $('.page-item-next').removeClass('disabled')
         }
 
