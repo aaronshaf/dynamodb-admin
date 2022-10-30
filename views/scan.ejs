@@ -218,15 +218,11 @@
                  </li>
               </ul>
            </nav>
-           <div style="width: 100px; float: right; margin-right: 12px">
+           <div style="float: right; margin-right: 1em">
              <select name="pageSize" class="form-control">
-               <option value="25"<% if (query.pageSize === '25' || !query.pageSize) { %> selected<% } %>>25</option>
-               <option value="100"<% if (query.pageSize === '100') { %> selected<% } %>>100</option>
-               <option value="250"<% if (query.pageSize === '250') { %> selected<% } %>>250</option>
-               <option value="500"<% if (query.pageSize === '500') { %> selected<% } %>>500</option>
-               <option value="1000"<% if (query.pageSize === '1000') { %> selected<% } %>>1000</option>
-               <option value="3000"<% if (query.pageSize === '3000') { %> selected<% } %>>3000</option>
-               <option value="10000"<% if (query.pageSize === '10000') { %> selected<% } %>>10000</option>
+               <% for (const [i, size] of [25, 100, 250, 500, 1000, 3000, 10000].entries()) { %>
+                 <option value="<%= size %>"<% if (Number.parseInt(query.pageSize) === size || (!query.pageSize && i === 0)) { %> selected<% } %>><%= size %></option>
+               <% } %>
              </select>
            </div>
         </div>
@@ -442,7 +438,7 @@
           location.search = search.toString();
         })
 
-        const pageSize = document.querySelector('select[name="pageSize"]').value
+        const pageSize = $('select[name="pageSize"]').val();
 
         if (data.pageNum > 1) {
           $('.page-link-previous')
