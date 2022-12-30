@@ -21,8 +21,8 @@
 /* BEGIN VARS */
 
 :root {
-    --font-color-1: rgb(10, 10, 10);
-    --font-color-2: #495057;
+    --font-color: rgb(10, 10, 10);
+    --font-color-disabled: #495057;
     --bg-color-1: #e9ecef;
     --bg-color-strongest: #fff;
     --border-color: #dee2e6 #dee2e6 #fff;
@@ -31,8 +31,8 @@
 }
 
 [data-theme="dark"] {
-    --font-color-1: #b9b4ac;
-    --font-color-2: #495057;
+    --font-color: #b9b4ac;
+    --font-color-disabled: #495057;
     --bg-color-1: rgb(26, 29, 30);
     --bg-color-strongest: rgb(14, 16, 17);
     --border-color: rgb(50, 54, 56) rgb(50, 54, 56) rgb(41, 44, 46);
@@ -74,14 +74,20 @@ html, body, input, select, button {
     border-color: #4a4b4c !important;
 }
 
-.table td, .table th {
+.table td,
+.table th,
+.table .thead-light th {
     background-color: var(--bg-color-strongest);
     border-color: var(--border-color);
-    color: var(--font-color-1);
+    color: var(--font-color);
 }
 
 .items-table::before {
     background-image: var(--background-image-gradient-before);
+}
+
+.items-table td:first-child {
+    background-color: var(--bg-color-strongest);
 }
 
 .breadcrumb {
@@ -91,12 +97,12 @@ html, body, input, select, button {
 
 .form-control {
     background-color: var(--bg-color);
-    color: var(--font-color-1);
+    color: var(--font-color);
 }
 
 .form-control:disabled, .form-control[readonly] {
     background-color: var(--bg-color-1);
-    color: var(--font-color-2);
+    color: var(--font-color-disabled);
 }
 
 /* BEGIN VARS */
@@ -137,7 +143,7 @@ input, .form-control {
 }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    color: var(--font-color-2);
+    color: var(--font-color);
     background-color: var(--bg-color);
     border-color: var(--border-color);
 }
@@ -160,6 +166,11 @@ a {
     color: var(--link-color);
 }
 
+a:hover,
+.page-link:hover {
+    color: var(--font-color);
+}
+
 /* **************************** */
 
 /* json formatter */
@@ -179,7 +190,7 @@ a {
 /* END VARS */
 
 .json-formatter-row, .json-formatter-row a, .json-formatter-row a:hover {
-    color: var(--font-color-1) !important;
+    color: var(--font-color) !important;
     text-decoration-color: initial;
 }
 
