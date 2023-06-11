@@ -51,7 +51,7 @@
         }).then((json) => {
           if (document.location.pathname.endsWith('/add-item')) {
             const urlPart1 = document.location.pathname.replace('/add-item', '')
-            const param = encodeURIComponent(Object.values(json).join(','))
+            const param = encodeURIComponent(Object.values(json).join('<%= KEY_SEPARATOR %>'))
 
             window.location = `${urlPart1}/items/${param}`
             return

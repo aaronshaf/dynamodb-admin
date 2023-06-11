@@ -1,47 +1,58 @@
-const { parseKey } = require('../lib/util')
+const { parseKey, KEY_SEPARATOR } = require('../lib/util')
 
 describe('parseKey', () => {
-  it('parses key with 1 attribute', () => {
-    const key = 'CfHhu6c1C_8W4JygfbAAc16UJJg2Bw,app_admin|0a5b7a9c-af15-2506-fd4f-80c20bca6414'
-    const parsedKey = parseKey(key, table1)
-    expect(parsedKey).toEqual({
-      document_id: 'CfHhu6c1C_8W4JygfbAAc16UJJg2Bw',
-      ctx_and_id: 'app_admin|0a5b7a9c-af15-2506-fd4f-80c20bca6414'
-    })
+  it.each([
+    [
+      'table has only HASH KEY as number',
+      '1234',
+      {
+        KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'N' }]
+      },
+      { id: 1234 }
+    ],
+    [
+      'table has only HASH KEY as string',
+      '1234',
+      {
+        KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }]
+      },
+      { id: '1234' }
+    ],
+    [
+      'HASH KEY and RANGE KEY are string',
+      `hash,key,value${KEY_SEPARATOR}rang,key,value`,
+      {
+        KeySchema: [
+          { AttributeName: 'id', KeyType: 'HASH' },
+          { AttributeName: 'name', KeyType: 'HASH' }
+        ],
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' },
+          { AttributeName: 'name', AttributeType: 'S' },
+        ],
+      },
+      { id: 'hash,key,value', name: 'rang,key,value' }
+    ],
+    [
+      'HASH KEY and RANGE KEY are number',
+      `1234${KEY_SEPARATOR}5678`,
+      {
+        KeySchema: [
+          { AttributeName: 'id', KeyType: 'HASH' },
+          { AttributeName: 'name', KeyType: 'HASH' }
+        ],
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'N' },
+          { AttributeName: 'name', AttributeType: 'N' },
+        ],
+      },
+      { id: 1234, name: 5678 }
+    ],
+  ])('should parse when %s', (_, keyString, table, expected) => {
+    const actual = parseKey(keyString, table)
+
+    expect(actual).toEqual(expected)
   })
 })
-
-const table1 = {
-  'AttributeDefinitions': [
-    {
-      'AttributeName': 'document_id',
-      'AttributeType': 'S'
-    },
-    {
-      'AttributeName': 'ctx_and_id',
-      'AttributeType': 'S'
-    }
-  ],
-  'TableName': 'app_annotations',
-  'KeySchema': [
-    {
-      'AttributeName': 'document_id',
-      'KeyType': 'HASH'
-    },
-    {
-      'AttributeName': 'ctx_and_id',
-      'KeyType': 'RANGE'
-    }
-  ],
-  'TableStatus': 'ACTIVE',
-  'CreationDateTime': '2016-06-29T21:46:09.943Z',
-  'ProvisionedThroughput': {
-    'LastIncreaseDateTime': '1970-01-01T00:00:00.000Z',
-    'LastDecreaseDateTime': '1970-01-01T00:00:00.000Z',
-    'NumberOfDecreasesToday': 0,
-    'ReadCapacityUnits': 5,
-    'WriteCapacityUnits': 5
-  },
-  'TableSizeBytes': 16392,
-  'ItemCount': 16
-}
