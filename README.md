@@ -55,6 +55,10 @@ server.on('listening', () => {
 });
 ```
 
+## Development
+
+Run `DYNAMO_ENDPOINT=http://localhost:8000 npm run dev` to start dynamodb-admin in development mode (with auto-reloading on change).
+
 ## See also
 
 * [aaronshaf/dynamodb-admin](https://hub.docker.com/r/aaronshaf/dynamodb-admin/) - docker image with dynamodb-admin only for integrating with your own stack
