@@ -406,7 +406,8 @@
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
           const viewUrl = '/tables/<%= Table.TableName %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
-          const rowEl = $('<tr><td><a href="' + viewUrl + '">View</a></td></tr>')
+          const viewRawUrl = '/tables/<%= Table.TableName %>/raw-items/' + encodeURIComponent(Object.values(item.__key).join(','))
+          const rowEl = $('<tr><td><div class="btn-group"><a class="btn btn-primary" href="' + viewUrl + '">View</a><a class="btn btn-primary" href="' + viewRawUrl + '">View Raw</a></div></td></tr>')
 
           for (const column of data.uniqueKeys) {
             const columnEl = $('<td></td>')
