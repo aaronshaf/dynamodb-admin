@@ -38,9 +38,16 @@ parser.add_argument('-p', '--port', {
   help: 'Port to run on (default: 8001)',
 })
 
+parser.add_argument('-l', '--local_config', {
+  action:'store_true',
+  required: false,
+  default: false,
+  help: 'Use local AWS credentials',
+})
+
 const args = parser.parse_args()
 
-const app = createServer()
+const app = createServer(undefined,undefined, args.local_config)
 const host = process.env.HOST || args.host
 const port = process.env.PORT || args.port
 const server = app.listen(port, host)
