@@ -22,7 +22,7 @@ Options:
  - --open / -o - opens server URL in a default browser on start
  - --port PORT / -p PORT -  Port to run on (default: 8001)
  - --host HOST / -h HOST -  Host to run on (default: localhost)
- - --dummy_creds -D - To run with no AWS credentials(default: searches for local AWS credentials)
+ - --local_config / -l - To use the locally configured AWS credentials(default: uses dummy credentials)
 
 You can specify host & port to run on by setting environment variables `HOST` and `PORT` respectively. This will override value specified on the command line. This is legacy way to specify the HOST & PORT.
 
