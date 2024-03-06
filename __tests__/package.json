@@ -1,0 +1,20 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "^20.4.6",
+    "cypress": "^13.6.6",
+    "cypress-iframe": "^1.0.1",
+    "dotenv": "16.0.0",
+    "typescript": "^4.0.3"
+  },
+  "scripts": {
+    "test": "cypress open",
+    "headless": "cypress run --no-runner-ui",
+    "lint": "tsc --noEmit --pretty --allowJs cypress/**/*.js"
+  },
+  "author": "@M.Rauf Qureshi",
+  "license": "CC0-1.0"
+}
