@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "baseUrl": "http://localhost:8000/",
+      "allowSyntheticDefaultImports": true,
+      "target": "es6",
+      "module": "commonjs",
+      "lib": ["es6", "dom"],
+      "types": ["cypress", "node"]
+    },
+  "include": ["**/*.ts"]
+}
