@@ -3,7 +3,9 @@
   "version": "4.6.2",
   "description": "GUI for DynamoDB. Useful for local development.",
   "main": "lib/backend.js",
-  "bin": "./bin/dynamodb-admin.js",
+  "bin": {
+    "dynamodb-admin": "bin/dynamodb-admin.js"
+  },
   "scripts": {
     "dev": "nodemon bin/dynamodb-admin.js",
     "start": "node bin/dynamodb-admin.js",
