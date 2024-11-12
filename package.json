@@ -41,7 +41,7 @@
     "errorhandler": "^1.5.1",
     "express": "^4.21.1",
     "lodash.pickby": "^4.6.0",
-    "open": "^8.4.2"
+    "open": "^10.1.0"
   },
   "devDependencies": {
     "ejs-lint": "^2.0.1",
