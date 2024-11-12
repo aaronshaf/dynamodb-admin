@@ -1,15 +1,15 @@
-FROM node:16-alpine
+FROM node:20-alpine
 EXPOSE 8001
 
 WORKDIR /home/node/app
 
 RUN apk add --no-cache tini
-RUN npm -g install npm@8
+RUN npm -g install npm@10
 
 ADD package.json .
 ADD package-lock.json .
 
-RUN npm ci --production
+RUN npm ci --omit=dev
 
 ADD bin bin
 ADD lib lib
