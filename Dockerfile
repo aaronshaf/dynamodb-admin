@@ -3,6 +3,7 @@ EXPOSE 8001
 
 WORKDIR /home/node/app
 
+RUN apk add --no-cache tini
 RUN npm -g install npm@8
 
 ADD package.json .
@@ -16,4 +17,5 @@ ADD public public
 ADD views views
 ADD README.md README.md
 
+ENTRYPOINT ["tini"]
 CMD ["node", "bin/dynamodb-admin.js"]
