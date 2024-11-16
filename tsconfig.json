@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "declaration": true,
+        "outDir": "./dist",
+        "module": "ES2022",
+        "target": "ES2022",
+        "esModuleInterop": true,
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+    },
+    "include": [
+        "bin/**/*",
+        "lib/**/*",
+        "eslint.config.ts",
+        "rollup.config.ts",
+    ]
+}
