@@ -57,7 +57,9 @@ server.on('listening', () => {
 
 ## Development
 
-Run `DYNAMO_ENDPOINT=http://localhost:8000 npm run dev` to start dynamodb-admin in development mode (with auto-reloading on change).
+Run `npm run build` and then `DYNAMO_ENDPOINT=http://localhost:8000 npm run start` to start dynamodb-admin.
+
+You can set up a build watcher in a separate terminal using `npm run build:watch` which will re-complile the code on change and restart the dynamodb-admin instance.
 
 ## See also
 

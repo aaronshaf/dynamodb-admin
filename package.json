@@ -2,16 +2,23 @@
   "name": "dynamodb-admin",
   "version": "4.6.2",
   "description": "GUI for DynamoDB. Useful for local development.",
-  "main": "lib/backend.js",
   "bin": {
-    "dynamodb-admin": "bin/dynamodb-admin.js"
+    "dynamodb-admin": "dist/dynamodb-admin.js"
   },
+  "main": "dist/backend.js",
+  "types": "dist/lib/backend.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "nodemon bin/dynamodb-admin.js",
-    "start": "node bin/dynamodb-admin.js",
-    "lint": "eslint --ext .js . && ejslint views",
-    "fix": "eslint --ext .js --fix .",
-    "test": "jest",
+    "build": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
+    "build:watch": "rollup --config rollup.config.ts --configPlugin typescript --watch",
+    "start": "nodemon dist/dynamodb-admin.js",
+    "lint": "eslint .",
+    "fix": "eslint --fix .",
+    "test": "vitest run",
+    "prepare": "npm run build",
+    "preversion": "npm run build",
     "postversion": "git push --follow-tags"
   },
   "husky": {
@@ -43,14 +50,30 @@
     "errorhandler": "^1.5.1",
     "express": "^4.21.1",
     "lodash.pickby": "^4.6.0",
-    "open": "^8.4.2"
+    "open": "^10.1.0"
   },
   "devDependencies": {
-    "ejs-lint": "^2.0.1",
-    "eslint": "^8.57.1",
-    "eslint-plugin-jest": "^27.9.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "@types/argparse": "^2.0.17",
+    "@types/cli-color": "^2.0.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/errorhandler": "^1.5.3",
+    "@types/express": "^5.0.0",
+    "@types/lodash.pickby": "^4.6.9",
+    "@types/node": "^20.17.6",
+    "concurrently": "^9.1.0",
+    "eslint": "9.14.0",
+    "eslint-config-rchl-base": "^2.0.4",
+    "eslint-config-rchl-typescript": "^3.0.3",
     "husky": "^4.3.8",
-    "jest": "^29.7.0",
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.1.7",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.27.2",
+    "rollup-plugin-bundle-esm": "^0.1.1",
+    "tslib": "^2.8.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
   }
 }

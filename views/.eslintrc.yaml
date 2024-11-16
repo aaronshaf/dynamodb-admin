@@ -1,6 +1,0 @@
----
-env:
-    jquery: true
-rules:
-    indent: 'off'
-    max-len: 'off'
