@@ -10,11 +10,11 @@ import { getPage } from './actions/getPage';
 import { purgeTable } from './actions/purgeTable';
 import { listAllTables } from './actions/listAllTables';
 import asyncMiddleware from './utils/asyncMiddleware';
-import type { DynamoDBAPI } from './types';
+import type { DynamoDbApi } from './dynamoDbApi';
 
 const DEFAULT_THEME = process.env.DEFAULT_THEME || 'light';
 
-export function setupRoutes(app: Express, ddbApi: DynamoDBAPI): void {
+export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
     app.use(errorhandler());
     app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 

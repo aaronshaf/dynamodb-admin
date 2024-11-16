@@ -1,9 +1,9 @@
 import type { DynamoDB } from 'aws-sdk';
-import type { DynamoDBAPI } from '../types';
 import { extractKey, doSearch, type ScanParams } from '../util';
+import type { DynamoDbApi } from '../dynamoDbApi';
 
 export async function getPage(
-    ddbApi: DynamoDBAPI,
+    ddbApi: DynamoDbApi,
     keySchema: DynamoDB.KeySchema,
     TableName: string,
     scanParams: ScanParams,

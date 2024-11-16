@@ -1,5 +1,5 @@
 import type { DynamoDB } from 'aws-sdk';
-import type { DynamoDBAPI } from './types';
+import type { DynamoDbApi } from './dynamoDbApi';
 
 export class DynamoDBAdminError extends Error {
     public status: number;
@@ -56,7 +56,7 @@ export function extractKeysForItems(Items: Record<string, any>[]): string[] {
  * @return Promise with items or rejected promise with error.
  */
 export async function doSearch(
-    ddbApi: DynamoDBAPI,
+    ddbApi: DynamoDbApi,
     tableName: string,
     scanParams: ScanParams,
     limit?: number,

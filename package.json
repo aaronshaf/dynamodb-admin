@@ -11,7 +11,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "tsc && rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
     "build:watch": "rollup --config rollup.config.ts --configPlugin typescript --watch",
     "start": "nodemon dist/dynamodb-admin.js",
     "lint": "eslint .",
