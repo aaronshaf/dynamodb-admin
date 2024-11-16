@@ -23,6 +23,8 @@ jobs:
           node-version: 20.x
       - name: npm install
         run: npm i
+      - name: build
+        run: npm run build
       - name: Unittesting
         run: npm run test
       - name: Linting
