@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "fix": "eslint --fix .",
     "test": "vitest run",
-    "prepare": "nr build",
+    "prepare": "npm run build",
     "preversion": "npm run build",
     "postversion": "git push --follow-tags"
   },
