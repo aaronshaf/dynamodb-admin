@@ -1,4 +1,5 @@
-import type { BatchWriteItemInput, BatchWriteItemOutput, KeySchemaElement } from '@aws-sdk/client-dynamodb';
+import type { BatchWriteItemOutput, KeySchemaElement } from '@aws-sdk/client-dynamodb';
+import type { BatchWriteCommandInput, BatchWriteCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { doSearch, type ScanParams } from '../util';
 import type { DynamoDbApi } from '../dynamoDbApi';
 import type { ItemList } from '../types';
@@ -48,10 +49,10 @@ async function findAllElements(tableName: string, primaryKeys: string[], ddbApi:
 }
 
 async function deleteAllElements(tableName: string, items: ItemList, ddbApi: DynamoDbApi): Promise<BatchWriteItemOutput[]> {
-    const deleteRequests: Promise<BatchWriteItemOutput>[] = [];
+    const deleteRequests: Promise<BatchWriteCommandOutput>[] = [];
     let counter = 0;
     const MAX_OPERATIONS = 25;
-    const requestItems: BatchWriteItemInput['RequestItems'] = {
+    const requestItems: BatchWriteCommandInput['RequestItems'] = {
         [tableName]: [],
     };
 

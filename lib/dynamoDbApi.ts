@@ -1,11 +1,8 @@
 import {
-    BatchWriteItemCommand,
     CreateTableCommand,
     DeleteTableCommand,
     DescribeTableCommand,
     ListTablesCommand,
-    type BatchWriteItemInput,
-    type BatchWriteItemOutput,
     type CreateTableInput,
     type CreateTableOutput,
     type DeleteTableInput,
@@ -17,6 +14,9 @@ import {
     type TableDescription,
 } from '@aws-sdk/client-dynamodb';
 import {
+    BatchWriteCommand,
+    type BatchWriteCommandInput,
+    type BatchWriteCommandOutput,
     DeleteCommand,
     type DeleteCommandInput,
     type DeleteCommandOutput,
@@ -37,7 +37,7 @@ import {
 import { DynamoDBAdminError } from './util';
 
 export type DynamoDbApi = {
-    batchWriteItem: (input: BatchWriteItemInput) => Promise<BatchWriteItemOutput>;
+    batchWriteItem: (input: BatchWriteCommandInput) => Promise<BatchWriteCommandOutput>;
     createTable: (input: CreateTableInput) => Promise<CreateTableOutput>;
     deleteItem: (input: DeleteCommandInput) => Promise<DeleteCommandOutput>;
     deleteTable: (input: DeleteTableInput) => Promise<DeleteTableOutput>;
@@ -52,7 +52,7 @@ export type DynamoDbApi = {
 export function createDynamoDbApi(dynamodb: DynamoDBClient): DynamoDbApi {
     const docClient = DynamoDBDocumentClient.from(dynamodb);
     return {
-        batchWriteItem: input => dynamodb.send(new BatchWriteItemCommand(input)),
+        batchWriteItem: input => dynamodb.send(new BatchWriteCommand(input)),
         createTable: input => dynamodb.send(new CreateTableCommand(input)),
         deleteItem: input => docClient.send(new DeleteCommand(input)),
         deleteTable: input => dynamodb.send(new DeleteTableCommand(input)),
