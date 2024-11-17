@@ -1,50 +1,31 @@
 import path from 'node:path';
-import fs from 'node:fs';
-import os from 'node:os';
 import express, { type Express } from 'express';
-import AWSSDK, { DynamoDB } from 'aws-sdk';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { createAwsConfig } from './config';
 import { setupRoutes } from './routes';
 import { createDynamoDbApi } from './dynamoDbApi';
 
-function getHomeDir(): string | null {
-    const env = process.env;
-    const home = env.HOME || env.USERPROFILE
-    || (env.HOMEPATH ? (env.HOMEDRIVE || 'C:/') + env.HOMEPATH : null);
+export type CreateServerOptions = {
+    dynamoDbClient?: DynamoDBClient;
+    expressInstance?: Express;
+    dynamoEndpoint?: string;
+    skipDefaultCredentials?: boolean;
+};
 
-    if (home) {
-        return home;
-    }
+export function createServer(options?: CreateServerOptions): Express {
+    const { dynamoDbClient, expressInstance, dynamoEndpoint, skipDefaultCredentials } = options || {};
+    const app = expressInstance || express();
+    let dynamoClient = dynamoDbClient;
 
-    if (typeof os.homedir === 'function') {
-        return os.homedir();
-    }
-
-    return null;
-}
-
-export function createServer(dynamodb?: DynamoDB, docClient?: DynamoDB.DocumentClient, expressInstance = express()): Express {
-    const app = expressInstance;
     app.set('json spaces', 2);
     app.set('view engine', 'ejs');
     app.set('views', path.resolve(__dirname, '..', 'views'));
 
-    if (!dynamodb || !docClient) {
-        const homeDir = getHomeDir();
-
-        if (homeDir && fs.existsSync(path.join(homeDir, '.aws', 'credentials')) &&
-      fs.existsSync(path.join(homeDir, '.aws', 'config'))) {
-            process.env.AWS_SDK_LOAD_CONFIG = '1';
-        }
-
-        if (!dynamodb) {
-            dynamodb = new DynamoDB(createAwsConfig(AWSSDK));
-        }
-
-        docClient = docClient || new DynamoDB.DocumentClient({ service: dynamodb });
+    if (!dynamoClient) {
+        dynamoClient = new DynamoDBClient(createAwsConfig({ dynamoEndpoint, skipDefaultCredentials }));
     }
 
-    const ddbApi = createDynamoDbApi(dynamodb, docClient);
+    const ddbApi = createDynamoDbApi(dynamoClient);
 
     setupRoutes(app, ddbApi);
 

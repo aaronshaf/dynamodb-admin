@@ -1,5 +1,7 @@
-import type { DynamoDB } from 'aws-sdk';
+import type { AttributeDefinition, KeySchemaElement, QueryInput, TableDescription } from '@aws-sdk/client-dynamodb';
+import type { ScanCommandInput, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type { DynamoDbApi } from './dynamoDbApi';
+import type { ItemList, Key } from './types';
 
 export class DynamoDBAdminError extends Error {
     public status: number;
@@ -10,23 +12,25 @@ export class DynamoDBAdminError extends Error {
     }
 }
 
-export type ScanParams = Omit<DynamoDB.DocumentClient.ScanInput & DynamoDB.DocumentClient.QueryInput, 'TableName' | 'Limit'>;
+export type ScanParams = Omit<ScanCommandInput & QueryInput, 'TableName' | 'Limit'>;
 
-export function extractKey(item: Record<string, any>, KeySchema: DynamoDB.KeySchema): Record<string, any> {
-    return KeySchema.reduce((prev, current) => {
-        return Object.assign({}, prev, {
-            [current.AttributeName]: item[current.AttributeName],
-        });
+export function extractKey(item: Record<string, any>, keySchema: KeySchemaElement[]): Record<string, any> {
+    return keySchema.reduce((prev, current) => {
+        return {
+            ...prev,
+            ...current.AttributeName ? { [current.AttributeName]: item[current.AttributeName] } : {},
+        };
     }, {});
 }
 
-export function parseKey(keys: string, tableDescription: DynamoDB.TableDescription): Record<string, string | number> {
+export function parseKey(keys: string, tableDescription: TableDescription): Record<string, string | number> {
     const splitKeys = keys.split(',');
 
     return tableDescription.KeySchema!.reduce((prev, current, index) => {
-        return Object.assign({}, prev, {
-            [current.AttributeName]: typecastKey(current.AttributeName, splitKeys[index], tableDescription),
-        });
+        return {
+            ...prev,
+            ...current.AttributeName ? { [current.AttributeName]: typecastKey(current.AttributeName, splitKeys[index], tableDescription) } : {},
+        };
     }, {});
 }
 
@@ -53,29 +57,26 @@ export function extractKeysForItems(Items: Record<string, any>[]): string[] {
  * @param startKey The key to start query from
  * @param progress Function to execute on each new items returned from query. Returns true to stop the query.
  * @param readOperation The read operation
- * @return Promise with items or rejected promise with error.
  */
 export async function doSearch(
     ddbApi: DynamoDbApi,
     tableName: string,
     scanParams: ScanParams,
     limit?: number,
-    startKey?: DynamoDB.Key,
-    progress?: (items: DynamoDB.ItemList | undefined, lastStartKey: DynamoDB.Key | undefined) => boolean,
+    progress?: (items: ItemList | undefined, lastStartKey: Key | undefined) => boolean,
     readOperation: 'query' | 'scan' = 'scan',
-): Promise<DynamoDB.DocumentClient.ItemList> {
-    const params: DynamoDB.DocumentClient.ScanInput | DynamoDB.DocumentClient.QueryInput = {
+): Promise<ItemList> {
+    const params: ScanCommandInput | QueryCommandInput = {
         TableName: tableName,
         ...scanParams ? scanParams : {},
         ...limit !== undefined ? { Limit: limit } : {},
-        ...startKey !== undefined ? { ExclusiveStartKey: startKey } : {},
     };
 
     const readMethod = ddbApi[readOperation];
 
-    let items: DynamoDB.DocumentClient.ItemList = [];
+    let items: ItemList = [];
 
-    const getNextBite = async(params: DynamoDB.DocumentClient.ScanInput | DynamoDB.DocumentClient.QueryInput, nextKey: DynamoDB.Key | undefined = undefined): Promise<DynamoDB.DocumentClient.ItemList> => {
+    const getNextBite = async(params: ScanCommandInput | QueryCommandInput, nextKey: Key | undefined = undefined): Promise<ItemList> => {
         if (nextKey) {
             params.ExclusiveStartKey = nextKey;
         }
@@ -108,7 +109,7 @@ export async function doSearch(
     return await getNextBite(params);
 }
 
-function typecastKey(keyName: string, keyValue: string, table: DynamoDB.TableDescription): string | number {
+function typecastKey(keyName: string, keyValue: string, table: TableDescription): string | number {
     const definition = table.AttributeDefinitions!.find(attribute => attribute.AttributeName === keyName);
     if (definition) {
         switch (definition.AttributeType) {
@@ -121,6 +122,6 @@ function typecastKey(keyName: string, keyValue: string, table: DynamoDB.TableDes
     return keyValue;
 }
 
-export function isAttributeNotAlreadyCreated(attributeDefinitions: DynamoDB.AttributeDefinitions, attributeName: string): boolean {
+export function isAttributeNotAlreadyCreated(attributeDefinitions: AttributeDefinition[], attributeName: string): boolean {
     return !attributeDefinitions.find(attributeDefinition => attributeDefinition.AttributeName === attributeName);
 }

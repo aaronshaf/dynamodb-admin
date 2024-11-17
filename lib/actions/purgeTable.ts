@@ -1,6 +1,7 @@
-import type { DynamoDB } from 'aws-sdk';
+import type { BatchWriteItemInput, BatchWriteItemOutput, KeySchemaElement } from '@aws-sdk/client-dynamodb';
 import { doSearch, type ScanParams } from '../util';
 import type { DynamoDbApi } from '../dynamoDbApi';
+import type { ItemList } from '../types';
 
 /**
  * This function deletes all record from a given table within dynamodb.
@@ -27,12 +28,12 @@ async function findPrimaryKeys(tableName: string, ddbApi: DynamoDbApi): Promise<
 
     return ['HASH', 'RANGE']
         .map(keyType => tableDescription.KeySchema!.find(element => element.KeyType === keyType))
-        .filter<DynamoDB.KeySchemaElement>(attribute => attribute !== undefined)
-        .map(attribute => attribute.AttributeName);
+        .filter<KeySchemaElement>(attribute => attribute !== undefined)
+        .map(attribute => attribute.AttributeName as string);
 }
 
-async function findAllElements(tableName: string, primaryKeys: string[], ddbApi: DynamoDbApi): Promise<DynamoDB.DocumentClient.ItemList> {
-    const ExpressionAttributeNames: DynamoDB.ExpressionAttributeNameMap = {};
+async function findAllElements(tableName: string, primaryKeys: string[], ddbApi: DynamoDbApi): Promise<ItemList> {
+    const ExpressionAttributeNames: ScanParams['ExpressionAttributeNames'] = {};
 
     for (const [index, key] of primaryKeys.entries()) {
         ExpressionAttributeNames[`#KEY${index}`] = key;
@@ -46,18 +47,16 @@ async function findAllElements(tableName: string, primaryKeys: string[], ddbApi:
     return await doSearch(ddbApi, tableName, scanParams);
 }
 
-async function deleteAllElements(tableName: string, items: DynamoDB.Key[], ddbApi: DynamoDbApi): Promise<DynamoDB.BatchWriteItemOutput[]> {
-    const deleteRequests: Promise<DynamoDB.BatchWriteItemOutput>[] = [];
+async function deleteAllElements(tableName: string, items: ItemList, ddbApi: DynamoDbApi): Promise<BatchWriteItemOutput[]> {
+    const deleteRequests: Promise<BatchWriteItemOutput>[] = [];
     let counter = 0;
     const MAX_OPERATIONS = 25;
-    const params: DynamoDB.Types.BatchWriteItemInput = {
-        RequestItems: {
-            [tableName]: [],
-        },
+    const requestItems: BatchWriteItemInput['RequestItems'] = {
+        [tableName]: [],
     };
 
     for (const item of items) {
-        params.RequestItems[tableName].push({
+        requestItems[tableName].push({
             DeleteRequest: {
                 Key: item,
             },
@@ -66,14 +65,14 @@ async function deleteAllElements(tableName: string, items: DynamoDB.Key[], ddbAp
         counter++;
 
         if (counter % MAX_OPERATIONS === 0) {
-            deleteRequests.push(ddbApi.batchWriteItem(params));
-            params.RequestItems[tableName] = [];
+            deleteRequests.push(ddbApi.batchWriteItem({ RequestItems: requestItems }));
+            requestItems[tableName] = [];
         }
     }
 
     if (counter % MAX_OPERATIONS !== 0) {
-        deleteRequests.push(ddbApi.batchWriteItem(params));
-        params.RequestItems[tableName] = [];
+        deleteRequests.push(ddbApi.batchWriteItem({ RequestItems: requestItems }));
+        requestItems[tableName] = [];
     }
 
     return await Promise.all(deleteRequests);
