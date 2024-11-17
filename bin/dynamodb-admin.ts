@@ -40,7 +40,7 @@ parser.add_argument('-p', '--port', {
 parser.add_argument('--dynamo-endpoint', {
     type: 'str',
     default: 'http://localhost:8000',
-    help: 'DynamoDB endpoint to connect to. Can alternatively be set through the "DYNAMO_ENDPOINT" env variable.',
+    help: 'DynamoDB endpoint to connect to.',
 });
 
 parser.add_argument('--skip-default-credentials', {
