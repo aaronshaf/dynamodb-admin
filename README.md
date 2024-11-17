@@ -59,7 +59,7 @@ server.on('listening', () => {
 
 Run `npm run build` and then `DYNAMO_ENDPOINT=http://localhost:8000 npm run start` to start dynamodb-admin.
 
-You can set up a build watcher in a separate terminal using `npm run build:watch` which will re-complile the code on change and restart the dynamodb-admin instance.
+You can set up a build watcher in a separate terminal using `npm run build:watch` which will re-compile the code on change and cause the dynamodb-admin instance to restart.
 
 ## See also
 
