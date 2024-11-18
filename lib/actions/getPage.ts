@@ -1,19 +1,19 @@
-import type { DynamoDB } from 'aws-sdk';
+import type { KeySchemaElement } from '@aws-sdk/client-dynamodb';
 import { extractKey, doSearch, type ScanParams } from '../util';
 import type { DynamoDbApi } from '../dynamoDbApi';
+import type { ItemList, Key } from '../types';
 
 export async function getPage(
     ddbApi: DynamoDbApi,
-    keySchema: DynamoDB.KeySchema,
+    keySchema: KeySchemaElement[],
     TableName: string,
     scanParams: ScanParams,
     pageSize: number,
-    startKey: DynamoDB.Key,
     operationType: 'query' | 'scan',
 ): Promise<{ pageItems: Record<string, any>[]; nextKey: any }> {
     const pageItems: Record<string, any>[] = [];
 
-    function onNewItems(items: DynamoDB.ItemList | undefined, lastStartKey: DynamoDB.Key | undefined): boolean {
+    function onNewItems(items: ItemList | undefined, lastStartKey: Key | undefined): boolean {
         if (items) {
             for (let i = 0; i < items.length && pageItems.length < pageSize + 1; i++) {
                 pageItems.push(items[i]);
@@ -26,7 +26,7 @@ export async function getPage(
         return pageItems.length > pageSize || !lastStartKey;
     }
 
-    let items = await doSearch(ddbApi, TableName, scanParams, 10, startKey, onNewItems, operationType);
+    let items = await doSearch(ddbApi, TableName, scanParams, 10, onNewItems, operationType);
     let nextKey = null;
 
     if (items.length > pageSize) {

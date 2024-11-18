@@ -37,16 +37,27 @@ parser.add_argument('-p', '--port', {
     help: 'Port to run on (default: 8001)',
 });
 
-const args = parser.parse_args();
+parser.add_argument('--dynamo-endpoint', {
+    type: 'str',
+    default: 'http://localhost:8000',
+    help: 'DynamoDB endpoint to connect to.',
+});
 
-const app = createServer();
-const host = process.env.HOST || args.host;
-const port = process.env.PORT || args.port;
-const server = app.listen(port, host);
+parser.add_argument('--skip-default-credentials', {
+    action: 'store_true',
+    help: 'Skip setting default credentials and region. By default the accessKeyId/secretAccessKey are set to "key" and "secret" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.',
+});
+
+const { host, port, open: openUrl, dynamo_endpoint: dynamoEndpoint, skip_default_credentials: skipDefaultCredentials } = parser.parse_args();
+
+const app = createServer({ dynamoEndpoint, skipDefaultCredentials });
+const resolvedHost = process.env.HOST || host;
+const resolvedPort = process.env.PORT || port;
+const server = app.listen(resolvedPort, resolvedHost);
 server.on('listening', () => {
     const address = server.address();
     if (!address) {
-        throw new Error(`Not able to listen on host and port "${host}:${port}"`);
+        throw new Error(`Not able to listen on host and port "${resolvedHost}:${resolvedPort}"`);
     }
     let listenAddress;
     let listenPort;
@@ -57,12 +68,12 @@ server.on('listening', () => {
         listenPort = address.port;
     }
     let url = `http://${listenAddress}${listenPort ? ':' + listenPort : ''}`;
-    if (!host && listenAddress !== '0.0.0.0') {
+    if (!resolvedHost && listenAddress !== '0.0.0.0') {
         url += ` (alternatively http://0.0.0.0:${listenPort})`;
     }
     console.info(`  dynamodb-admin listening on ${url}`);
 
-    if (args.open) {
+    if (openUrl) {
         open(url);
     }
 });

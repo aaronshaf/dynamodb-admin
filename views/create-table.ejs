@@ -42,13 +42,15 @@
                     secondaryIndexes.push(index)
                 }
                 const createTableRequest = {
-                    TableName: findFormInputValue(formValues, 'TableName'),
-                    HashAttributeName: findFormInputValue(formValues, 'HashAttributeName'),
-                    HashAttributeType: findFormInputValue(formValues, 'HashAttributeType'),
-                    RangeAttributeName: findFormInputValue(formValues, 'RangeAttributeName'),
-                    RangeAttributeType: findFormInputValue(formValues, 'RangeAttributeType'),
-                    ReadCapacityUnits: findFormInputValue(formValues, 'ReadCapacityUnits'),
-                    WriteCapacityUnits: findFormInputValue(formValues, 'WriteCapacityUnits'),
+                    TableDefinition: {
+                        TableName: findFormInputValue(formValues, 'TableName'),
+                        HashAttributeName: findFormInputValue(formValues, 'HashAttributeName'),
+                        HashAttributeType: findFormInputValue(formValues, 'HashAttributeType'),
+                        RangeAttributeName: findFormInputValue(formValues, 'RangeAttributeName'),
+                        RangeAttributeType: findFormInputValue(formValues, 'RangeAttributeType'),
+                        ReadCapacityUnits: findFormInputValue(formValues, 'ReadCapacityUnits'),
+                        WriteCapacityUnits: findFormInputValue(formValues, 'WriteCapacityUnits'),
+                    },
                     SecondaryIndexes: secondaryIndexes
                 }
                 const response = await fetch(document.location.pathname, {
@@ -82,7 +84,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="IndexName">Index Name</label>
-                                <input type="text" name="secondary-index-${index}-IndexName" class="form-control" autofocus />
+                                <input required type="text" name="secondary-index-${index}-IndexName" class="form-control" autofocus />
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -97,13 +99,13 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="HashAttributeName">Hash Attribute Name</label>
-                                <input type="text" name="secondary-index-${index}-HashAttributeName" class="form-control" autofocus />
+                                <input required type="text" name="secondary-index-${index}-HashAttributeName" class="form-control" autofocus />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="HashAttributeType">Hash Attribute Type</label>
-                                <select name="secondary-index-${index}-HashAttributeType" class="form-control">
+                                <select required name="secondary-index-${index}-HashAttributeType" class="form-control">
                                     <option></option>
                                     <option value="S">String</option>
                                     <option value="N">Number</option>
@@ -113,13 +115,13 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="RangeAttributeName">Range Attribute Name(Optional)</label>
+                                <label for="RangeAttributeName">Range Attribute Name (Optional)</label>
                                 <input type="text" name="secondary-index-${index}-RangeAttributeName" class="form-control" autofocus />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="RangeAttributeType">Range Attribute Type(Optional)</label>
+                                <label for="RangeAttributeType">Range Attribute Type (Optional)</label>
                                 <select name="secondary-index-${index}-RangeAttributeType" class="form-control">
                                     <option></option>
                                     <option value="S">String</option>
@@ -131,14 +133,14 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="ReadCapacityUnits">ReadCapacityUnits</label>
-                                <input type="text" id="secondary-index-${index}-ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
+                                <input required type="number" id="secondary-index-${index}-ReadCapacityUnits" name="secondary-index-${index}-ReadCapacityUnits" class="form-control"
                                     value="3" />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="WriteCapacityUnits">WriteCapacityUnits</label>
-                                <input type="text" id="secondary-index-${index}-WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
+                                <input required type="number" id="secondary-index-${index}-WriteCapacityUnits" name="secondary-index-${index}-WriteCapacityUnits" class="form-control"
                                     value="3" />
                             </div>
                         </div>
@@ -194,7 +196,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="TableName">Table Name</label>
-                            <input type="text" id="TableName" name="TableName" class="form-control" autofocus />
+                            <input required type="text" id="TableName" name="TableName" class="form-control" autofocus />
                         </div>
                     </div>
                 </div>
@@ -202,13 +204,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="HashAttributeName">Hash Attribute Name</label>
-                            <input type="text" id="HashAttributeName" name="HashAttributeName" class="form-control" />
+                            <input required type="text" id="HashAttributeName" name="HashAttributeName" class="form-control" />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Hash Attribute Type</label>
-                            <select name="HashAttributeType" class="form-control">
+                            <select required name="HashAttributeType" class="form-control">
                                 <option value="S">String</option>
                                 <option value="N">Number</option>
                                 <option value="B">Binary</option>
@@ -239,14 +241,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="ReadCapacityUnits">ReadCapacityUnits</label>
-                            <input type="text" id="ReadCapacityUnits" name="ReadCapacityUnits" class="form-control"
+                            <input required type="number" id="ReadCapacityUnits" name="ReadCapacityUnits" class="form-control"
                                 value="3" />
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="WriteCapacityUnits">WriteCapacityUnits</label>
-                            <input type="text" id="WriteCapacityUnits" name="WriteCapacityUnits" class="form-control"
+                            <input required type="number" id="WriteCapacityUnits" name="WriteCapacityUnits" class="form-control"
                                 value="3" />
                         </div>
                     </div>

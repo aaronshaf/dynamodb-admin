@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { DynamoDB } from 'aws-sdk';
+import type { AttributeDefinition, KeySchemaElement, GlobalSecondaryIndex, LocalSecondaryIndex, ScanInput, QueryInput, ScalarAttributeType } from '@aws-sdk/client-dynamodb';
 import express, { type Express, type ErrorRequestHandler } from 'express';
 import errorhandler from 'errorhandler';
 import bodyParser from 'body-parser';
@@ -43,20 +43,36 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
         res.render('create-table', {});
     });
 
+    type TableDefinitionInput = {
+        TableName: string;
+        HashAttributeName: string;
+        HashAttributeType: ScalarAttributeType;
+        RangeAttributeName?: string;
+        RangeAttributeType?: ScalarAttributeType;
+        ReadCapacityUnits: number;
+        WriteCapacityUnits: number;
+    };
+
+    type SecondaryIndexesInput = Omit<TableDefinitionInput, 'TableName'> & {
+        IndexName: string;
+        IndexType: 'global' | 'local';
+    };
+
     app.post(
         '/create-table',
         bodyParser.json({ limit: '500kb' }),
         asyncMiddleware(async(req, res) => {
-            const { TableName, HashAttributeName, HashAttributeType, RangeAttributeName, RangeAttributeType, SecondaryIndexes, ReadCapacityUnits, WriteCapacityUnits } = req.body;
+            const { TableName, HashAttributeName, HashAttributeType, RangeAttributeName, RangeAttributeType, ReadCapacityUnits, WriteCapacityUnits } = req.body.TableDefinition as TableDefinitionInput;
+            const SecondaryIndexes = req.body.SecondaryIndexes as SecondaryIndexesInput[];
 
-            const attributeDefinitions: DynamoDB.AttributeDefinitions = [
+            const attributeDefinitions: AttributeDefinition[] = [
                 {
                     AttributeName: HashAttributeName,
                     AttributeType: HashAttributeType,
                 },
             ];
 
-            const keySchema: DynamoDB.KeySchema = [
+            const keySchema: KeySchemaElement[] = [
                 {
                     AttributeName: HashAttributeName,
                     KeyType: 'HASH',
@@ -64,6 +80,11 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
             ];
 
             if (RangeAttributeName) {
+                if (!RangeAttributeType) {
+                    res.status(400).json({ message: `The attribute type of the range attribute "${RangeAttributeName}" is not specified` });
+                    return;
+                }
+
                 attributeDefinitions.push({
                     AttributeName: RangeAttributeName,
                     AttributeType: RangeAttributeType,
@@ -75,11 +96,11 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
                 });
             }
 
-            const globalSecondaryIndexes: DynamoDB.GlobalSecondaryIndexList = [];
-            const localSecondaryIndexes: DynamoDB.LocalSecondaryIndexList = [];
+            const globalSecondaryIndexes: GlobalSecondaryIndex[] = [];
+            const localSecondaryIndexes: LocalSecondaryIndex[] = [];
             if (SecondaryIndexes) {
                 for (const secondaryIndex of SecondaryIndexes) {
-                    const secondaryIndexKeySchema: DynamoDB.KeySchema = [
+                    const secondaryIndexKeySchema: KeySchemaElement[] = [
                         {
                             AttributeName: secondaryIndex.HashAttributeName,
                             KeyType: 'HASH',
@@ -93,8 +114,12 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
                     }
 
                     if (secondaryIndex.RangeAttributeName) {
-                        if (isAttributeNotAlreadyCreated(
-                            attributeDefinitions, secondaryIndex.RangeAttributeName)) {
+                        if (!secondaryIndex.RangeAttributeType) {
+                            res.status(400).json({ message: `The attribute type of the range attribute "${secondaryIndex.RangeAttributeName}" is not specified` });
+                            return;
+                        }
+
+                        if (isAttributeNotAlreadyCreated(attributeDefinitions, secondaryIndex.RangeAttributeName)) {
                             attributeDefinitions.push({
                                 AttributeName: secondaryIndex.RangeAttributeName,
                                 AttributeType: secondaryIndex.RangeAttributeType,
@@ -107,7 +132,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
                         });
                     }
 
-                    const index: DynamoDB.GlobalSecondaryIndex | DynamoDB.LocalSecondaryIndex = {
+                    const index: GlobalSecondaryIndex | LocalSecondaryIndex = {
                         IndexName: secondaryIndex.IndexName,
                         KeySchema: secondaryIndexKeySchema,
                         Projection: {
@@ -119,8 +144,8 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
                         globalSecondaryIndexes.push({
                             ...index,
                             ProvisionedThroughput: {
-                                ReadCapacityUnits,
-                                WriteCapacityUnits,
+                                ReadCapacityUnits: secondaryIndex.ReadCapacityUnits,
+                                WriteCapacityUnits: secondaryIndex.WriteCapacityUnits,
                             },
                         });
                     } else {
@@ -252,8 +277,8 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
             }
         }
 
-        const ExpressionAttributeNames: DynamoDB.ExpressionAttributeNameMap = {};
-        const ExpressionAttributeValues: DynamoDB.ExpressionAttributeValueMap = {};
+        const ExpressionAttributeNames: ScanInput['ExpressionAttributeNames'] | QueryInput['ExpressionAttributeNames'] = {};
+        const ExpressionAttributeValues: ScanInput['ExpressionAttributeValues'] | QueryInput['ExpressionAttributeValues'] = {};
         const FilterExpressions: string[] = [];
         const KeyConditionExpression: string[] = [];
 
@@ -294,16 +319,16 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
 
         const params: ScanParams = {
             FilterExpression: FilterExpressions.length ? FilterExpressions.join(' AND ') : undefined,
+            ExclusiveStartKey: Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined,
             ExpressionAttributeNames: Object.keys(ExpressionAttributeNames).length ? ExpressionAttributeNames : undefined,
             ExpressionAttributeValues: Object.keys(ExpressionAttributeValues).length ? ExpressionAttributeValues : undefined,
             KeyConditionExpression: KeyConditionExpression.length ? KeyConditionExpression.join(' AND ') : undefined,
             IndexName: queryableSelection !== 'table' ? queryableSelection : undefined,
         };
-        const startKey = Object.keys(ExclusiveStartKey).length ? ExclusiveStartKey : undefined;
         const pageSize = typeof req.query.pageSize === 'string' ? Number.parseInt(req.query.pageSize) : 25;
 
         try {
-            const results = await getPage(ddbApi, tableDescription.KeySchema!, TableName, params, pageSize, startKey, operationType);
+            const results = await getPage(ddbApi, tableDescription.KeySchema!, TableName, params, pageSize, operationType);
             const { pageItems, nextKey } = results;
 
             const primaryKeys = tableDescription.KeySchema!.map(schema => schema.AttributeName);
@@ -353,12 +378,10 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
     app.delete('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
-        const params = {
+        await ddbApi.deleteItem({
             TableName,
             Key: parseKey(req.params.key, tableDescription),
-        };
-
-        await ddbApi.deleteItem(params);
+        });
         res.status(204).end();
     }));
 
@@ -367,8 +390,14 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
         const tableDescription = await ddbApi.describeTable({ TableName });
         const Item: Record<string, string | number> = {};
         for (const key of tableDescription.KeySchema!) {
-            const definition = tableDescription.AttributeDefinitions!.find(attribute => attribute.AttributeName === key.AttributeName);
-            Item[key.AttributeName] = definition!.AttributeType === 'S' ? '' : 0;
+            if (!key.AttributeName || !tableDescription.AttributeDefinitions) {
+                continue;
+            }
+            const definition = tableDescription.AttributeDefinitions.find(attribute => attribute.AttributeName === key.AttributeName);
+            if (!definition) {
+                continue;
+            }
+            Item[key.AttributeName] = definition.AttributeType === 'S' ? '' : 0;
         }
         res.render('item', {
             Table: tableDescription,

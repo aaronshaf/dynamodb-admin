@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import type { DynamoDB } from 'aws-sdk';
+import type { TableDescription } from '@aws-sdk/client-dynamodb';
 import { parseKey } from './util';
 
-const table1: DynamoDB.TableDescription = {
+const table1: TableDescription = {
     AttributeDefinitions: [
         {
             AttributeName: 'document_id',

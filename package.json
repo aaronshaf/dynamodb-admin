@@ -41,8 +41,9 @@
   },
   "homepage": "https://github.com/aaronshaf/dynamodb-viewer#readme",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.693.0",
+    "@aws-sdk/lib-dynamodb": "^3.693.0",
     "argparse": "^2.0.1",
-    "aws-sdk": "^2.1692.0",
     "body-parser": "^1.20.3",
     "cli-color": "^2.0.4",
     "cookie-parser": "^1.4.7",

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { TableDescription } from '@aws-sdk/client-dynamodb';
 import { extractKey } from './util';
 
 const item1 = {
@@ -9,7 +10,7 @@ const item1 = {
     password_hash: 'xyz',
 };
 
-const table1 = {
+const table1: TableDescription = {
     AttributeDefinitions: [
         {
             AttributeName: 'username',
@@ -28,10 +29,10 @@ const table1 = {
         },
     ],
     TableStatus: 'ACTIVE',
-    CreationDateTime: '2016-08-29T22:24:58.739Z',
+    CreationDateTime: new Date('2016-08-29T22:24:58.739Z'),
     ProvisionedThroughput: {
-        LastIncreaseDateTime: '1970-01-01T00:00:00.000Z',
-        LastDecreaseDateTime: '1970-01-01T00:00:00.000Z',
+        LastIncreaseDateTime: new Date('1970-01-01T00:00:00.000Z'),
+        LastDecreaseDateTime: new Date('1970-01-01T00:00:00.000Z'),
         NumberOfDecreasesToday: 0,
         ReadCapacityUnits: 1,
         WriteCapacityUnits: 1,
@@ -71,7 +72,7 @@ const item2 = {
     document_id: 'CfHhu6d1C_8W4JygfbBAc16UJeg2Bw',
 };
 
-const table2 = {
+const table2: TableDescription = {
     AttributeDefinitions: [
         {
             AttributeName: 'document_id',
@@ -94,10 +95,10 @@ const table2 = {
         },
     ],
     TableStatus: 'ACTIVE',
-    CreationDateTime: '2016-06-29T21:46:09.943Z',
+    CreationDateTime: new Date('2016-06-29T21:46:09.943Z'),
     ProvisionedThroughput: {
-        LastIncreaseDateTime: '1970-01-01T00:00:00.000Z',
-        LastDecreaseDateTime: '1970-01-01T00:00:00.000Z',
+        LastIncreaseDateTime: new Date('1970-01-01T00:00:00.000Z'),
+        LastDecreaseDateTime: new Date('1970-01-01T00:00:00.000Z'),
         NumberOfDecreasesToday: 0,
         ReadCapacityUnits: 5,
         WriteCapacityUnits: 5,
@@ -108,14 +109,14 @@ const table2 = {
 
 describe('extractKey', () => {
     it('serializes item with 1 key attribute', () => {
-        const serializedKey = extractKey(item1, table1.KeySchema);
+        const serializedKey = extractKey(item1, table1.KeySchema!);
         expect(serializedKey).toEqual({
             username: 'jdoe@domain.com',
         });
     });
 
     it('serializes item with 2 key attributes', () => {
-        const serializedKey = extractKey(item2, table2.KeySchema);
+        const serializedKey = extractKey(item2, table2.KeySchema!);
         expect(serializedKey).toEqual({
             document_id: 'CfHhu6d1C_8W4JygfbBAc16UJeg2Bw',
             ctx_and_id: 'admin|0a5c7a9c-af15-2156-fd4f-80c20bca6414',

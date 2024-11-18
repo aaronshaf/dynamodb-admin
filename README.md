@@ -10,41 +10,41 @@
 ```bash
 npm install -g dynamodb-admin
 
-# For Windows:
-set DYNAMO_ENDPOINT=http://localhost:8000
-dynamodb-admin
-
-# For Mac/Linux:
-DYNAMO_ENDPOINT=http://localhost:8000 dynamodb-admin
+dynamodb-admin --dynamo-endpoint=http://localhost:8000
 ```
 
 Options:
- - --open / -o - opens server URL in a default browser on start
- - --port PORT / -p PORT -  Port to run on (default: 8001)
- - --host HOST / -h HOST -  Host to run on (default: localhost)
+ - `--open` / `-o` - opens server URL in a default browser on start
+ - `--port PORT` / `-p PORT` -  Port to run on (default: 8001)
+ - `--host HOST` / `-h HOST` -  Host to run on (default: localhost)
+ - `--dynamo-endpoint` - DynamoDB endpoint to connect to (default: http://localhost:8000).
+ - `--skip-default-credentials` - Skip setting default credentials and region. By default the accessKeyId/secretAccessKey are set to "key" and "secret" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.
 
-You can specify host & port to run on by setting environment variables `HOST` and `PORT` respectively. This will override value specified on the command line. This is legacy way to specify the HOST & PORT.
+Environment variables `HOST`, `PORT` and `DYNAMO_ENDPOINT` can also be used to set the respective options. Those are not recommended.
 
-If you use a local dynamodb that cares about credentials, you can configure them by using the following environment variables `AWS_REGION` `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY`
+If you use a local dynamodb that cares about credentials, you can configure them by using the following environment variables `AWS_REGION` `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` or specify the `--skip-default-credentials` argument and rely on the default AWS SDK credentials resolving behavior.
 
 For example with the `amazon/dynamodb-local` docker image you can launch `dynamodb-admin` with:
 
 ```bash
 AWS_REGION=eu-west-1 AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local dynamodb-admin
 ```
-
 If you are accessing your database from another piece of software, the `AWS_ACCESS_KEY_ID` used by that application must match the `AWS_ACCESS_KEY_ID` you used with `dynamodb-admin` if you want both to see the same data.
+
+By default `dynamodb-admin` sets a default key/secret to values "key" and "secret" and the region to "us-east-1".
 
 ### Use as a library in your project
 
+This requires AWS SDK v3.
+If you depend on AWS SDK v2 then you need to use dynamodb-admin v4.
+
 ```js
-const AWS = require('aws-sdk');
-const {createServer} = require('dynamodb-admin');
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createServer } from 'dynamodb-admin';
 
-const dynamodb = new AWS.DynamoDB();
-const dynClient = new AWS.DynamoDB.DocumentClient({service: dynamodb});
+const dynamoDbClient = new DynamoDBClient();
 
-const app = createServer(dynamodb, dynClient);
+const app = createServer({ dynamoDbClient });
 
 const host = 'localhost';
 const port = 8001;
@@ -59,7 +59,7 @@ server.on('listening', () => {
 
 Run `npm run build` and then `DYNAMO_ENDPOINT=http://localhost:8000 npm run start` to start dynamodb-admin.
 
-You can set up a build watcher in a separate terminal using `npm run build:watch` which will re-complile the code on change and restart the dynamodb-admin instance.
+You can set up a build watcher in a separate terminal using `npm run build:watch` which will re-compile the code on change and cause the dynamodb-admin instance to restart.
 
 ## See also
 
