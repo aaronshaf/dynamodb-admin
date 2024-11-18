@@ -27,13 +27,13 @@ parser.add_argument('-o', '--open', {
 
 parser.add_argument('-H', '--host', {
     type: 'str',
-    required: false,
+    default: process.env.HOST || undefined,
     help: 'Host to run on (default: undefined)',
 });
 
 parser.add_argument('-p', '--port', {
     type: 'int',
-    default: 8001,
+    default: process.env.PORT ?? 8001,
     help: 'Port to run on (default: 8001)',
 });
 
@@ -51,13 +51,11 @@ parser.add_argument('--skip-default-credentials', {
 const { host, port, open: openUrl, dynamo_endpoint: dynamoEndpoint, skip_default_credentials: skipDefaultCredentials } = parser.parse_args();
 
 const app = createServer({ dynamoEndpoint, skipDefaultCredentials });
-const resolvedHost = process.env.HOST || host;
-const resolvedPort = process.env.PORT || port;
-const server = app.listen(resolvedPort, resolvedHost);
+const server = app.listen(port, host);
 server.on('listening', () => {
     const address = server.address();
     if (!address) {
-        throw new Error(`Not able to listen on host and port "${resolvedHost}:${resolvedPort}"`);
+        throw new Error(`Not able to listen on host and port "${host}:${port}"`);
     }
     let listenAddress;
     let listenPort;
@@ -68,7 +66,7 @@ server.on('listening', () => {
         listenPort = address.port;
     }
     let url = `http://${listenAddress}${listenPort ? ':' + listenPort : ''}`;
-    if (!resolvedHost && listenAddress !== '0.0.0.0') {
+    if (!host && listenAddress !== '0.0.0.0') {
         url += ` (alternatively http://0.0.0.0:${listenPort})`;
     }
     console.info(`  dynamodb-admin listening on ${url}`);
