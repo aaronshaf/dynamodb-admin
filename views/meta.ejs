@@ -38,6 +38,8 @@
         <a class='nav-link active' href='/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
       </li>
     </ul>
+
+    <%- include('partials/error-container') %>
   </header>
 
   <main class="flex-fill d-flex flex-column">
@@ -55,13 +57,14 @@
       document.querySelector('#deleteTable').addEventListener('click', () => {
           fetch('/tables/<%= encodeURIComponent(Table.TableName) %>', {
               method: 'delete'
-          }).then((response) => {
+          }).then(async (response) => {
               if (!response.ok) {
-                  throw new Error
+                  const responseText = await response.text()
+                  throw new Error(JSON.parse(responseText).message)
               }
               window.location.href = '/'
-          }).catch(() => {
-              window.alert('There was an error when attempting to delete the table.')
+          }).catch((error) => {
+              handleError(error.message)
           })
       });
 

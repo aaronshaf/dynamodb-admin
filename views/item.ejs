@@ -28,6 +28,7 @@
       }
     %>
     <%- include('partials/breadcrumb', { breadcrumb }) %>
+    <%- include('partials/error-container') %>
   </header>
 
   <main class='flex-fill d-flex flex-column'>
@@ -42,11 +43,12 @@
             'Content-Type': 'application/json'
           },
           body: editor.getValue()
-        }).then((response) => {
+        }).then(async (response) => {
           if (response.ok) {
             return response.json()
           } else {
-            throw new Error()
+            const responseText = await response.text()
+            throw new Error(JSON.parse(responseText).message)
           }
         }).then((json) => {
           if (document.location.pathname.endsWith('/add-item')) {
@@ -72,7 +74,7 @@
             saveButton.classList.add('btn-primary')
             saveButton.classList.remove('btn-warning')
           }, 2000)
-          console.error(error)
+          handleError(error.message)
         })
       }
       </script>
@@ -90,13 +92,15 @@
         event.preventDefault()
         fetch(document.location.pathname, {
           method: 'delete'
-        }).then((response) => {
+        }).then(async (response) => {
           if (response.ok) {
             window.location = `/tables/<%= encodeURIComponent(TableName) %>`
+          } else {
+            const responseText = await response.text()
+            throw new Error(JSON.parse(responseText).message)
           }
         }).catch((error) => {
-          console.error(error)
-          alert('There was an error.')
+          handleError(error.message)
         })
       }
       </script>

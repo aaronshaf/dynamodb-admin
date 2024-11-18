@@ -154,22 +154,17 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
                 }
             }
 
-            try {
-                await ddbApi.createTable({
-                    TableName,
-                    ProvisionedThroughput: {
-                        ReadCapacityUnits,
-                        WriteCapacityUnits,
-                    },
-                    GlobalSecondaryIndexes: globalSecondaryIndexes.length ? globalSecondaryIndexes : undefined,
-                    LocalSecondaryIndexes: localSecondaryIndexes.length ? localSecondaryIndexes : undefined,
-                    KeySchema: keySchema,
-                    AttributeDefinitions: attributeDefinitions,
-                });
-            } catch (error) {
-                res.status(400).send(error);
-                return;
-            }
+            await ddbApi.createTable({
+                TableName,
+                ProvisionedThroughput: {
+                    ReadCapacityUnits,
+                    WriteCapacityUnits,
+                },
+                GlobalSecondaryIndexes: globalSecondaryIndexes.length ? globalSecondaryIndexes : undefined,
+                LocalSecondaryIndexes: localSecondaryIndexes.length ? localSecondaryIndexes : undefined,
+                KeySchema: keySchema,
+                AttributeDefinitions: attributeDefinitions,
+            });
 
             res.status(204).end();
         }),
@@ -327,39 +322,34 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
         };
         const pageSize = typeof req.query.pageSize === 'string' ? Number.parseInt(req.query.pageSize) : 25;
 
-        try {
-            const results = await getPage(ddbApi, tableDescription.KeySchema!, TableName, params, pageSize, operationType);
-            const { pageItems, nextKey } = results;
+        const results = await getPage(ddbApi, tableDescription.KeySchema!, TableName, params, pageSize, operationType);
+        const { pageItems, nextKey } = results;
 
-            const primaryKeys = tableDescription.KeySchema!.map(schema => schema.AttributeName);
-            // Primary keys are listed first.
-            const uniqueKeys = [
-                ...primaryKeys,
-                ...extractKeysForItems(pageItems).filter(key => !primaryKeys.includes(key)),
-            ];
+        const primaryKeys = tableDescription.KeySchema!.map(schema => schema.AttributeName);
+        // Primary keys are listed first.
+        const uniqueKeys = [
+            ...primaryKeys,
+            ...extractKeysForItems(pageItems).filter(key => !primaryKeys.includes(key)),
+        ];
 
-            // Append the item key.
-            for (const item of pageItems) {
-                item.__key = extractKey(item, tableDescription.KeySchema!);
-            }
-
-            const data = {
-                query: req.query,
-                pageNum,
-                prevKey: encodeURIComponent(typeof req.query.prevKey === 'string' ? req.query.prevKey : ''),
-                startKey: encodeURIComponent(typeof req.query.startKey === 'string' ? req.query.startKey : ''),
-                nextKey: nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null,
-                filterQueryString: encodeURIComponent(typeof req.query.filters === 'string' ? req.query.filters : ''),
-                Table: tableDescription,
-                Items: pageItems,
-                uniqueKeys,
-            };
-
-            res.json(data);
-        } catch (error: any) {
-            const typedError: Error & { code?: number } = error;
-            res.status(400).send((typedError.code ? '[' + typedError.code + '] ' : '') + typedError.message);
+        // Append the item key.
+        for (const item of pageItems) {
+            item.__key = extractKey(item, tableDescription.KeySchema!);
         }
+
+        const data = {
+            query: req.query,
+            pageNum,
+            prevKey: encodeURIComponent(typeof req.query.prevKey === 'string' ? req.query.prevKey : ''),
+            startKey: encodeURIComponent(typeof req.query.startKey === 'string' ? req.query.startKey : ''),
+            nextKey: nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null,
+            filterQueryString: encodeURIComponent(typeof req.query.filters === 'string' ? req.query.filters : ''),
+            Table: tableDescription,
+            Items: pageItems,
+            uniqueKeys,
+        };
+
+        res.json(data);
     }));
 
     app.get('/tables/:TableName/meta', asyncMiddleware(async(req, res) => {
@@ -453,8 +443,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
         res.json(response.Item);
     }));
 
-    app.use(((err, _req, _res, next) => {
-        console.error(err);
-        next(err);
+    app.use(((error, _req, res, _next) => {
+        res.status(500).send(error);
     }) as ErrorRequestHandler);
 }

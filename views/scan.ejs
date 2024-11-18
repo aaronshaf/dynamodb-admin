@@ -105,6 +105,8 @@
         <a href="/tables/<%= encodeURIComponent(Table.TableName) %>/add-item" class="nav-link">Create item</a>
       </li>
     </ul>
+
+    <%- include('partials/error-container') %>
   </header>
 
   <main>
@@ -501,18 +503,19 @@
       }
 
       fetch(document.location.pathname + '/items' + document.location.search)
-        .then(response => {
+        .then(async (response) => {
           if (response.ok) {
             return response.json()
           }
 
-          return response.text().then(text => Promise.reject(new Error(text)))
+          const responseText = await response.text()
+          throw new Error(JSON.parse(responseText).message)
         })
         .then(json => {
           renderItems(json)
         })
         .catch(error => {
-          alert('Error loading data: ' + error)
+          handleError(error.message)
         })
     })
     </script>

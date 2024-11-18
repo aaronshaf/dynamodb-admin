@@ -63,8 +63,8 @@
                 if (response.ok) {
                     window.location = '/'
                 } else {
-                    const value = await response.text()
-                    $('#error-wrapper').html('<div class="alert alert-danger" role="alert">' + JSON.parse(value).message + '</div>')
+                    const error = await response.text()
+                    handleError(JSON.parse(error).message)
                 }
             })
 
@@ -182,16 +182,12 @@
           ]
         %>
         <%- include('partials/breadcrumb', { breadcrumb }) %>
+        <%- include('partials/error-container') %>
     </header>
     <main>
         <form id="form" method="post">
             <div class="container">
                 <h1>Create Table</h1>
-                <div class="row">
-                    <div class="col">
-                        <span id="error-wrapper"></span>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">

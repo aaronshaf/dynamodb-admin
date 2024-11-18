@@ -7,5 +7,16 @@
 <script>
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
-  })
+  });
+
+  function handleError(errorText) {
+    const errorEl = $('#error-wrapper')
+    if (errorEl.length) {
+      $('#error-wrapper').html('<div class="alert alert-danger" role="alert">' + errorText + '</div>')[0].scrollIntoView({
+        behavior: 'smooth',
+      });
+    } else {
+      window.alert(errorText)
+    }
+  }
 </script>
