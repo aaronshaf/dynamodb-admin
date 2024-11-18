@@ -92,7 +92,7 @@
           method: 'delete'
         }).then((response) => {
           if (response.ok) {
-            window.location = `/tables/<%= TableName %>`
+            window.location = `/tables/<%= encodeURIComponent(TableName) %>`
           }
         }).catch((error) => {
           console.error(error)
