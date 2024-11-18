@@ -65,7 +65,7 @@
     "@types/lodash.pickby": "^4.6.9",
     "@types/node": "^20.17.6",
     "concurrently": "^9.1.0",
-    "eslint": "9.14.0",
+    "eslint": "9.15.0",
     "eslint-config-rchl-base": "^2.0.4",
     "eslint-config-rchl-typescript": "^3.0.3",
     "husky": "^4.3.8",
