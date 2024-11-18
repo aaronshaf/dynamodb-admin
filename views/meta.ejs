@@ -53,7 +53,6 @@
   </main>
   <script>
       document.querySelector('#deleteTable').addEventListener('click', () => {
-          fetch('/tables/<%= Table.TableName %>', {
           fetch('/tables/<%= encodeURIComponent(Table.TableName) %>', {
               method: 'delete'
           }).then((response) => {
