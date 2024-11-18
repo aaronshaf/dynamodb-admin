@@ -20,7 +20,7 @@ Options:
  - `--dynamo-endpoint` - DynamoDB endpoint to connect to (default: http://localhost:8000).
  - `--skip-default-credentials` - Skip setting default credentials and region. By default the accessKeyId/secretAccessKey are set to "key" and "secret" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.
 
-Environment variables `HOST`, `PORT` and `DYNAMO_ENDPOINT` can also be used to set the respective options. Those are not recommended.
+Environment variables `HOST`, `PORT` and `DYNAMO_ENDPOINT` can also be used to set the respective options.
 
 If you use a local dynamodb that cares about credentials, you can configure them by using the following environment variables `AWS_REGION` `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` or specify the `--skip-default-credentials` argument and rely on the default AWS SDK credentials resolving behavior.
 
