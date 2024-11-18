@@ -419,9 +419,15 @@
             if (Number.isInteger(value)) {
               let dateValue
               if (value >= 10000000000) {  // 11 digits - assume date format in milliseconds
-                dateValue = `${new Date(value).toISOString()} (assumed milliseconds since epoch)`
+                const date = new Date(value)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed milliseconds since epoch)`
+                }
               } else if (value >= 100000000) {  // 9 digits - assume date format in seconds
-                dateValue = `${new Date(value * 1000).toISOString()} (assumed seconds since epoch)`
+                const date = new Date(value * 1000)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed seconds since epoch)`
+                }
               }
 
               if (dateValue) {
