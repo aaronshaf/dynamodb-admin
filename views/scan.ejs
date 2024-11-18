@@ -89,20 +89,20 @@
 
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active item-count" href="/tables/<%= Table.TableName %>">
+        <a class="nav-link active item-count" href="/tables/<%= encodeURIComponent(Table.TableName) %>">
           Items
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/tables/<%= Table.TableName %>/get">
+        <a class="nav-link" href="/tables/<%= encodeURIComponent(Table.TableName) %>/get">
           Get
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/tables/<%= Table.TableName %>/meta">Meta</a>
+        <a class="nav-link" href="/tables/<%= encodeURIComponent(Table.TableName) %>/meta">Meta</a>
       </li>
       <li class="nav-item ml-auto">
-        <a href="/tables/<%= Table.TableName %>/add-item" class="nav-link">Create item</a>
+        <a href="/tables/<%= encodeURIComponent(Table.TableName) %>/add-item" class="nav-link">Create item</a>
       </li>
     </ul>
   </header>
@@ -110,7 +110,7 @@
   <main>
     <form
       autocomplete="off"
-      action="/tables/<%= Table.TableName %>"
+      action="/tables/<%= encodeURIComponent(Table.TableName) %>"
       method="get"
       style="padding-top: 20px;padding-bottom: 20px;"
       id="form"
@@ -405,7 +405,7 @@
 
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
-          const viewUrl = '/tables/<%= Table.TableName %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
+          const viewUrl = '/tables/<%= encodeURIComponent(Table.TableName) %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
           const rowEl = $('<tr><td><a href="' + viewUrl + '">View</a></td></tr>')
 
           for (const column of data.uniqueKeys) {

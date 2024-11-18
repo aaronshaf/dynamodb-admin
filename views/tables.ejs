@@ -124,7 +124,7 @@
     <ul class="list-group" id="table-list">
       <% for(var i = 0; i < data.length; i++) { %>
         <li class="list-group-item" data-table-name="<%= data[i].TableName %>">
-          <a href='/tables/<%= data[i].TableName %>'>
+          <a href='/tables/<%= encodeURIComponent(data[i].TableName) %>'>
             <%= data[i].TableName %>
           </a>
           <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
