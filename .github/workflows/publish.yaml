@@ -27,3 +27,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: aaronshaf/dynamodb-admin:latest,aaronshaf/dynamodb-admin:${{ env.VERSION }}
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: aaronshaf/dynamodb-admin
