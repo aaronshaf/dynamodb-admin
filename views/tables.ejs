@@ -54,11 +54,11 @@
     }
 
     function deleteTable(TableName) {
-      if (!confirm(`Are you sure you want to delete table "${TableName}" ?`)) {
+      if (!confirm(`Are you sure you want to delete table "${TableName}"?`)) {
         return
       }
 
-      fetch(`/tables/${TableName}`, {
+      fetch(`/tables/${encodeURIComponent(TableName)}`, {
         method: 'delete'
       })
         .then(async (response) => {
@@ -74,11 +74,11 @@
     }
 
     function purgeTable(TableName) {
-      if (!confirm(`Are you sure you want to purge all records from table "${TableName}" ?`)) {
+      if (!confirm(`Are you sure you want to purge all records from table "${TableName}"?`)) {
         return
       }
 
-      fetch(`/tables/${TableName}/all`, {
+      fetch(`/tables/${encodeURIComponent(TableName)}/all`, {
         method: 'delete'
       }).then(async (response) => {
         if (!response.ok) {

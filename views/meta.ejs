@@ -44,6 +44,7 @@
 
   <main class="flex-fill d-flex flex-column">
     <div style="margin: 16px 0;">
+      <button id="purgeTable" type="button" class="btn btn-warning">Purge table</button>
       <button id="deleteTable" type="button" class="btn btn-danger">Delete table</button>
     </div>
     <div
@@ -54,7 +55,27 @@
     </div>
   </main>
   <script>
+      document.querySelector('#purgeTable').addEventListener('click', () => {
+          if (!confirm(`Are you sure you want to purge all records from table "<%= Table.TableName %>"?`)) {
+            return
+          }
+          fetch('/tables/<%= encodeURIComponent(Table.TableName) %>/all', {
+              method: 'delete'
+          }).then(async (response) => {
+              if (!response.ok) {
+                  const responseText = await response.text()
+                  throw new Error(JSON.parse(responseText).message)
+              }
+              window.location.href = '/tables/<%= encodeURIComponent(Table.TableName) %>'
+          }).catch((error) => {
+              handleError(error.message)
+          })
+      });
+
       document.querySelector('#deleteTable').addEventListener('click', () => {
+          if (!confirm(`Are you sure you want to delete table "<%= Table.TableName %>"?`)) {
+            return
+          }
           fetch('/tables/<%= encodeURIComponent(Table.TableName) %>', {
               method: 'delete'
           }).then(async (response) => {
