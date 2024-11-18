@@ -416,15 +416,25 @@
             const value = item[column]
             let wrapperEl = null
 
-            if (Number.isInteger(value) && value >= 0) {
+            if (Number.isInteger(value)) {
               let dateValue
-              try {
-                dateValue = new Date(value).toISOString()
-              } catch (error) {
-                dateValue = error.message
+              if (value >= 10000000000) {  // 11 digits - assume date format in milliseconds
+                const date = new Date(value)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed milliseconds since epoch)`
+                }
+              } else if (value >= 100000000) {  // 9 digits - assume date format in seconds
+                const date = new Date(value * 1000)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed seconds since epoch)`
+                }
               }
 
-              wrapperEl = $('<abbr data-toggle="tooltip" data-placement="top" title="' + dateValue + '"></abbr>')
+              if (dateValue) {
+                wrapperEl = $('<abbr data-toggle="tooltip" data-placement="top" title="' + dateValue + '"></abbr>')
+              } else {
+                wrapperEl = $('<div class="preformatted"></div>')
+              }
             } else {
               wrapperEl = $('<div class="preformatted"></div>')
             }
