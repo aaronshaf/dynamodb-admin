@@ -37,9 +37,20 @@
             }
             $(element).show()
           })
+          window.history.replaceState({}, undefined, getUrlWithState({ filter: query }))
         })
         .trigger('input')
     })
+
+    function getUrlWithState({ filter }) {
+      const url = new URL(location.href);
+      if (filter) {
+        url.searchParams.set('filter', filter)
+      } else {
+        url.searchParams.delete('filter')
+      }
+      return url.toString()
+    }
 
     function deleteTable(TableName) {
       if (!confirm(`Are you sure you want to delete table "${TableName}" ?`)) {
@@ -118,7 +129,7 @@
     </script>
 
     <div class="form-group">
-      <input type="text" class="form-control mb-3" id="filter-input" placeholder="Filter tables">
+      <input type="search" class="form-control mb-3" id="filter-input" placeholder="Filter tables">
     </div>
 
     <ul class="list-group" id="table-list">
