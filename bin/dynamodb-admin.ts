@@ -39,7 +39,7 @@ parser.add_argument('-p', '--port', {
 
 parser.add_argument('--dynamo-endpoint', {
     type: 'str',
-    default: 'http://localhost:8000',
+    default: process.env.DYNAMO_ENDPOINT || 'http://localhost:8000',
     help: 'DynamoDB endpoint to connect to.',
 });
 
