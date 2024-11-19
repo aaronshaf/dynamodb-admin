@@ -8,7 +8,9 @@
   "main": "dist/backend.js",
   "types": "dist/lib/backend.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "public",
+    "views"
   ],
   "scripts": {
     "build": "tsc && rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
