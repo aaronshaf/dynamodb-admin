@@ -15,7 +15,7 @@
           text: 'Tables',
         },
         {
-          href: `/tables/${TableName}`,
+          href: `/tables/${encodeURIComponent(TableName)}`,
           text: Table.TableName,
           badge: Table.ItemCount,
         },
