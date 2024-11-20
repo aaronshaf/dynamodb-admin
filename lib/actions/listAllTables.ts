@@ -1,7 +1,7 @@
 import type { TableDescription } from '@aws-sdk/client-dynamodb';
-import type { DynamoDbApi } from '../dynamoDbApi';
+import type { DynamoApiController } from '../dynamoDbApi';
 
-export async function listAllTables(ddbApi: DynamoDbApi): Promise<TableDescription[]> {
+export async function listAllTables(ddbApi: DynamoApiController): Promise<TableDescription[]> {
     const allTableNames: string[] = [];
     let lastEvaluatedTableName: string | undefined = undefined;
 

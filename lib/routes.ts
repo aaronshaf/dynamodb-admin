@@ -10,11 +10,11 @@ import { getPage } from './actions/getPage';
 import { purgeTable } from './actions/purgeTable';
 import { listAllTables } from './actions/listAllTables';
 import asyncMiddleware from './utils/asyncMiddleware';
-import type { DynamoDbApi } from './dynamoDbApi';
+import type { DynamoApiController } from './dynamoDbApi';
 
 const DEFAULT_THEME = process.env.DEFAULT_THEME || 'light';
 
-export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
+export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
     app.use(errorhandler());
     app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 
@@ -444,6 +444,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoDbApi): void {
     }));
 
     app.use(((error, _req, res, _next) => {
-        res.status(500).send(error);
+        console.info(error.stack);
+        res.status(500).json({ message: error.message });
     }) as ErrorRequestHandler);
 }

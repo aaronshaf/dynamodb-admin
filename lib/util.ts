@@ -1,6 +1,6 @@
 import type { AttributeDefinition, KeySchemaElement, QueryInput, TableDescription } from '@aws-sdk/client-dynamodb';
 import type { ScanCommandInput, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
-import type { DynamoDbApi } from './dynamoDbApi';
+import type { DynamoApiController } from './dynamoDbApi';
 import type { ItemList, Key } from './types';
 
 export class DynamoDBAdminError extends Error {
@@ -59,7 +59,7 @@ export function extractKeysForItems(Items: Record<string, any>[]): string[] {
  * @param readOperation The read operation
  */
 export async function doSearch(
-    ddbApi: DynamoDbApi,
+    ddbApi: DynamoApiController,
     tableName: string,
     scanParams: ScanParams,
     limit?: number,
@@ -72,8 +72,6 @@ export async function doSearch(
         ...limit !== undefined ? { Limit: limit } : {},
     };
 
-    const readMethod = ddbApi[readOperation];
-
     let items: ItemList = [];
 
     const getNextBite = async(params: ScanCommandInput | QueryCommandInput, nextKey: Key | undefined = undefined): Promise<ItemList> => {
@@ -81,7 +79,7 @@ export async function doSearch(
             params.ExclusiveStartKey = nextKey;
         }
 
-        const data = await readMethod(params);
+        const data = await ddbApi[readOperation](params);
         if (data.Items && data.Items.length > 0) {
             items = items.concat(data.Items);
         }

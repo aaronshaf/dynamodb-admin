@@ -1,10 +1,10 @@
 import type { KeySchemaElement } from '@aws-sdk/client-dynamodb';
 import { extractKey, doSearch, type ScanParams } from '../util';
-import type { DynamoDbApi } from '../dynamoDbApi';
+import type { DynamoApiController } from '../dynamoDbApi';
 import type { ItemList, Key } from '../types';
 
 export async function getPage(
-    ddbApi: DynamoDbApi,
+    ddbApi: DynamoApiController,
     keySchema: KeySchemaElement[],
     TableName: string,
     scanParams: ScanParams,
