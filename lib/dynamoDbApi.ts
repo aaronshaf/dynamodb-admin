@@ -36,37 +36,56 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBAdminError } from './util';
 
-export type DynamoDbApi = {
-    batchWriteItem: (input: BatchWriteCommandInput) => Promise<BatchWriteCommandOutput>;
-    createTable: (input: CreateTableInput) => Promise<CreateTableOutput>;
-    deleteItem: (input: DeleteCommandInput) => Promise<DeleteCommandOutput>;
-    deleteTable: (input: DeleteTableInput) => Promise<DeleteTableOutput>;
-    describeTable: (input: DescribeTableInput) => Promise<TableDescription>;
-    getItem: (input: GetCommandInput) => Promise<GetCommandOutput>;
-    listTables: (input: ListTablesInput) => Promise<ListTablesOutput>;
-    putItem: (input: PutCommandInput) => Promise<PutCommandOutput>;
-    query: (input: QueryCommandInput) => Promise<QueryCommandOutput>;
-    scan: (input: ScanCommandInput) => Promise<ScanCommandOutput>;
-};
+export class DynamoApiController {
+    dynamodb: DynamoDBClient;
+    docClient: DynamoDBDocumentClient;
 
-export function createDynamoDbApi(dynamodb: DynamoDBClient): DynamoDbApi {
-    const docClient = DynamoDBDocumentClient.from(dynamodb);
-    return {
-        batchWriteItem: input => dynamodb.send(new BatchWriteCommand(input)),
-        createTable: input => dynamodb.send(new CreateTableCommand(input)),
-        deleteItem: input => docClient.send(new DeleteCommand(input)),
-        deleteTable: input => dynamodb.send(new DeleteTableCommand(input)),
-        describeTable: async input => {
-            const description = await dynamodb.send(new DescribeTableCommand(input));
-            if (!description.Table) {
-                throw new DynamoDBAdminError(`No table named ${input.TableName}`);
-            }
-            return description.Table;
-        },
-        getItem: input => docClient.send(new GetCommand(input)),
-        listTables: input => dynamodb.send(new ListTablesCommand(input)),
-        putItem: input => docClient.send(new PutCommand(input)),
-        query: input => docClient.send(new QueryCommand(input)),
-        scan: input => docClient.send(new ScanCommand(input)),
-    };
+    constructor(dynamodb: DynamoDBClient) {
+        this.dynamodb = dynamodb;
+        this.docClient = DynamoDBDocumentClient.from(dynamodb);
+    }
+
+    async batchWriteItem(input: BatchWriteCommandInput): Promise<BatchWriteCommandOutput> {
+        return await this.dynamodb.send(new BatchWriteCommand(input));
+    }
+
+    async createTable(input: CreateTableInput): Promise<CreateTableOutput> {
+        return await this.dynamodb.send(new CreateTableCommand(input));
+    }
+
+    async deleteItem(input: DeleteCommandInput): Promise<DeleteCommandOutput> {
+        return await this.docClient.send(new DeleteCommand(input));
+    }
+
+    async deleteTable(input: DeleteTableInput): Promise<DeleteTableOutput> {
+        return await this.dynamodb.send(new DeleteTableCommand(input));
+    }
+
+    async describeTable(input: DescribeTableInput): Promise<TableDescription> {
+        const description = await this.dynamodb.send(new DescribeTableCommand(input));
+        if (!description.Table) {
+            throw new DynamoDBAdminError(`No table named ${input.TableName}`);
+        }
+        return description.Table;
+    }
+
+    async listTables(input: ListTablesInput): Promise<ListTablesOutput> {
+        return await this.dynamodb.send(new ListTablesCommand(input));
+    }
+
+    async query(input: QueryCommandInput): Promise<QueryCommandOutput> {
+        return await this.docClient.send(new QueryCommand(input));
+    }
+
+    async scan(input: ScanCommandInput): Promise<ScanCommandOutput> {
+        return await this.docClient.send(new ScanCommand(input));
+    }
+
+    async getItem(input: GetCommandInput): Promise<GetCommandOutput> {
+        return await this.docClient.send(new GetCommand(input));
+    }
+
+    async putItem(input: PutCommandInput): Promise<PutCommandOutput> {
+        return await this.docClient.send(new PutCommand(input));
+    }
 }
