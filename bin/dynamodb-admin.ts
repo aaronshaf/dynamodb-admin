@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { ArgumentParser } from 'argparse';
 import open from 'open';
-import clc from 'cli-color';
+import colors from 'picocolors';
 import { createServer } from '../lib/backend';
 
 const { description, version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), { encoding: 'utf8' }));
 
 if (process.env.NODE_ENV === 'production') {
-    console.error(clc.red('Do not run this in production!'));
+    console.error(colors.red('Do not run this in production!'));
     process.exit(1);
 }
 

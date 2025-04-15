@@ -1,5 +1,5 @@
 import type { DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
-import clc from 'cli-color';
+import colors from 'picocolors';
 
 type CreateAwsConfigOptions = {
     dynamoEndpoint?: string;
@@ -28,21 +28,21 @@ export function createAwsConfig({ dynamoEndpoint, skipDefaultCredentials }: Crea
     if (!dynamoEndpoint) {
         if (typeof process.env.DYNAMO_ENDPOINT === 'string') {
             if (process.env.DYNAMO_ENDPOINT.indexOf('.amazonaws.com') > -1) {
-                console.error(clc.red('dynamodb-admin is only intended for local development'));
+                console.error(colors.red('dynamodb-admin is only intended for local development'));
                 process.exit(1);
             }
             dynamoConfig.endpoint = process.env.DYNAMO_ENDPOINT;
         } else {
-            console.info(clc.yellow('  DYNAMO_ENDPOINT is not defined (using default of http://localhost:8000)'));
+            console.info(colors.yellow('  DYNAMO_ENDPOINT is not defined (using default of http://localhost:8000)'));
         }
     }
 
-    console.info(clc.blackBright(`  database endpoint: \t${dynamoConfig.endpoint}`));
+    console.info(colors.blackBright(`  database endpoint: \t${dynamoConfig.endpoint}`));
     if (dynamoConfig.region) {
-        console.info(clc.blackBright(`  region: \t\t${dynamoConfig.region}`));
+        console.info(colors.blackBright(`  region: \t\t${dynamoConfig.region}`));
     }
     if (dynamoConfig.credentials && 'accessKeyId' in dynamoConfig.credentials) {
-        console.info(clc.blackBright(`  accessKey: \t\t${dynamoConfig.credentials.accessKeyId}\n`));
+        console.info(colors.blackBright(`  accessKey: \t\t${dynamoConfig.credentials.accessKeyId}\n`));
     }
 
     return dynamoConfig;
