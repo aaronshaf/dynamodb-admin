@@ -71,6 +71,7 @@
     .sortable-header {
       cursor: pointer;
       user-select: none;
+      white-space: nowrap;
     }
 
     .sort-arrows {
@@ -428,10 +429,10 @@
     function renderItems(data) {
       $('#actions-row').append(data.uniqueKeys.map(key => 
         `<th scope="col" class="sortable-header" data-column="${key}" aria-sort="none">
-          ${key} 
+          ${key}
           <span class="sort-arrows">
-            <span class="sort-arrow sort-arrow-up" data-direction="asc" aria-label="Sort ascending" title="Sort ascending">🠥</span>
-            <span class="sort-arrow sort-arrow-down" data-direction="desc" aria-label="Sort descending" title="Sort descending">🠧</span>
+            <span class="sort-arrow sort-arrow-up" data-direction="asc" aria-label="Sort ascending" title="Sort ascending">↑</span>
+            <span class="sort-arrow sort-arrow-down" data-direction="desc" aria-label="Sort descending" title="Sort descending">↓</span>
           </span>
         </th>`
       ))
