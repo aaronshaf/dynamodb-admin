@@ -11,7 +11,7 @@
     <%
       const breadcrumb = [
         {
-          href: '/',
+          href: basePath + '/',
           text: 'Tables',
         },
         {
@@ -25,17 +25,17 @@
 
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
-        <a class='nav-link' href='/tables/<%= encodeURIComponent(Table.TableName) %>'>
+        <a class='nav-link' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'>
           Items
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/tables/<%= encodeURIComponent(Table.TableName) %>/get">
+        <a class="nav-link" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/get'>
           Get
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link active' href='/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
+        <a class='nav-link active' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
       </li>
     </ul>
 
@@ -59,14 +59,14 @@
           if (!confirm(`Are you sure you want to purge all records from table "<%= Table.TableName %>"?`)) {
             return
           }
-          fetch('/tables/<%= encodeURIComponent(Table.TableName) %>/all', {
+          fetch('<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/all', {
               method: 'delete'
           }).then(async (response) => {
               if (!response.ok) {
                   const responseText = await response.text()
                   throw new Error(JSON.parse(responseText).message)
               }
-              window.location.href = '/tables/<%= encodeURIComponent(Table.TableName) %>'
+              window.location.href = '<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'
           }).catch((error) => {
               handleError(error.message)
           })
@@ -76,14 +76,14 @@
           if (!confirm(`Are you sure you want to delete table "<%= Table.TableName %>"?`)) {
             return
           }
-          fetch('/tables/<%= encodeURIComponent(Table.TableName) %>', {
+          fetch('<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>', {
               method: 'delete'
           }).then(async (response) => {
               if (!response.ok) {
                   const responseText = await response.text()
                   throw new Error(JSON.parse(responseText).message)
               }
-              window.location.href = '/'
+              window.location.href = '<%= basePath %>/'
           }).catch((error) => {
               handleError(error.message)
           })

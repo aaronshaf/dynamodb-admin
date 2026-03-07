@@ -10,7 +10,7 @@
     <%
       const breadcrumb = [
         {
-          href: '/',
+          href: basePath + '/',
           text: 'Tables',
         },
         {
@@ -24,17 +24,17 @@
 
     <ul class='nav nav-tabs'>
       <li class='nav-item'>
-        <a class='nav-link' href='/tables/<%= encodeURIComponent(Table.TableName) %>'>
+        <a class='nav-link' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'>
           Items
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link active" href="/tables/<%= encodeURIComponent(Table.TableName) %>/get">
+        <a class="nav-link active" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/get'>
           Get
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' href='/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
+        <a class='nav-link' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
       </li>
     </ul>
   </header>

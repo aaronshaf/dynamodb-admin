@@ -61,7 +61,7 @@
                     body: JSON.stringify(createTableRequest)
                 })
                 if (response.ok) {
-                    window.location = '/'
+                    window.location = '<%= basePath %>/'
                 } else {
                     const error = await response.text()
                     handleError(JSON.parse(error).message)

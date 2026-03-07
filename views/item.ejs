@@ -11,11 +11,11 @@
     <%
       const breadcrumb = [
         {
-          href: '/',
+          href: basePath + '/',
           text: 'Tables',
         },
         {
-          href: `/tables/${encodeURIComponent(TableName)}`,
+          href: `${basePath}/tables/${encodeURIComponent(TableName)}`,
           text: Table.TableName,
           badge: Table.ItemCount,
         },
@@ -94,7 +94,7 @@
           method: 'delete'
         }).then(async (response) => {
           if (response.ok) {
-            window.location = `/tables/<%= encodeURIComponent(TableName) %>`
+            window.location = '<%= basePath %>/tables/<%= encodeURIComponent(TableName) %>'
           } else {
             const responseText = await response.text()
             throw new Error(JSON.parse(responseText).message)

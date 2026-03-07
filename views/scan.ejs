@@ -3,7 +3,7 @@
 <head>
   <%- include('partials/head') %>
   <%- include('partials/bootstrap-deps') %>
-  <script src='/assets/vendor/json-formatter/json-formatter.js'></script>
+  <script src='<%= basePath %>/assets/vendor/json-formatter/json-formatter.js'></script>
   <style>
     .table-container {
       margin-bottom: 1rem;
@@ -75,7 +75,7 @@
     <%
       const breadcrumb = [
         {
-          href: '/',
+          href: basePath + '/',
           text: 'Tables',
         },
         {
@@ -89,20 +89,20 @@
 
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active item-count" href="/tables/<%= encodeURIComponent(Table.TableName) %>">
+        <a class="nav-link active item-count" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'>
           Items
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/tables/<%= encodeURIComponent(Table.TableName) %>/get">
+        <a class="nav-link" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/get'>
           Get
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/tables/<%= encodeURIComponent(Table.TableName) %>/meta">Meta</a>
+        <a class="nav-link" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
       </li>
       <li class="nav-item ml-auto">
-        <a href="/tables/<%= encodeURIComponent(Table.TableName) %>/add-item" class="nav-link">Create item</a>
+        <a href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/add-item' class="nav-link">Create item</a>
       </li>
     </ul>
 
@@ -112,7 +112,7 @@
   <main>
     <form
       autocomplete="off"
-      action="/tables/<%= encodeURIComponent(Table.TableName) %>"
+      action='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'
       method="get"
       style="padding-top: 20px;padding-bottom: 20px;"
       id="form"
@@ -407,7 +407,7 @@
 
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
-          const viewUrl = '/tables/<%= encodeURIComponent(Table.TableName) %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
+          const viewUrl = '<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
           const rowEl = $('<tr><td><a href="' + viewUrl + '">View</a></td></tr>')
 
           for (const column of data.uniqueKeys) {

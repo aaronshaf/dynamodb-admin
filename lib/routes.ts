@@ -14,32 +14,35 @@ import type { DynamoApiController } from './dynamoDbApi';
 
 const DEFAULT_THEME = process.env.DEFAULT_THEME || 'light';
 
-export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
-    app.use(errorhandler());
-    app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath = ''): void {
+    const router = express.Router();
 
-    app.use(
+    router.use(errorhandler());
+    router.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+
+    router.use(
         cookieParser(),
         (req, res, next) => {
             const { theme = DEFAULT_THEME } = req.cookies;
             res.locals = {
                 theme,
+                basePath,
             };
             next();
         },
     );
 
-    app.get('/', asyncMiddleware(async(_req, res) => {
+    router.get('/', asyncMiddleware(async(_req, res) => {
         const data = await listAllTables(ddbApi);
         res.render('tables', { data });
     }));
 
-    app.get('/api/tables', asyncMiddleware(async(_req, res) => {
+    router.get('/api/tables', asyncMiddleware(async(_req, res) => {
         const data = await listAllTables(ddbApi);
         res.send(data);
     }));
 
-    app.get('/create-table', (_req, res) => {
+    router.get('/create-table', (_req, res) => {
         res.render('create-table', {});
     });
 
@@ -58,7 +61,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         IndexType: 'global' | 'local';
     };
 
-    app.post(
+    router.post(
         '/create-table',
         bodyParser.json({ limit: '500kb' }),
         asyncMiddleware(async(req, res) => {
@@ -170,7 +173,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         }),
     );
 
-    app.delete('/tables', asyncMiddleware(async(_req, res) => {
+    router.delete('/tables', asyncMiddleware(async(_req, res) => {
         const tablesList = await listAllTables(ddbApi);
         if (tablesList.length === 0) {
             res.send('There are no tables to delete');
@@ -180,7 +183,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.send('Tables deleted');
     }));
 
-    app.delete('/tables-purge', asyncMiddleware(async(req, res) => {
+    router.delete('/tables-purge', asyncMiddleware(async(req, res) => {
         const tablesList = await listAllTables(ddbApi);
         if (tablesList.length === 0) {
             res.send('There are no tables to purge');
@@ -190,27 +193,27 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.send('Tables purged');
     }));
 
-    app.delete('/tables/:TableName', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         await ddbApi.deleteTable({ TableName });
         res.status(204).end();
     }));
 
-    app.delete('/tables/:TableName/all', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName/all', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         await purgeTable(TableName, ddbApi);
         res.status(200).end();
     }));
 
-    app.get('/tables/:TableName/get', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/get', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const hash = req.query.hash as string;
         const range = req.query.range as string;
         if (hash) {
             if (range) {
-                res.redirect(`/tables/${encodeURIComponent(TableName)}/items/${encodeURIComponent(hash)},${encodeURIComponent(range)}`);
+                res.redirect(`${basePath}/tables/${encodeURIComponent(TableName)}/items/${encodeURIComponent(hash)},${encodeURIComponent(range)}`);
             } else {
-                res.redirect(`/tables/${encodeURIComponent(TableName)}/items/${encodeURIComponent(hash)}`);
+                res.redirect(`${basePath}/tables/${encodeURIComponent(TableName)}/items/${encodeURIComponent(hash)}`);
             }
             return;
         }
@@ -225,7 +228,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         });
     }));
 
-    app.get('/tables/:TableName', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName', asyncMiddleware(async(req, res) => {
         const TableName = req.params.TableName;
         req.query = pickBy(req.query);
         const pageNum = typeof req.query.pageNum === 'string' ? Number.parseInt(req.query.pageNum) : 1;
@@ -252,7 +255,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.render('scan', data);
     }));
 
-    app.get('/tables/:TableName/items', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/items', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         req.query = pickBy(req.query);
         const filters = typeof req.query.filters === 'string' ? JSON.parse(req.query.filters) : {};
@@ -352,7 +355,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.json(data);
     }));
 
-    app.get('/tables/:TableName/meta', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/meta', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const [tableDescription, items] = await Promise.all([
             ddbApi.describeTable({ TableName }),
@@ -365,7 +368,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.render('meta', data);
     }));
 
-    app.delete('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.deleteItem({
@@ -375,7 +378,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.status(204).end();
     }));
 
-    app.get('/tables/:TableName/add-item', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/add-item', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         const Item: Record<string, string | number> = {};
@@ -397,7 +400,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         });
     }));
 
-    app.get('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         const params = {
@@ -418,7 +421,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         });
     }));
 
-    app.put('/tables/:TableName/add-item', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/add-item', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
@@ -432,7 +435,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         return;
     }));
 
-    app.put('/tables/:TableName/items/:key', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/items/:key', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
@@ -443,8 +446,10 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController): void {
         res.json(response.Item);
     }));
 
-    app.use(((error, _req, res, _next) => {
+    router.use(((error, _req, res, _next) => {
         console.info(error.stack);
         res.status(500).json({ message: error.message });
     }) as ErrorRequestHandler);
+
+    app.use(basePath, router);
 }
