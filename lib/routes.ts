@@ -1,12 +1,11 @@
 import path from 'node:path';
 import type { AttributeDefinition, KeySchemaElement, GlobalSecondaryIndex, LocalSecondaryIndex, ScanInput, QueryInput, ScalarAttributeType } from '@aws-sdk/client-dynamodb';
-import { NumberValue } from '@aws-sdk/lib-dynamodb';
 import express, { type Express, type ErrorRequestHandler } from 'express';
 import errorhandler from 'errorhandler';
 import bodyParser from 'body-parser';
 import pickBy from 'lodash.pickby';
 import cookieParser from 'cookie-parser';
-import { extractKey, extractKeysForItems, isAttributeNotAlreadyCreated, parseKey, ScanParams } from './util';
+import { extractKey, extractKeysForItems, isAttributeNotAlreadyCreated, parseKey, safeNumber, ScanParams } from './util';
 import { getPage } from './actions/getPage';
 import { purgeTable } from './actions/purgeTable';
 import { listAllTables } from './actions/listAllTables';
@@ -282,15 +281,11 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         const FilterExpressions: string[] = [];
         const KeyConditionExpression: string[] = [];
 
-        // Create a variable to uniquely identify each expression attribute
         let i = 0;
 
         for (const key in filters) {
             if (filters[key].type === 'N') {
-                const num = Number(filters[key].value);
-                filters[key].value = Number.isFinite(num) && String(num) === filters[key].value
-                    ? num
-                    : new NumberValue(filters[key].value);
+                filters[key].value = safeNumber(filters[key].value);
             }
 
             ExpressionAttributeNames[`#key${i}`] = key;
@@ -300,23 +295,18 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
                 : undefined;
 
             if (matchedKeySchema) {
-                // Only the Range key can support begins_with operator
                 if (matchedKeySchema.KeyType === 'RANGE' && filters[key].operator === 'begins_with') {
                     KeyConditionExpression.push(`${filters[key].operator} ( #key${i} , :key${i})`);
                 } else {
                     KeyConditionExpression.push(`#key${i} ${filters[key].operator} :key${i}`);
                 }
             } else {
-                ExpressionAttributeNames[`#key${i}`] = key;
-                ExpressionAttributeValues[`:key${i}`] = filters[key].value;
-
                 if (filters[key].operator === 'begins_with') {
                     FilterExpressions.push(`${filters[key].operator} ( #key${i} , :key${i})`);
                 } else {
                     FilterExpressions.push(`#key${i} ${filters[key].operator} :key${i}`);
                 }
             }
-            // Increment the unique ID variable
             i = i + 1;
         }
 

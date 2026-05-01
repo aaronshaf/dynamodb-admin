@@ -107,18 +107,24 @@ export async function doSearch(
     return await getNextBite(params);
 }
 
+/**
+ * Convert a numeric string to a plain JS number if it can be represented
+ * without precision loss, otherwise wrap it in NumberValue for the DynamoDB SDK.
+ */
+export function safeNumber(value: string): number | NumberValue {
+    const num = Number(value);
+    if (Number.isFinite(num) && String(num) === value) {
+        return num;
+    }
+    return new NumberValue(value);
+}
+
 function typecastKey(keyName: string, keyValue: string, table: TableDescription): string | number | NumberValue {
     const definition = table.AttributeDefinitions!.find(attribute => attribute.AttributeName === keyName);
     if (definition) {
         switch (definition.AttributeType) {
-            case 'N': {
-                const num = Number(keyValue);
-                // Use plain number if safe, NumberValue if it would lose precision
-                if (Number.isFinite(num) && String(num) === keyValue) {
-                    return num;
-                }
-                return new NumberValue(keyValue);
-            }
+            case 'N':
+                return safeNumber(keyValue);
             case 'S':
                 return String(keyValue);
         }

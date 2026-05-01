@@ -20,9 +20,6 @@ window.DynamoAttrRenderer = (function () {
     return e
   }
 
-  /**
-   * Render a DynamoDB attribute value as a DOM element.
-   */
   function renderValue(attr) {
     if (attr == null) return el('span', 'json-formatter-null', 'null')
     if (attr.S !== undefined) return el('span', 'json-formatter-string', '"' + escapeString(attr.S) + '"')
@@ -35,14 +32,11 @@ window.DynamoAttrRenderer = (function () {
     if (attr.SS) return renderStringSet(attr.SS)
     if (attr.NS) return renderNumberSet(attr.NS)
     if (attr.BS) return el('span', 'json-formatter-string', '"<BinarySet>"')
-    // Fallback
     return el('span', '', JSON.stringify(attr))
   }
 
-  /**
-   * Detect if a numeric string looks like a timestamp and return a
-   * human-readable date string, or null if it doesn't look like one.
-   */
+  // -- Timestamp detection for number tooltips --
+
   function detectDate(numStr) {
     if (!/^\d+$/.test(numStr)) return null
     var num = Number(numStr)
@@ -69,10 +63,6 @@ window.DynamoAttrRenderer = (function () {
     return null
   }
 
-  /**
-   * Render a DynamoDB N value. If it looks like a timestamp, wrap it in
-   * an <abbr> with a tooltip showing the interpreted date.
-   */
   function renderNumber(numStr) {
     var span = el('span', 'json-formatter-number', numStr)
     var dateStr = detectDate(numStr)
@@ -87,153 +77,78 @@ window.DynamoAttrRenderer = (function () {
     return span
   }
 
-  function renderMap(map) {
-    var keys = Object.keys(map)
-    if (keys.length === 0) {
-      return el('span', 'json-formatter-bracket', '{}')
-    }
+  // -- Collapsible container (shared by Map, List, and Set renderers) --
 
+  /**
+   * Render a collapsible container with a toggler, type label, preview, and children.
+   * @param {string} typeLabel - e.g. "Object ", "Array[3] ", "StringSet[2] "
+   * @param {string} typeLabelClass - CSS class for the type label span
+   * @param {string} previewText - text shown when collapsed, e.g. "{...}", "[...]"
+   * @param {Array} items - array of {key, value} where value is a DOM element
+   */
+  function renderCollapsible(typeLabel, typeLabelClass, previewText, items) {
     var row = el('div', 'json-formatter-row json-formatter-open')
 
-    // Toggler link
     var link = el('a', 'json-formatter-toggler-link')
-    var toggler = el('span', 'json-formatter-toggler')
-    link.appendChild(toggler)
-
-    var typeLabel = el('span', '', 'Object ')
-    link.appendChild(typeLabel)
-
-    // Preview (shown when collapsed)
-    var preview = el('span', 'json-formatter-preview-text')
-    preview.textContent = '{' + keys.slice(0, 3).map(function (k) { return JSON.stringify(k) + ': ...' }).join(', ') + (keys.length > 3 ? ', ...' : '') + '}'
-    link.appendChild(preview)
-
+    link.appendChild(el('span', 'json-formatter-toggler'))
+    link.appendChild(el('span', typeLabelClass, typeLabel))
+    link.appendChild(el('span', 'json-formatter-preview-text', previewText))
     row.appendChild(link)
 
-    // Children
     var children = el('div', 'json-formatter-children')
-    keys.forEach(function (key) {
+    items.forEach(function (item) {
       var childRow = el('div', 'json-formatter-row')
       var childLink = el('a')
-      var keySpan = el('span', 'json-formatter-key', key + ':')
-      childLink.appendChild(keySpan)
+      childLink.appendChild(el('span', 'json-formatter-key', item.key + ':'))
       childLink.appendChild(document.createTextNode(' '))
-      childLink.appendChild(renderValue(map[key]))
+      childLink.appendChild(item.value)
       childRow.appendChild(childLink)
       children.appendChild(childRow)
     })
     row.appendChild(children)
 
-    // Toggle behavior
     link.addEventListener('click', function (e) {
       e.preventDefault()
       row.classList.toggle('json-formatter-open')
     })
 
     return row
+  }
+
+  // -- Type-specific renderers --
+
+  function renderMap(map) {
+    var keys = Object.keys(map)
+    if (keys.length === 0) return el('span', 'json-formatter-bracket', '{}')
+
+    var preview = '{' + keys.slice(0, 3).map(function (k) { return JSON.stringify(k) + ': ...' }).join(', ') + (keys.length > 3 ? ', ...' : '') + '}'
+    var items = keys.map(function (key) {
+      return { key: key, value: renderValue(map[key]) }
+    })
+    return renderCollapsible('Object ', '', preview, items)
   }
 
   function renderList(list) {
-    if (list.length === 0) {
-      return el('span', 'json-formatter-bracket', '[]')
-    }
+    if (list.length === 0) return el('span', 'json-formatter-bracket', '[]')
 
-    var row = el('div', 'json-formatter-row json-formatter-open')
-
-    // Toggler link
-    var link = el('a', 'json-formatter-toggler-link')
-    var toggler = el('span', 'json-formatter-toggler')
-    link.appendChild(toggler)
-
-    var typeLabel = el('span', 'json-formatter-bracket', 'Array[' + list.length + '] ')
-    link.appendChild(typeLabel)
-
-    // Preview
-    var preview = el('span', 'json-formatter-preview-text')
-    preview.textContent = '[...]'
-    link.appendChild(preview)
-
-    row.appendChild(link)
-
-    // Children
-    var children = el('div', 'json-formatter-children')
-    list.forEach(function (item, i) {
-      var childRow = el('div', 'json-formatter-row')
-      var childLink = el('a')
-      var keySpan = el('span', 'json-formatter-key', i + ':')
-      childLink.appendChild(keySpan)
-      childLink.appendChild(document.createTextNode(' '))
-      childLink.appendChild(renderValue(item))
-      childRow.appendChild(childLink)
-      children.appendChild(childRow)
+    var items = list.map(function (item, i) {
+      return { key: i, value: renderValue(item) }
     })
-    row.appendChild(children)
-
-    // Toggle behavior
-    link.addEventListener('click', function (e) {
-      e.preventDefault()
-      row.classList.toggle('json-formatter-open')
-    })
-
-    return row
+    return renderCollapsible('Array[' + list.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
 
   function renderStringSet(ss) {
-    var row = el('div', 'json-formatter-row json-formatter-open')
-    var link = el('a', 'json-formatter-toggler-link')
-    var toggler = el('span', 'json-formatter-toggler')
-    link.appendChild(toggler)
-    link.appendChild(el('span', 'json-formatter-bracket', 'StringSet[' + ss.length + '] '))
-    var preview = el('span', 'json-formatter-preview-text', '[...]')
-    link.appendChild(preview)
-    row.appendChild(link)
-
-    var children = el('div', 'json-formatter-children')
-    ss.forEach(function (s, i) {
-      var childRow = el('div', 'json-formatter-row')
-      var childLink = el('a')
-      childLink.appendChild(el('span', 'json-formatter-key', i + ':'))
-      childLink.appendChild(document.createTextNode(' '))
-      childLink.appendChild(el('span', 'json-formatter-string', '"' + escapeString(s) + '"'))
-      childRow.appendChild(childLink)
-      children.appendChild(childRow)
+    var items = ss.map(function (s, i) {
+      return { key: i, value: el('span', 'json-formatter-string', '"' + escapeString(s) + '"') }
     })
-    row.appendChild(children)
-
-    link.addEventListener('click', function (e) {
-      e.preventDefault()
-      row.classList.toggle('json-formatter-open')
-    })
-    return row
+    return renderCollapsible('StringSet[' + ss.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
 
   function renderNumberSet(ns) {
-    var row = el('div', 'json-formatter-row json-formatter-open')
-    var link = el('a', 'json-formatter-toggler-link')
-    var toggler = el('span', 'json-formatter-toggler')
-    link.appendChild(toggler)
-    link.appendChild(el('span', 'json-formatter-bracket', 'NumberSet[' + ns.length + '] '))
-    var preview = el('span', 'json-formatter-preview-text', '[...]')
-    link.appendChild(preview)
-    row.appendChild(link)
-
-    var children = el('div', 'json-formatter-children')
-    ns.forEach(function (n, i) {
-      var childRow = el('div', 'json-formatter-row')
-      var childLink = el('a')
-      childLink.appendChild(el('span', 'json-formatter-key', i + ':'))
-      childLink.appendChild(document.createTextNode(' '))
-      childLink.appendChild(el('span', 'json-formatter-number', n))
-      childRow.appendChild(childLink)
-      children.appendChild(childRow)
+    var items = ns.map(function (n, i) {
+      return { key: i, value: el('span', 'json-formatter-number', n) }
     })
-    row.appendChild(children)
-
-    link.addEventListener('click', function (e) {
-      e.preventDefault()
-      row.classList.toggle('json-formatter-open')
-    })
-    return row
+    return renderCollapsible('NumberSet[' + ns.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
 
   function escapeString(s) {
