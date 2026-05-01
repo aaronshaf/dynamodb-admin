@@ -53,6 +53,7 @@
     "errorhandler": "^1.5.1",
     "express": "^4.21.1",
     "lodash.pickby": "^4.6.0",
+    "lossless-json": "^4.3.0",
     "open": "^10.1.0"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@
   <%- include('partials/head') %>
   <%- include('partials/ace-deps') %>
   <%- include('partials/bootstrap-deps') %>
+  <script src='<%= basePath %>/assets/vendor/lossless-json/lossless-json.js'></script>
   <%- include('partials/head-tail') %>
 </head>
 <body class='container-fluid d-flex flex-column'>
@@ -34,26 +35,148 @@
   </header>
 
   <main class='flex-fill d-flex flex-column'>
-    <nav>
+    <nav class="d-flex align-items-center">
       <script>
+      /* global LosslessJSON, $ */
+
+      // ---- Editor view mode state ----
+      // 'json' = clean JSON view (default), 'attribute' = DynamoDB attribute map view
+      let viewMode = 'json'
+
+      // ---- Attribute map <-> JSON conversion ----
+
       /**
-       * Extract the scalar value from a DynamoDB attribute map value.
-       * e.g. {"S": "hello"} -> "hello", {"N": "42"} -> "42"
+       * Convert a DynamoDB attribute map to a plain JS-like object for display.
+       * Numbers are emitted as LosslessNumber so LosslessJSON.stringify renders
+       * them as raw numeric literals without precision loss.
        */
+      function attrMapToJsonValue(attr) {
+        if (attr == null) return null
+        if (attr.S !== undefined) return attr.S
+        if (attr.N !== undefined) return new LosslessJSON.LosslessNumber(attr.N)
+        if (attr.BOOL !== undefined) return attr.BOOL
+        if (attr.NULL) return null
+        if (attr.L) return attr.L.map(attrMapToJsonValue)
+        if (attr.M) {
+          const result = {}
+          for (const [k, v] of Object.entries(attr.M)) {
+            result[k] = attrMapToJsonValue(v)
+          }
+          return result
+        }
+        if (attr.SS) return attr.SS
+        if (attr.NS) return attr.NS.map(n => new LosslessJSON.LosslessNumber(n))
+        if (attr.BS) return attr.BS
+        if (attr.B) return attr.B
+        return attr
+      }
+
+      function attrMapToJsonString(attrMap) {
+        const obj = {}
+        for (const [k, v] of Object.entries(attrMap)) {
+          obj[k] = attrMapToJsonValue(v)
+        }
+        return LosslessJSON.stringify(obj, null, 2)
+      }
+
+      /**
+       * Convert a parsed JSON value (from LosslessJSON.parse) back to a
+       * DynamoDB attribute map value.
+       */
+      function jsonValueToAttrMap(value) {
+        if (value === null || value === undefined) return { NULL: true }
+        if (LosslessJSON.isLosslessNumber(value)) return { N: value.toString() }
+        if (typeof value === 'number') return { N: String(value) }
+        if (typeof value === 'boolean') return { BOOL: value }
+        if (typeof value === 'string') return { S: value }
+        if (Array.isArray(value)) return { L: value.map(jsonValueToAttrMap) }
+        if (typeof value === 'object') {
+          const m = {}
+          for (const [k, v] of Object.entries(value)) {
+            m[k] = jsonValueToAttrMap(v)
+          }
+          return { M: m }
+        }
+        return { S: String(value) }
+      }
+
+      function jsonStringToAttrMap(jsonStr) {
+        const parsed = LosslessJSON.parse(jsonStr)
+        const result = {}
+        for (const [k, v] of Object.entries(parsed)) {
+          result[k] = jsonValueToAttrMap(v)
+        }
+        return result
+      }
+
+      // ---- Get current editor content as attribute map (regardless of view mode) ----
+
+      function getEditorAsAttrMap() {
+        const text = editor.getValue()
+        if (viewMode === 'attribute') {
+          return JSON.parse(text)
+        } else {
+          return jsonStringToAttrMap(text)
+        }
+      }
+
+      // ---- Set editor content from an attribute map ----
+
+      function setEditorFromAttrMap(attrMap) {
+        if (viewMode === 'json') {
+          editor.setValue(attrMapToJsonString(attrMap), -1)
+        } else {
+          editor.setValue(JSON.stringify(attrMap, null, 2), -1)
+        }
+      }
+
+      // ---- Extract scalar value from attribute ----
+
       function attrValue(attr) {
         if (!attr || typeof attr !== 'object') return attr
         return attr.S || attr.N || attr.BOOL || attr.NULL || JSON.stringify(attr)
       }
 
+      // ---- Toggle handler (wired up after DOM ready, see bottom of file) ----
+
+      function handleToggleView(checked) {
+        try {
+          if (checked) {
+            // Switch to attribute map view
+            const attrMap = getEditorAsAttrMap()
+            viewMode = 'attribute'
+            editor.setValue(JSON.stringify(attrMap, null, 2), -1)
+          } else {
+            // Switch to JSON view
+            const attrMap = JSON.parse(editor.getValue())
+            viewMode = 'json'
+            editor.setValue(attrMapToJsonString(attrMap), -1)
+          }
+        } catch (e) {
+          handleError('Cannot switch view: ' + e.message)
+        }
+        editor.focus()
+      }
+
+      // ---- Save handler ----
+
       function handleEditClick () {
         const saveButton = document.getElementById('saveButton')
+
+        let body
+        try {
+          body = JSON.stringify(getEditorAsAttrMap())
+        } catch (e) {
+          handleError('Invalid JSON: ' + e.message)
+          return
+        }
 
         fetch(document.location.pathname, {
           method: 'put',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: editor.getValue()
+          body: body
         }).then(async (response) => {
           if (response.ok) {
             return response.json()
@@ -69,7 +192,7 @@
             window.location = `${urlPart1}/items/${param}`
             return
           }
-          editor.setValue(JSON.stringify(json, null, 2));
+          setEditorFromAttrMap(json)
           editor.focus()
           saveButton.classList.remove('btn-primary')
           saveButton.classList.add('btn-success')
@@ -88,17 +211,9 @@
           handleError(error.message)
         })
       }
-      </script>
-      <button
-        class='btn btn-primary'
-        id='saveButton'
-        onclick='handleEditClick()'
-        type='button'
-      >
-        Save
-      </button>
 
-      <script>
+      // ---- Delete handler ----
+
       function handleDeleteClick (event) {
         event.preventDefault()
         fetch(document.location.pathname, {
@@ -115,15 +230,29 @@
         })
       }
       </script>
+
+      <button
+        class='btn btn-primary'
+        id='saveButton'
+        onclick='handleEditClick()'
+        type='button'
+      >
+        Save
+      </button>
+
       <% if (!isNew) { %>
         <button
-          class='btn btn-danger'
+          class='btn btn-danger ml-1'
           onclick='handleDeleteClick(event)'
           type='button'
         >
           Delete
         </button>
       <% } %>
+
+      <div class="ml-auto">
+        DynamoDB Format <input id="view-mode-toggle" type="checkbox" data-toggle="toggle" data-size="xs" data-onstyle="secondary">
+      </div>
     </nav>
     <article
         id="documentWrapper"
@@ -134,14 +263,25 @@
         top: 0;
         right: 0;
         bottom: 0;
-        left: 0;'><%= JSON.stringify(Item, null, 2) %></div>
+        left: 0;'></div>
       <script>
       const editor = ace.edit("documentTextarea")
       editor.resize()
       editor.getSession().setMode("ace/mode/json")
       editor.setTheme("ace/theme/monokai")
       editor.setFontSize(14)
-      editor.focus();
+
+      // Initialize editor with JSON view of the attribute map
+      const initialAttrMap = <%- JSON.stringify(Item) %>;
+      setEditorFromAttrMap(initialAttrMap)
+      editor.focus()
+
+      // Wire up the view mode toggle
+      $(function () {
+        $('#view-mode-toggle').change(function () {
+          handleToggleView(this.checked)
+        })
+      })
       </script>
     </article>
   </main>
