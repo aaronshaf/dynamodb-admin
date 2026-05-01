@@ -42,6 +42,8 @@
       // ---- Editor view mode state ----
       // 'json' = clean JSON view (default), 'attribute' = DynamoDB attribute map view
       let viewMode = 'json'
+      // Tracks the last attribute map to preserve set types (SS/NS/BS) through JSON round-trips
+      let lastKnownAttrMap = null
 
       // ---- Attribute map <-> JSON conversion ----
 
@@ -81,30 +83,51 @@
 
       /**
        * Convert a parsed JSON value (from LosslessJSON.parse) back to a
-       * DynamoDB attribute map value.
+       * DynamoDB attribute map value. An optional `hint` (the original
+       * attribute at this position) is used to preserve set types (SS/NS/BS)
+       * that are indistinguishable from lists in plain JSON.
        */
-      function jsonValueToAttrMap(value) {
+      function jsonValueToAttrMap(value, hint) {
         if (value === null || value === undefined) return { NULL: true }
         if (LosslessJSON.isLosslessNumber(value)) return { N: value.toString() }
         if (typeof value === 'number') return { N: String(value) }
         if (typeof value === 'boolean') return { BOOL: value }
-        if (typeof value === 'string') return { S: value }
-        if (Array.isArray(value)) return { L: value.map(jsonValueToAttrMap) }
+        if (typeof value === 'string') {
+          // Preserve binary type when the original attribute was B
+          if (hint && hint.B !== undefined) return { B: value }
+          return { S: value }
+        }
+        if (Array.isArray(value)) {
+          // Preserve set types when the original attribute was a set
+          if (hint && hint.SS && value.every(v => typeof v === 'string')) {
+            return { SS: value }
+          }
+          if (hint && hint.NS && value.every(v => typeof v === 'number' || LosslessJSON.isLosslessNumber(v))) {
+            return { NS: value.map(v => LosslessJSON.isLosslessNumber(v) ? v.toString() : String(v)) }
+          }
+          if (hint && hint.BS && value.every(v => typeof v === 'string')) {
+            return { BS: value }
+          }
+          // Recurse into list items, using L hint items positionally
+          const hintItems = hint && hint.L ? hint.L : []
+          return { L: value.map((v, i) => jsonValueToAttrMap(v, hintItems[i])) }
+        }
         if (typeof value === 'object') {
+          const hintMap = hint && hint.M ? hint.M : {}
           const m = {}
           for (const [k, v] of Object.entries(value)) {
-            m[k] = jsonValueToAttrMap(v)
+            m[k] = jsonValueToAttrMap(v, hintMap[k])
           }
           return { M: m }
         }
         return { S: String(value) }
       }
 
-      function jsonStringToAttrMap(jsonStr) {
+      function jsonStringToAttrMap(jsonStr, hintAttrMap) {
         const parsed = LosslessJSON.parse(jsonStr)
         const result = {}
         for (const [k, v] of Object.entries(parsed)) {
-          result[k] = jsonValueToAttrMap(v)
+          result[k] = jsonValueToAttrMap(v, hintAttrMap ? hintAttrMap[k] : undefined)
         }
         return result
       }
@@ -116,13 +139,14 @@
         if (viewMode === 'attribute') {
           return JSON.parse(text)
         } else {
-          return jsonStringToAttrMap(text)
+          return jsonStringToAttrMap(text, lastKnownAttrMap)
         }
       }
 
       // ---- Set editor content from an attribute map ----
 
       function setEditorFromAttrMap(attrMap) {
+        lastKnownAttrMap = attrMap
         if (viewMode === 'json') {
           editor.setValue(attrMapToJsonString(attrMap), -1)
         } else {

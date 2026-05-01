@@ -28,10 +28,10 @@ window.DynamoAttrRenderer = (function () {
     if (attr.NULL) return el('span', 'json-formatter-null', 'null')
     if (attr.L) return renderList(attr.L)
     if (attr.M) return renderMap(attr.M)
-    if (attr.B) return el('span', 'json-formatter-string', '"<Binary>"')
-    if (attr.SS) return renderStringSet(attr.SS)
+    if (attr.B) return el('span', 'json-formatter-string', '"' + escapeString(String(attr.B)) + '"')
+    if (attr.SS) return renderStringLikeSet(attr.SS, 'StringSet')
     if (attr.NS) return renderNumberSet(attr.NS)
-    if (attr.BS) return el('span', 'json-formatter-string', '"<BinarySet>"')
+    if (attr.BS) return renderStringLikeSet(attr.BS, 'BinarySet')
     return el('span', '', JSON.stringify(attr))
   }
 
@@ -137,11 +137,11 @@ window.DynamoAttrRenderer = (function () {
     return renderCollapsible('Array[' + list.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
 
-  function renderStringSet(ss) {
-    var items = ss.map(function (s, i) {
-      return { key: i, value: el('span', 'json-formatter-string', '"' + escapeString(s) + '"') }
+  function renderStringLikeSet(values, typeLabel) {
+    var items = values.map(function (v, i) {
+      return { key: i, value: el('span', 'json-formatter-string', '"' + escapeString(String(v)) + '"') }
     })
-    return renderCollapsible('StringSet[' + ss.length + '] ', 'json-formatter-bracket', '[...]', items)
+    return renderCollapsible(typeLabel + '[' + values.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
 
   function renderNumberSet(ns) {

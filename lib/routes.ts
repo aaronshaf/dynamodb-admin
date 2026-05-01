@@ -333,7 +333,13 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         // Append the item key and convert items to attribute maps for the browser.
         const marshalledItems = pageItems.map(item => {
             const marshalled = itemToAttributeMap(item);
-            marshalled.__key = { M: itemToAttributeMap(extractKey(item, tableDescription.KeySchema!)) };
+            const keyAttrs: Record<string, any> = {};
+            for (const schema of tableDescription.KeySchema!) {
+                if (schema.AttributeName && marshalled[schema.AttributeName]) {
+                    keyAttrs[schema.AttributeName] = marshalled[schema.AttributeName];
+                }
+            }
+            marshalled.__key = { M: keyAttrs };
             return marshalled;
         });
 
