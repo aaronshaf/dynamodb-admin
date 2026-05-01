@@ -18,6 +18,9 @@ export default defineConfig({
             generatedCode: 'es2015',
         },
     ],
+    external: [
+        '@aws-sdk/util-dynamodb',
+    ],
     plugins: [
         commonJS(),
         nodeResolve({ preferBuiltins: true }),

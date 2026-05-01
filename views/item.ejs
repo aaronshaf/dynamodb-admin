@@ -21,8 +21,10 @@
         },
       ]
 
-      if (Item.id) {
-        breadcrumb.push({ text: Item.id })
+      // Item is an attribute map; extract the display value for the breadcrumb
+      const idAttr = Item.id
+      if (idAttr) {
+        breadcrumb.push({ text: idAttr.S || idAttr.N || 'Item' })
       } else {
         breadcrumb.push({ text: 'Item' })
       }
@@ -34,6 +36,15 @@
   <main class='flex-fill d-flex flex-column'>
     <nav>
       <script>
+      /**
+       * Extract the scalar value from a DynamoDB attribute map value.
+       * e.g. {"S": "hello"} -> "hello", {"N": "42"} -> "42"
+       */
+      function attrValue(attr) {
+        if (!attr || typeof attr !== 'object') return attr
+        return attr.S || attr.N || attr.BOOL || attr.NULL || JSON.stringify(attr)
+      }
+
       function handleEditClick () {
         const saveButton = document.getElementById('saveButton')
 
@@ -53,7 +64,7 @@
         }).then((json) => {
           if (document.location.pathname.endsWith('/add-item')) {
             const urlPart1 = document.location.pathname.replace('/add-item', '')
-            const param = encodeURIComponent(Object.values(json).join(','))
+            const param = encodeURIComponent(Object.values(json).map(attrValue).join(','))
 
             window.location = `${urlPart1}/items/${param}`
             return

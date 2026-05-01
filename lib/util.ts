@@ -1,5 +1,5 @@
 import type { AttributeDefinition, KeySchemaElement, QueryInput, TableDescription } from '@aws-sdk/client-dynamodb';
-import type { ScanCommandInput, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { NumberValue, type ScanCommandInput, type QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type { DynamoApiController } from './dynamoDbApi';
 import type { ItemList, Key } from './types';
 
@@ -23,7 +23,7 @@ export function extractKey(item: Record<string, any>, keySchema: KeySchemaElemen
     }, {});
 }
 
-export function parseKey(keys: string, tableDescription: TableDescription): Record<string, string | number> {
+export function parseKey(keys: string, tableDescription: TableDescription): Record<string, string | number | NumberValue> {
     const splitKeys = keys.split(',');
 
     return tableDescription.KeySchema!.reduce((prev, current, index) => {
@@ -107,12 +107,18 @@ export async function doSearch(
     return await getNextBite(params);
 }
 
-function typecastKey(keyName: string, keyValue: string, table: TableDescription): string | number {
+function typecastKey(keyName: string, keyValue: string, table: TableDescription): string | number | NumberValue {
     const definition = table.AttributeDefinitions!.find(attribute => attribute.AttributeName === keyName);
     if (definition) {
         switch (definition.AttributeType) {
-            case 'N':
-                return Number(keyValue);
+            case 'N': {
+                const num = Number(keyValue);
+                // Use plain number if safe, NumberValue if it would lose precision
+                if (Number.isFinite(num) && String(num) === keyValue) {
+                    return num;
+                }
+                return new NumberValue(keyValue);
+            }
             case 'S':
                 return String(keyValue);
         }

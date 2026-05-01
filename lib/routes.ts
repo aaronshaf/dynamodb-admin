@@ -1,5 +1,6 @@
 import path from 'node:path';
 import type { AttributeDefinition, KeySchemaElement, GlobalSecondaryIndex, LocalSecondaryIndex, ScanInput, QueryInput, ScalarAttributeType } from '@aws-sdk/client-dynamodb';
+import { NumberValue } from '@aws-sdk/lib-dynamodb';
 import express, { type Express, type ErrorRequestHandler } from 'express';
 import errorhandler from 'errorhandler';
 import bodyParser from 'body-parser';
@@ -11,6 +12,7 @@ import { purgeTable } from './actions/purgeTable';
 import { listAllTables } from './actions/listAllTables';
 import asyncMiddleware from './utils/asyncMiddleware';
 import type { DynamoApiController } from './dynamoDbApi';
+import { itemToAttributeMap, attributeMapToItem, attributeMapBodyParser } from './json';
 
 const DEFAULT_THEME = process.env.DEFAULT_THEME || 'light';
 
@@ -259,7 +261,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         const { TableName } = req.params;
         req.query = pickBy(req.query);
         const filters = typeof req.query.filters === 'string' ? JSON.parse(req.query.filters) : {};
-        const ExclusiveStartKey = typeof req.query.startKey === 'string' ? JSON.parse(req.query.startKey) : {};
+        const ExclusiveStartKey = typeof req.query.startKey === 'string' ? attributeMapToItem(JSON.parse(req.query.startKey)) : {};
         const pageNum = typeof req.query.pageNum === 'string' ? parseInt(req.query.pageNum) : 1;
         const queryableSelection = typeof req.query.queryableSelection === 'string' ? req.query.queryableSelection : 'table';
         const operationType: 'scan' | 'query' = req.query.operationType === 'query' ? 'query' : 'scan';
@@ -285,7 +287,10 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
 
         for (const key in filters) {
             if (filters[key].type === 'N') {
-                filters[key].value = Number(filters[key].value);
+                const num = Number(filters[key].value);
+                filters[key].value = Number.isFinite(num) && String(num) === filters[key].value
+                    ? num
+                    : new NumberValue(filters[key].value);
             }
 
             ExpressionAttributeNames[`#key${i}`] = key;
@@ -335,20 +340,22 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
             ...extractKeysForItems(pageItems).filter(key => !primaryKeys.includes(key)),
         ];
 
-        // Append the item key.
-        for (const item of pageItems) {
-            item.__key = extractKey(item, tableDescription.KeySchema!);
-        }
+        // Append the item key and convert items to attribute maps for the browser.
+        const marshalledItems = pageItems.map(item => {
+            const marshalled = itemToAttributeMap(item);
+            marshalled.__key = { M: itemToAttributeMap(extractKey(item, tableDescription.KeySchema!)) };
+            return marshalled;
+        });
 
         const data = {
             query: req.query,
             pageNum,
             prevKey: encodeURIComponent(typeof req.query.prevKey === 'string' ? req.query.prevKey : ''),
             startKey: encodeURIComponent(typeof req.query.startKey === 'string' ? req.query.startKey : ''),
-            nextKey: nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null,
+            nextKey: nextKey ? encodeURIComponent(JSON.stringify(itemToAttributeMap(nextKey))) : null,
             filterQueryString: encodeURIComponent(typeof req.query.filters === 'string' ? req.query.filters : ''),
             Table: tableDescription,
-            Items: pageItems,
+            Items: marshalledItems,
             uniqueKeys,
         };
 
@@ -395,7 +402,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('item', {
             Table: tableDescription,
             TableName: req.params.TableName,
-            Item,
+            Item: itemToAttributeMap(Item),
             isNew: true,
         });
     }));
@@ -416,12 +423,12 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('item', {
             Table: tableDescription,
             TableName: req.params.TableName,
-            Item: response.Item,
+            Item: itemToAttributeMap(response.Item!),
             isNew: false,
         });
     }));
 
-    router.put('/tables/:TableName/add-item', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/add-item', ...attributeMapBodyParser({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
@@ -431,11 +438,11 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
             res.status(404).send('Not found');
             return;
         }
-        res.json(Key);
+        res.json(itemToAttributeMap(Key));
         return;
     }));
 
-    router.put('/tables/:TableName/items/:key', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/items/:key', ...attributeMapBodyParser({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
@@ -443,7 +450,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
             TableName,
             Key: parseKey(req.params.key, tableDescription),
         });
-        res.json(response.Item);
+        res.json(itemToAttributeMap(response.Item!));
     }));
 
     router.use(((error, _req, res, _next) => {

@@ -42,7 +42,9 @@ export class DynamoApiController {
 
     constructor(dynamodb: DynamoDBClient) {
         this.dynamodb = dynamodb;
-        this.docClient = DynamoDBDocumentClient.from(dynamodb);
+        this.docClient = DynamoDBDocumentClient.from(dynamodb, {
+            unmarshallOptions: { wrapNumbers: true },
+        });
     }
 
     async batchWriteItem(input: BatchWriteCommandInput): Promise<BatchWriteCommandOutput> {

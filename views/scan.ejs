@@ -234,7 +234,59 @@
 
     <script>
     /* global JSONFormatter, $ */
-    const JSONRender = value => new JSONFormatter.default(value).render()
+
+    /**
+     * Convert a DynamoDB attribute map value to a JS value for display.
+     * Handles all DynamoDB types: S, N, BOOL, NULL, L, M, B, SS, NS, BS.
+     * Numbers that fit safely in JS are returned as numbers; large numbers
+     * are marked with __dynamo_number so JSONRender can style them.
+     */
+    function attrToDisplay(attr) {
+      if (attr == null) return null
+      if (attr.S !== undefined) return attr.S
+      if (attr.N !== undefined) {
+        const num = Number(attr.N)
+        if (Number.isFinite(num) && String(num) === attr.N) {
+          return num
+        }
+        // Large number - return a tagged object so JSONRender can handle it
+        return { __dynamo_number: attr.N }
+      }
+      if (attr.BOOL !== undefined) return attr.BOOL
+      if (attr.NULL) return null
+      if (attr.L) return attr.L.map(attrToDisplay)
+      if (attr.M) {
+        const result = {}
+        for (const [k, v] of Object.entries(attr.M)) {
+          result[k] = attrToDisplay(v)
+        }
+        return result
+      }
+      if (attr.B) return attr.B
+      if (attr.SS) return attr.SS
+      if (attr.NS) return attr.NS
+      if (attr.BS) return attr.BS
+      return attr
+    }
+
+    /**
+     * Render a value as a DOM element for display in the items table.
+     * Large numbers (tagged with __dynamo_number) are rendered directly
+     * as number-styled spans to avoid JSONFormatter quoting them as strings.
+     */
+    function JSONRender(attr) {
+      const value = attrToDisplay(attr)
+      if (value && typeof value === 'object' && value.__dynamo_number) {
+        const row = document.createElement('span')
+        row.className = 'json-formatter-row'
+        const numSpan = document.createElement('span')
+        numSpan.className = 'json-formatter-number'
+        numSpan.textContent = value.__dynamo_number
+        row.appendChild(numSpan)
+        return row
+      }
+      return new JSONFormatter.default(value).render()
+    }
 
     const form = document.querySelector('#form')
     form.addEventListener('submit', () => {
@@ -407,24 +459,52 @@
 
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
-          const viewUrl = '<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/items/' + encodeURIComponent(Object.values(item.__key).join(','))
+          // __key is {M: {pk: {S:"..."}, ...}} - extract the inner map values
+          const keyMap = item.__key && item.__key.M ? item.__key.M : {}
+          const keyValues = Object.values(keyMap).map(attr => attr.S || attr.N || '')
+          const viewUrl = '<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/items/' + encodeURIComponent(keyValues.join(','))
           const rowEl = $('<tr><td><a href="' + viewUrl + '">View</a></td></tr>')
 
           for (const column of data.uniqueKeys) {
             const columnEl = $('<td></td>')
 
-            const value = item[column]
+            const attr = item[column]
             let wrapperEl = null
 
-            if (Number.isInteger(value)) {
+            // Detect numeric values for date tooltip hints.
+            // In attribute map format, numbers are {N: "string"}.
+            let numericValue = null
+            if (attr && attr.N !== undefined) {
+              const str = attr.N
+              if (/^\d+$/.test(str)) {
+                const num = Number(str)
+                if (Number.isFinite(num)) {
+                  numericValue = num
+                }
+              }
+            }
+
+            if (numericValue !== null) {
               let dateValue
-              if (value >= 10000000000) {  // 11 digits - assume date format in milliseconds
-                const date = new Date(value)
+              if (numericValue >= 1000000000000000000) {  // 19 digits - assume nanoseconds since epoch
+                const ms = numericValue / 1000000
+                const date = new Date(ms)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed nanoseconds since epoch)`
+                }
+              } else if (numericValue >= 1000000000000000) {  // 16 digits - assume microseconds since epoch
+                const ms = numericValue / 1000
+                const date = new Date(ms)
+                if (!isNaN(date)) {
+                  dateValue = `${date.toISOString()} (assumed microseconds since epoch)`
+                }
+              } else if (numericValue >= 10000000000) {  // 11 digits - assume date format in milliseconds
+                const date = new Date(numericValue)
                 if (!isNaN(date)) {
                   dateValue = `${date.toISOString()} (assumed milliseconds since epoch)`
                 }
-              } else if (value >= 100000000) {  // 9 digits - assume date format in seconds
-                const date = new Date(value * 1000)
+              } else if (numericValue >= 100000000) {  // 9 digits - assume date format in seconds
+                const date = new Date(numericValue * 1000)
                 if (!isNaN(date)) {
                   dateValue = `${date.toISOString()} (assumed seconds since epoch)`
                 }
@@ -439,7 +519,7 @@
               wrapperEl = $('<div class="preformatted"></div>')
             }
 
-            rowEl.append(columnEl.append(wrapperEl.append(JSONRender(value))))
+            rowEl.append(columnEl.append(wrapperEl.append(JSONRender(attr))))
           }
 
           return rowEl
