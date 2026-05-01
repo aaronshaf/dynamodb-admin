@@ -254,7 +254,15 @@
      * Uses DynamoAttrRenderer for a collapsible tree with full-precision numbers.
      */
     function JSONRender(attr) {
-      return DynamoAttrRenderer.render(attr)
+      var rendered = DynamoAttrRenderer.render(attr)
+      // Wrap in .json-formatter-row if not already, so scoped CSS applies to top-level scalars
+      if (!rendered.classList || !rendered.classList.contains('json-formatter-row')) {
+        var wrapper = document.createElement('span')
+        wrapper.className = 'json-formatter-row'
+        wrapper.appendChild(rendered)
+        return wrapper
+      }
+      return rendered
     }
 
     const form = document.querySelector('#form')

@@ -146,7 +146,7 @@ window.DynamoAttrRenderer = (function () {
 
   function renderNumberSet(ns) {
     var items = ns.map(function (n, i) {
-      return { key: i, value: el('span', 'json-formatter-number', n) }
+      return { key: i, value: renderNumber(n) }
     })
     return renderCollapsible('NumberSet[' + ns.length + '] ', 'json-formatter-bracket', '[...]', items)
   }
