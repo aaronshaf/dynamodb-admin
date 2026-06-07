@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang='en' data-theme="<%= theme %>">
+<head>
+  <%- include('partials/head') %>
+  <%- include('partials/bootstrap-deps') %>
+  <%- include('partials/head-tail') %>
+</head>
+<body class='container-fluid d-flex flex-column'>
+  <header>
+    <%
+      const breadcrumb = [
+        {
+          href: basePath + '/',
+          text: 'Tables',
+        },
+        {
+          active: true,
+          text: Table.TableName,
+          badge: Table.ItemCount
+        },
+      ]
+    %>
+    <%- include('partials/breadcrumb', { breadcrumb }) %>
+
+    <ul class='nav nav-tabs'>
+      <li class='nav-item'>
+        <a class='nav-link' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>'>
+          Items
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/get'>
+          Get
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/meta'>Meta</a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link active' href='<%= basePath %>/tables/<%= encodeURIComponent(Table.TableName) %>/ttl'>TTL</a>
+      </li>
+    </ul>
+
+    <%- include('partials/error-container') %>
+  </header>
+
+  <main class="flex-fill d-flex flex-column">
+    <%
+      const status = TimeToLive.TimeToLiveStatus || 'DISABLED';
+      const statusBadge = {
+        ENABLED: 'badge-success',
+        ENABLING: 'badge-info',
+        DISABLING: 'badge-warning',
+        DISABLED: 'badge-secondary',
+      }[status] || 'badge-secondary';
+    %>
+    <table class="table table-bordered" style="margin-top: 16px; max-width: 480px;">
+      <tbody>
+        <tr>
+          <th scope="row">Status</th>
+          <td><span class="badge <%= statusBadge %>"><%= status %></span></td>
+        </tr>
+        <tr>
+          <th scope="row">Attribute</th>
+          <td><%= TimeToLive.AttributeName || '—' %></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -368,6 +368,19 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('meta', data);
     }));
 
+    router.get('/tables/:TableName/ttl', asyncMiddleware(async(req, res) => {
+        const { TableName } = req.params;
+        const [tableDescription, timeToLive] = await Promise.all([
+            ddbApi.describeTable({ TableName }),
+            ddbApi.describeTimeToLive({ TableName }),
+        ]);
+        const data = {
+            Table: tableDescription,
+            TimeToLive: timeToLive,
+        };
+        res.render('ttl', data);
+    }));
+
     router.delete('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
