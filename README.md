@@ -19,7 +19,7 @@ Options:
  - `--host HOST` / `-h HOST` -  Host to run on (default: localhost)
  - `--dynamo-endpoint` - DynamoDB endpoint to connect to (default: http://localhost:8000).
  - `--base-path` - Base path for the application (e.g., /dynamo). Useful when running behind a reverse proxy (default: empty).
- - `--skip-default-credentials` - Skip setting default credentials and region. By default the accessKeyId/secretAccessKey are set to "key" and "secret" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.
+ - `--skip-default-credentials` - Skip setting default credentials and region. By default the accessKeyId/secretAccessKey/token are set to "key", "secret" and "token" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.
 
 Environment variables `HOST`, `PORT`, `BASE_PATH` and `DYNAMO_ENDPOINT` can also be used to set the respective options.
 
