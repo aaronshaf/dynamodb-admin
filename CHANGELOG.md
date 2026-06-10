@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.3](https://github.com/aaronshaf/dynamodb-admin/compare/v5.3.2...v5.3.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* update rollup ([#533](https://github.com/aaronshaf/dynamodb-admin/issues/533)) ([9543786](https://github.com/aaronshaf/dynamodb-admin/commit/95437860f620c981c3e1c65283af2be242c5b905))
+
 ## [5.3.2](https://github.com/aaronshaf/dynamodb-admin/compare/v5.3.1...v5.3.2) (2026-06-10)
 
 
