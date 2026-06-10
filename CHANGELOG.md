@@ -6,6 +6,8 @@
 ### Bug Fixes
 
 * update rollup ([#533](https://github.com/aaronshaf/dynamodb-admin/issues/533)) ([9543786](https://github.com/aaronshaf/dynamodb-admin/commit/95437860f620c981c3e1c65283af2be242c5b905))
+* update rollup ([#534](https://github.com/aaronshaf/dynamodb-admin/issues/534)) ([830cf47](https://github.com/aaronshaf/dynamodb-admin/commit/830cf47ad5fdd4e4542cd478afca825a5fa3d3e6))
+* update rollup ([#535](https://github.com/aaronshaf/dynamodb-admin/issues/535)) ([afe684f](https://github.com/aaronshaf/dynamodb-admin/commit/afe684fe8ad36997219253b31834dec9a20a13d1))
 
 ## [5.3.2](https://github.com/aaronshaf/dynamodb-admin/compare/v5.3.1...v5.3.2) (2026-06-10)
 
