@@ -7,6 +7,7 @@ RUN corepack enable
 COPY bin bin/
 COPY lib lib/
 COPY pnpm-lock.yaml .
+COPY pnpm-workspace.yaml .
 COPY package.json .
 COPY rollup.config.ts .
 COPY tsconfig.json .
