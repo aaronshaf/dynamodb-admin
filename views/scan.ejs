@@ -67,6 +67,30 @@
     .items-table td:first-child {
       background-color: white;
     }
+
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .sort-arrows {
+      margin-left: 4px;
+    }
+
+    .sort-arrow {
+      opacity: 0.3;
+      transition: opacity 0.2s;
+      font-size: 16px;
+    }
+
+    .sort-arrow:hover {
+      opacity: 0.8;
+    }
+
+    .sort-arrow.active {
+      opacity: 1;
+    }
   </style>
   <%- include('partials/head-tail') %>
 </head>
@@ -403,7 +427,15 @@
     }
 
     function renderItems(data) {
-      $('#actions-row').append(data.uniqueKeys.map(key => '<th scope="col">' + key + '</th>'))
+      $('#actions-row').append(data.uniqueKeys.map(key => 
+        `<th scope="col" class="sortable-header" data-column="${key}" aria-sort="none">
+          ${key}
+          <span class="sort-arrows">
+            <span class="sort-arrow sort-arrow-up" data-direction="asc" aria-label="Sort ascending" title="Sort ascending">↑</span>
+            <span class="sort-arrow sort-arrow-down" data-direction="desc" aria-label="Sort descending" title="Sort descending">↓</span>
+          </span>
+        </th>`
+      ))
 
       if (data.Items.length) {
         $('#items-container').append(data.Items.map(item => {
@@ -478,6 +510,62 @@
       $('#table-placeholder').addClass('d-none')
 
       updateFilterAutocomplete(data.uniqueKeys)
+
+      $('.sort-arrow').on('click', function(e) {
+        e.stopPropagation()
+        const column = $(this).closest('.sortable-header').data('column')
+        const direction = $(this).data('direction')
+        $('.sort-arrow').removeClass('active')
+        $(this).addClass('active')
+
+        sortTableByColumn(column, direction)
+      })
+    }
+
+    function sortTableByColumn(column, direction) {
+      const tbody = $('#items-container')
+      const rows = tbody.find('tr').toArray()
+
+      rows.sort(function(a, b) {
+        const aVal = getCellValue(a, column)
+        const bVal = getCellValue(b, column)
+
+        let result = 0
+
+        if (aVal < bVal) result = -1
+        if (aVal > bVal) result = 1
+
+        return direction === 'asc' ? result : -result
+      })
+
+      tbody.append(rows)
+    }
+
+    function getCellValue(row, column) {
+      const cells = $(row).find('td')
+      const actionsCell = cells[0]
+
+      const headers = $('#actions-row th')
+      let columnIndex = -1
+      headers.each(function(index) {
+        if ($(this).data('column') === column) {
+          columnIndex = index
+          return false
+        }
+      })
+
+      if (columnIndex === -1) return ''
+
+      const dataCell = cells[columnIndex]
+      if (!dataCell) return ''
+
+      const jsonFormatter = $(dataCell).find('.json-formatter-row-value')[0] || $(dataCell).find('.json-formatter-string')[0] || $(dataCell).find('.json-formatter-number')[0]
+
+      if (jsonFormatter) {
+        return $(jsonFormatter).text().trim()
+      }
+
+      return $(dataCell).text().trim()
     }
 
     window.addEventListener('load', () => {
