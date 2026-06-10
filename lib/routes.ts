@@ -12,6 +12,38 @@ import { listAllTables } from './actions/listAllTables';
 import asyncMiddleware from './utils/asyncMiddleware';
 import type { DynamoApiController } from './dynamoDbApi';
 
+type TableNameParams = { TableName: string };
+type TableItemParams = { TableName: string; key: string };
+
+type TableDefinitionInput = {
+    TableName: string;
+    HashAttributeName: string;
+    HashAttributeType: ScalarAttributeType;
+    RangeAttributeName?: string;
+    RangeAttributeType?: ScalarAttributeType;
+    ReadCapacityUnits: number;
+    WriteCapacityUnits: number;
+};
+
+type SecondaryIndexesInput = Omit<TableDefinitionInput, 'TableName'> & {
+    IndexName: string;
+    IndexType: 'global' | 'local';
+};
+
+type GetItemQuery = { hash?: string; range?: string };
+
+type TableScanQuery = { pageNum?: string };
+
+type ItemsQuery = {
+    filters?: string;
+    startKey?: string;
+    prevKey?: string;
+    pageNum?: string;
+    pageSize?: string;
+    queryableSelection?: string;
+    operationType?: string;
+};
+
 const DEFAULT_THEME = process.env.DEFAULT_THEME || 'light';
 
 export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath = ''): void {
@@ -45,21 +77,6 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
     router.get('/create-table', (_req, res) => {
         res.render('create-table', {});
     });
-
-    type TableDefinitionInput = {
-        TableName: string;
-        HashAttributeName: string;
-        HashAttributeType: ScalarAttributeType;
-        RangeAttributeName?: string;
-        RangeAttributeType?: ScalarAttributeType;
-        ReadCapacityUnits: number;
-        WriteCapacityUnits: number;
-    };
-
-    type SecondaryIndexesInput = Omit<TableDefinitionInput, 'TableName'> & {
-        IndexName: string;
-        IndexType: 'global' | 'local';
-    };
 
     router.post(
         '/create-table',
@@ -193,22 +210,21 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.send('Tables purged');
     }));
 
-    router.delete('/tables/:TableName', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName', asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         await ddbApi.deleteTable({ TableName });
         res.status(204).end();
     }));
 
-    router.delete('/tables/:TableName/all', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName/all', asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         await purgeTable(TableName, ddbApi);
         res.status(200).end();
     }));
 
-    router.get('/tables/:TableName/get', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/get', asyncMiddleware<TableNameParams, any, any, GetItemQuery>(async(req, res) => {
         const { TableName } = req.params;
-        const hash = req.query.hash as string;
-        const range = req.query.range as string;
+        const { hash, range } = req.query;
         if (hash) {
             if (range) {
                 res.redirect(`${basePath}/tables/${encodeURIComponent(TableName)}/items/${encodeURIComponent(hash)},${encodeURIComponent(range)}`);
@@ -228,10 +244,10 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         });
     }));
 
-    router.get('/tables/:TableName', asyncMiddleware(async(req, res) => {
-        const TableName = req.params.TableName;
+    router.get('/tables/:TableName', asyncMiddleware<TableNameParams, any, any, TableScanQuery>(async(req, res) => {
+        const { TableName } = req.params;
         req.query = pickBy(req.query);
-        const pageNum = typeof req.query.pageNum === 'string' ? Number.parseInt(req.query.pageNum) : 1;
+        const pageNum = req.query.pageNum ? Number.parseInt(req.query.pageNum) : 1;
 
         const description = await ddbApi.describeTable({ TableName });
         const data = {
@@ -255,13 +271,13 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('scan', data);
     }));
 
-    router.get('/tables/:TableName/items', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/items', asyncMiddleware<TableNameParams, any, any, ItemsQuery>(async(req, res) => {
         const { TableName } = req.params;
         req.query = pickBy(req.query);
-        const filters = typeof req.query.filters === 'string' ? JSON.parse(req.query.filters) : {};
-        const ExclusiveStartKey = typeof req.query.startKey === 'string' ? JSON.parse(req.query.startKey) : {};
-        const pageNum = typeof req.query.pageNum === 'string' ? parseInt(req.query.pageNum) : 1;
-        const queryableSelection = typeof req.query.queryableSelection === 'string' ? req.query.queryableSelection : 'table';
+        const filters = req.query.filters ? JSON.parse(req.query.filters) : {};
+        const ExclusiveStartKey = req.query.startKey ? JSON.parse(req.query.startKey) : {};
+        const pageNum = req.query.pageNum ? parseInt(req.query.pageNum) : 1;
+        const queryableSelection = req.query.queryableSelection ?? 'table';
         const operationType: 'scan' | 'query' = req.query.operationType === 'query' ? 'query' : 'scan';
         let indexBeingUsed = null;
 
@@ -323,7 +339,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
             KeyConditionExpression: KeyConditionExpression.length ? KeyConditionExpression.join(' AND ') : undefined,
             IndexName: queryableSelection !== 'table' ? queryableSelection : undefined,
         };
-        const pageSize = typeof req.query.pageSize === 'string' ? Number.parseInt(req.query.pageSize) : 25;
+        const pageSize = req.query.pageSize ? Number.parseInt(req.query.pageSize) : 25;
 
         const results = await getPage(ddbApi, tableDescription.KeySchema!, TableName, params, pageSize, operationType);
         const { pageItems, nextKey } = results;
@@ -343,10 +359,10 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         const data = {
             query: req.query,
             pageNum,
-            prevKey: encodeURIComponent(typeof req.query.prevKey === 'string' ? req.query.prevKey : ''),
-            startKey: encodeURIComponent(typeof req.query.startKey === 'string' ? req.query.startKey : ''),
+            prevKey: encodeURIComponent(req.query.prevKey ?? ''),
+            startKey: encodeURIComponent(req.query.startKey ?? ''),
             nextKey: nextKey ? encodeURIComponent(JSON.stringify(nextKey)) : null,
-            filterQueryString: encodeURIComponent(typeof req.query.filters === 'string' ? req.query.filters : ''),
+            filterQueryString: encodeURIComponent(req.query.filters ?? ''),
             Table: tableDescription,
             Items: pageItems,
             uniqueKeys,
@@ -355,7 +371,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.json(data);
     }));
 
-    router.get('/tables/:TableName/meta', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/meta', asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         const [tableDescription, items] = await Promise.all([
             ddbApi.describeTable({ TableName }),
@@ -368,7 +384,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('meta', data);
     }));
 
-    router.get('/tables/:TableName/ttl', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/ttl', asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         const [tableDescription, timeToLive] = await Promise.all([
             ddbApi.describeTable({ TableName }),
@@ -381,7 +397,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.render('ttl', data);
     }));
 
-    router.delete('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
+    router.delete('/tables/:TableName/items/:key', asyncMiddleware<TableItemParams>(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.deleteItem({
@@ -391,7 +407,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         res.status(204).end();
     }));
 
-    router.get('/tables/:TableName/add-item', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/add-item', asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         const Item: Record<string, string | number> = {};
@@ -413,7 +429,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         });
     }));
 
-    router.get('/tables/:TableName/items/:key', asyncMiddleware(async(req, res) => {
+    router.get('/tables/:TableName/items/:key', asyncMiddleware<TableItemParams>(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         const params = {
@@ -434,7 +450,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         });
     }));
 
-    router.put('/tables/:TableName/add-item', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/add-item', bodyParser.json({ limit: '500kb' }), asyncMiddleware<TableNameParams>(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
@@ -448,7 +464,7 @@ export function setupRoutes(app: Express, ddbApi: DynamoApiController, basePath 
         return;
     }));
 
-    router.put('/tables/:TableName/items/:key', bodyParser.json({ limit: '500kb' }), asyncMiddleware(async(req, res) => {
+    router.put('/tables/:TableName/items/:key', bodyParser.json({ limit: '500kb' }), asyncMiddleware<TableItemParams>(async(req, res) => {
         const { TableName } = req.params;
         const tableDescription = await ddbApi.describeTable({ TableName });
         await ddbApi.putItem({ TableName, Item: req.body });
