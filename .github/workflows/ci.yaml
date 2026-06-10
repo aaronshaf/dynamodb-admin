@@ -20,12 +20,12 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-      - name: npm install
-        run: npm i
+          node-version: 24.x
+      - name: pnpm install
+        run: pnpm i
       - name: build
-        run: npm run build
+        run: pnpm build
       - name: Unittesting
-        run: npm run test
+        run: pnpm test
       - name: Linting
-        run: npm run lint
+        run: pnpm lint
