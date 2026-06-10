@@ -1,10 +1,10 @@
----
 name: docker-publish
 
 on:
   push:
     tags:
       - v*.*.*
+  workflow_dispatch:
 
 jobs:
   docker:
