@@ -13,7 +13,7 @@
       const breadcrumb = [
         {
           active: true,
-          href: '/',
+          href: basePath + '/',
           text: 'Tables',
         },
       ]
@@ -58,7 +58,7 @@
         return
       }
 
-      fetch(`/tables/${encodeURIComponent(TableName)}`, {
+      fetch(`<%= basePath %>/tables/${encodeURIComponent(TableName)}`, {
         method: 'delete'
       })
         .then(async (response) => {
@@ -78,7 +78,7 @@
         return
       }
 
-      fetch(`/tables/${encodeURIComponent(TableName)}/all`, {
+      fetch(`<%= basePath %>/tables/${encodeURIComponent(TableName)}/all`, {
         method: 'delete'
       }).then(async (response) => {
         if (!response.ok) {
@@ -95,7 +95,7 @@
         if (!confirm('Are you sure you want to purge all tables?')) {
           return
         }
-        fetch('/tables-purge', {
+        fetch('<%= basePath %>/tables-purge', {
           method: 'delete'
         }).then(async (response) => {
           const responseText = await response.text()
@@ -113,7 +113,7 @@
         if (!confirm('Are you sure you want to delete all tables?')) {
           return
         }
-        fetch('/tables', {
+        fetch('<%= basePath %>/tables', {
           method: 'delete'
         }).then(async (response) => {
           const responseText = await response.text()
@@ -136,14 +136,14 @@
     <ul class="list-group" id="table-list">
       <% for(var i = 0; i < data.length; i++) { %>
         <li class="list-group-item" data-table-name="<%= data[i].TableName %>">
-          <a href='/tables/<%= encodeURIComponent(data[i].TableName) %>'>
+          <a href='<%= basePath %>/tables/<%= encodeURIComponent(data[i].TableName) %>'>
             <%= data[i].TableName %>
           </a>
           <a href="#" onClick="deleteTable('<%= data[i].TableName %>'); return false"
               class="badge badge-danger badge-pill float-right ml-1">
             Delete
           </a>
-          <a href="/" onClick="purgeTable('<%= data[i].TableName %>'); return false"
+          <a href='#' onClick="purgeTable('<%= data[i].TableName %>'); return false"
              class="badge badge-warning badge-pill float-right ml-1">
             Purge
           </a>
@@ -154,7 +154,7 @@
       <% } %>
     </ul>
     <div style="margin-top: 12px; display: flex; justify-content: space-between;">
-      <a href='/create-table' class="btn btn-primary">
+      <a href='<%= basePath %>/create-table' class="btn btn-primary">
         Create table
       </a>
       <div>

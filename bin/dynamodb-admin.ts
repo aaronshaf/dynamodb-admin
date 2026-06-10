@@ -48,9 +48,15 @@ parser.add_argument('--skip-default-credentials', {
     help: 'Skip setting default credentials and region. By default the accessKeyId/secretAccessKey are set to "key" and "secret" and the region is set to "us-east-1". If you specify this argument then you need to ensure that credentials are provided some other way. See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html for more details on how default credentials provider works.',
 });
 
-const { host, port, open: openUrl, dynamo_endpoint: dynamoEndpoint, skip_default_credentials: skipDefaultCredentials } = parser.parse_args();
+parser.add_argument('--base-path', {
+    type: 'str',
+    default: process.env.BASE_PATH || '',
+    help: 'Base path for the application (e.g., /dynamo). Useful when running behind a reverse proxy.',
+});
 
-const app = createServer({ dynamoEndpoint, skipDefaultCredentials });
+const { host, port, open: openUrl, dynamo_endpoint: dynamoEndpoint, skip_default_credentials: skipDefaultCredentials, base_path: basePath } = parser.parse_args();
+
+const app = createServer({ dynamoEndpoint, skipDefaultCredentials, basePath });
 const server = app.listen(port, host);
 server.on('listening', () => {
     const address = server.address();

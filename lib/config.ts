@@ -22,6 +22,7 @@ export function createAwsConfig({ dynamoEndpoint, skipDefaultCredentials }: Crea
         dynamoConfig.credentials = {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'key',
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? 'secret',
+            sessionToken: process.env.AWS_SESSION_TOKEN ?? 'token',
         };
     }
 

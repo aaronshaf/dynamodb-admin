@@ -2,16 +2,19 @@ import {
     CreateTableCommand,
     DeleteTableCommand,
     DescribeTableCommand,
+    DescribeTimeToLiveCommand,
     ListTablesCommand,
     type CreateTableInput,
     type CreateTableOutput,
     type DeleteTableInput,
     type DeleteTableOutput,
     type DescribeTableInput,
+    type DescribeTimeToLiveInput,
     type DynamoDBClient,
     type ListTablesInput,
     type ListTablesOutput,
     type TableDescription,
+    type TimeToLiveDescription,
 } from '@aws-sdk/client-dynamodb';
 import {
     BatchWriteCommand,
@@ -67,6 +70,14 @@ export class DynamoApiController {
             throw new DynamoDBAdminError(`No table named ${input.TableName}`);
         }
         return description.Table;
+    }
+
+    async describeTimeToLive(input: DescribeTimeToLiveInput): Promise<TimeToLiveDescription> {
+        const description = await this.dynamodb.send(new DescribeTimeToLiveCommand(input));
+        if (!description.TimeToLiveDescription) {
+            throw new DynamoDBAdminError(`No table named ${input.TableName}`);
+        }
+        return description.TimeToLiveDescription;
     }
 
     async listTables(input: ListTablesInput): Promise<ListTablesOutput> {

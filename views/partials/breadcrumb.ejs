@@ -30,7 +30,7 @@
   }
 
   function setCookie(theme) {
-    $.cookie("theme", theme, { path: '/' });
+    $.cookie("theme", theme, { path: '<%= basePath %>/' });
   }
 
   function detectColorScheme() {
