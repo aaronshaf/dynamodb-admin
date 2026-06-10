@@ -1,0 +1,43 @@
+name: Release New Version
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  id-token: write  # Required for OIDC
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5.0.0
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - uses: actions/checkout@v6
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: pnpm/action-setup@v6
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: actions/setup-node@v6
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+          package-manager-cache: false  # never use caching in release builds
+
+      - name: Lint and Test
+        if: ${{ steps.release.outputs.release_created }}
+        run: pnpm install && pnpm build && pnpm lint
+
+      - name: Publish to NPM
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm publish
